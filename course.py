@@ -31,7 +31,7 @@ class Course():
 Represents the course's abbreviation and number
 
 IT IS the responsibility of this class to uniquely identify courses in an institution
-"""
+""" 
 class CourseCode():
     
     def __init__(self, subject, number):
