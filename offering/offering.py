@@ -1,7 +1,7 @@
 from course import Course, CourseCode, CourseDetails
 import datetime
 from institution import Institution
-from offering import Section
+from schedule import Section
 from requirements import Requirements
 # from schedule import CourseSchedule
 from term import Term, TermTypes

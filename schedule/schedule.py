@@ -17,25 +17,6 @@ Provides utility functions that help evaluate section schedules. Namely:
 - 
 """
 
-#        {
-#            "name": "A01",
-#            "type": "lecture",
-#            "crn" : 31466,
-#            "meetings": [
-#                {
-#                    "days": ["T"],
-#                    "location": "ECS 125",
-#                    "date range": {
-#                        "start": "2020-06-05",
-#                        "end":   "2020-07-31"
-#                    },
-#                    "times": {
-#                        "start": "14:30",
-#                        "end":   "16:20"
-#                    }
-#                }
-#            ]
-#        }
 class Section():
     SCHEMA =  {
         "type": "object",
@@ -54,49 +35,9 @@ class Section():
             "meetings": {
                 "type": "array",
                 "items": {
-                    "type": "object",
-                    "properties": {
-                        "days": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "enum": ["M","T","W","R","F"]
-                            }
-                        },
-                        "location": {
-                            "type": "string"
-                        },
-                        "date range": {
-                            "type": "object",
-                            "properties": {
-                                "start": {
-                                    "type": "string",
-                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                                },
-                                "end": {
-                                    "type": "string",
-                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                                }
-                            },
-                            "required": ["start", "end"]
-                        },
-                        "times": {
-                            "type": "object",
-                            "properties": {
-                                "start": {
-                                    "type": "string",
-                                    "pattern": "^\\d{2}:\\d{2}$"
-                                },
-                                "end": {
-                                    "type": "string",
-                                    "pattern": "^\\d{2}:\\d{2}$"
-                                }
-                            },
-                            "required": ["start", "end"]
-                        }
-                    },
-                    "required": ["days", "location", "date range", "times"]
+                    "type": "object"
                 }
+                
             }
         },
         "required": ["name", "type", "crn", "meetings"]
@@ -110,10 +51,10 @@ class Section():
     def __init__(self, jsonSchedule):
         jsonschema.validate(jsonSchedule, self.SCHEMA)
 
-        self.name = "A01"
-        self.type = SectionType.LECTURE 
-        self.crn  = 34966
-        self.meetings = []
+        self.name = jsonSchedule["name"]
+        self.type = SectionType(jsonSchedule["type"])
+        self.crn  = jsonSchedule["crn"]
+        self.meetings = [SectionMeeting(jsonElement) for jsonElement in jsonSchedule["meetings"]]
 
     """
     Takes a Section object, and determines if any of the meetings conflict
@@ -132,9 +73,9 @@ class Section():
         return False
 
 class SectionType(Enum):
-    LECTURE = 1
-    LAB = 2
-    TUTORIAL = 3
+    LECTURE = "lecture"
+    LAB = "lab"
+    TUTORIAL = "tutorial"
 
 class Weekday(Enum):
     MONDAY = 0
@@ -146,18 +87,60 @@ class Weekday(Enum):
     SUNDAY = 6
 
 class SectionMeeting():
+    SCHEMA = {
+        "type": "object",
+        "properties": {
+            "days": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["M","T","W","R","F"]
+                }
+            },
+            "location": {
+                "type": "string"
+            },
+            "date range": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    "end": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    }
+                },
+                "required": ["start", "end"]
+            },
+            "times": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2}$"
+                    },
+                    "end": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2}$"
+                    }
+                },
+                "required": ["start", "end"]
+            }
+        },
+        "required": ["days", "location", "date range", "times"]
+    }
+
+
     def __init__(self, jsonMeeting):
+        jsonschema.validate(jsonMeeting, self.SCHEMA)
+
         # Do some sort of validation here
         self.days = [Weekday.TUESDAY] 
-        self.location = "ECS 125"
-        self.dates = {
-            "start": datetime.date(2020,8,20),
-            "end":   datetime.date(2020,9,15)
-        },
-        self.times = {
-            "start": datetime.time(14, 30),
-            "end":   datetime.time(16, 20)
-        }
+        self.location = jsonMeeting["location"]
+        self.dates = jsonMeeting["date range"]
+        self.times = jsonMeeting["times"]
 
     """
     Determines if the given meeting conflicts with the current meeting
@@ -176,27 +159,38 @@ class SectionMeeting():
         # we must only check the specific days they overlap for time 
         # conflicts.
 
-        # We know now that:
-        # meeting.dates["end"] >= toCompareMeeting.dates["start"]
-        #  and meeting.dates["start"] <= toCompareMeeting.dates["end"]
+        # First case where overlap is less than 7 days
         if (meeting.dates["end"] - self.dates["start"]) < 7:
             # Only compare the overlapping weekdays where both meetings are offered
             overlappingWeekdays = self.getWeekdaysInDateRange(self.dates["start"], meeting.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
             # If any weekdays are to compare, then same time conflict between all those weekdays
-            if len(weekdaysToCompare) > 0:
-                pass
+            if len(weekdaysToCompare) == 0:
+                return False
 
+            if self.doesTimeConflict(self.times, meeting.times):
+                return True 
+
+        # Second case where overlap is less than 7 days
         elif (self.dates["end"] - meeting.dates["start"]) < 7:
             overlappingWeekdays = self.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
-            if len(weekdaysToCompare) > 0:
-                pass
+            if len(weekdaysToCompare) == 0:
+                return False
+
+            if self.doesTimeConflict(self.times, meeting.times):
+                return True
+
+        # Third case when overlap is 7 days or more. Any weekdays are applicable
         else:
-            # We have to check the conflict for every weekday that both meetings are offered
             weekdaysToCompare = [day for day in list(Weekday) if (day in meeting.days) and (day in self.days)]
-            if len(weekdaysToCompare) > 0:
-                pass
+            if len(weekdaysToCompare) == 0:
+                return False
+
+            if self.doesTimeConflict(self.times, meeting.times):
+                return True 
+
+        return False
 
     """
     Takes two datetime.date objects, and returns the list of weekdays spannesd by the 2 dates.
@@ -224,8 +218,6 @@ class SectionMeeting():
             return True
         else:
             return False
-
-        
 
 # What to expect in terms of a course's schedule? 
 
