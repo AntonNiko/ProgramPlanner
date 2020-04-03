@@ -47,14 +47,13 @@ class Section():
     The class is responsible for validating the arguments and storing 
     the internal representation.
     """
-    ## TESTED: NO
-    def __init__(self, jsonSchedule):
-        jsonschema.validate(jsonSchedule, self.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, self.SCHEMA)
 
-        self.name = jsonSchedule["name"]
-        self.type = SectionType(jsonSchedule["type"])
-        self.crn  = jsonSchedule["crn"]
-        self.meetings = [SectionMeeting(jsonElement) for jsonElement in jsonSchedule["meetings"]]
+        self.name = jsonData["name"]
+        self.type = SectionType(jsonData["type"])
+        self.crn  = jsonData["crn"]
+        self.meetings = [SectionMeeting(jsonElement) for jsonElement in jsonData["meetings"]]
 
     """
     Takes a Section object, and determines if any of the meetings conflict
@@ -71,20 +70,6 @@ class Section():
                 if meeting.doesMeetingConflict(toCompareMeeting):
                     return True 
         return False
-
-class SectionType(Enum):
-    LECTURE = "lecture"
-    LAB = "lab"
-    TUTORIAL = "tutorial"
-
-class Weekday(Enum):
-    MONDAY = 0
-    TUESDAY = 1
-    WEDNESDAY = 2
-    THURSDAY = 3
-    FRIDAY = 4
-    SATURDAY = 5
-    SUNDAY = 6
 
 class SectionMeeting():
     SCHEMA = {
@@ -133,14 +118,28 @@ class SectionMeeting():
     }
 
 
-    def __init__(self, jsonMeeting):
-        jsonschema.validate(jsonMeeting, self.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, self.SCHEMA)
 
         # Do some sort of validation here
-        self.days = [Weekday.TUESDAY] 
-        self.location = jsonMeeting["location"]
-        self.dates = jsonMeeting["date range"]
-        self.times = jsonMeeting["times"]
+        self.days = [WeekdayString(day) for day in jsonData["days"]] 
+        self.location = jsonData["location"]
+
+        # Parse meeting dates
+        startYear, startMonth, startDay = [int(x) for x in jsonData["date range"]["start"].split("-")]
+        endYear, endMonth, endDay = [int(x) for x in jsonData["date range"]["end"].split("-")]
+        self.dates =  {
+            "start": datetime.date(startYear, startMonth, startDay),
+            "end": datetime.date(endYear, endMonth, endDay)
+        }
+
+        # Parse meeting times
+        startHour, startMinute = [int(x) for x in jsonData["times"]["start"].split(":")]
+        endHour, endMinute     = [int(x) for x in jsonData["times"]["end"].split(":")]
+        self.times = {
+            "start": datetime.time(startHour, startMinute),
+            "end":   datetime.time(endHour, endMinute)
+        }
 
     """
     Determines if the given meeting conflicts with the current meeting
@@ -162,23 +161,23 @@ class SectionMeeting():
         # First case where overlap is less than 7 days
         if (meeting.dates["end"] - self.dates["start"]) < 7:
             # Only compare the overlapping weekdays where both meetings are offered
-            overlappingWeekdays = self.getWeekdaysInDateRange(self.dates["start"], meeting.dates["end"])
+            overlappingWeekdays = SectionMeeting.getWeekdaysInDateRange(self.dates["start"], meeting.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
             # If any weekdays are to compare, then same time conflict between all those weekdays
             if len(weekdaysToCompare) == 0:
                 return False
 
-            if self.doesTimeConflict(self.times, meeting.times):
+            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
                 return True 
 
         # Second case where overlap is less than 7 days
         elif (self.dates["end"] - meeting.dates["start"]) < 7:
-            overlappingWeekdays = self.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
+            overlappingWeekdays = SectionMeeting.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
             if len(weekdaysToCompare) == 0:
                 return False
 
-            if self.doesTimeConflict(self.times, meeting.times):
+            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
                 return True
 
         # Third case when overlap is 7 days or more. Any weekdays are applicable
@@ -187,16 +186,16 @@ class SectionMeeting():
             if len(weekdaysToCompare) == 0:
                 return False
 
-            if self.doesTimeConflict(self.times, meeting.times):
+            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
                 return True 
 
         return False
 
     """
-    Takes two datetime.date objects, and returns the list of weekdays spannesd by the 2 dates.
+    Takes two datetime.date objects, and returns the list of weekdays spanned by the 2 dates.
     """
-    ## TESTED: NO
-    def getWeekdaysInDateRange(self, dateOne, dateTwo):
+    @staticmethod
+    def getWeekdaysInDateRange(dateOne, dateTwo):
         assert type(dateOne) == datetime.date 
         assert type(dateTwo) == datetime.date 
         assert dateTwo >= dateOne 
@@ -212,33 +211,34 @@ class SectionMeeting():
     """
     Takes two variables, each a dictionary with "start" and "end" datetime.time elements
     """
-    def doesTimeConflict(self, timeOne, timeTwo):
-        if timeOne["end"] >= timeTwo["start"] \
-            and timeOne["start"] <= timeTwo["end"]:
+    @staticmethod
+    def doesTimeConflict(timeOne, timeTwo):
+        # TODO: Validation
+        if timeOne["end"] > timeTwo["start"] \
+            and timeOne["start"] < timeTwo["end"]:
             return True
         else:
             return False
 
-# What to expect in terms of a course's schedule? 
+class SectionType(Enum):
+    LECTURE = "lecture"
+    LAB = "lab"
+    TUTORIAL = "tutorial"
 
-if __name__ == '__main__':
-    test = {
-            "name": "A01",
-            "type": "lecture",
-            "crn" : 31466,
-            "meetings": [
-                {
-                    "days": ["T"],
-                    "location": "ECS 125",
-                    "date range": {
-                        "start": "2020-06-05",
-                        "end":   "2020-07-31"
-                    },
-                    "times": {
-                        "start": "14:30",
-                        "end":   "16:20"
-                    }
-                }
-            ]
-        }
-    s = Section(test)
+class Weekday(Enum):
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3 
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
+
+class WeekdayString(Enum):
+    MONDAY = "M"
+    TUESDAY = "T"
+    WEDNESDAY = "W"
+    THURSDAY = "R" 
+    FRIDAY = "F"
+    SATURDAY = "S"
+    SUNDAY = "Z"   
