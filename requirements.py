@@ -16,14 +16,29 @@ class Requirements():
 
 # Possible list of requirements expression that must be implemented
 #
-# COURSE (just the course!)
-# XXX and YYY: [XXX, "AND", YYY]
-# XXX or YYY:  [XXX, "OR",  YYY]
-# N of XXX, YYY, ZZZ ...: ["N OF", [XXX, YYY, ZZZ, ...]]; where N is an integer between 1 and the length of the list
+# - COURSE (just the course!)
+# - XXX and YYY: [XXX, "AND", YYY]
+# - XXX or YYY:  [XXX, "OR",  YYY]
+# - N of XXX, YYY, ZZZ ...: ["N OF", [XXX, YYY, ZZZ, ...]]; where N is an integer between 1 and the length of the list
 # 
 # Restrictions expressions:
 # 
-# NOT XXX; where 
+# - NOT XXX; where XXX is an expression
+#
+# Other exceptional expressions:
+#
+# - COURSE can only be taken once
+# - Courses such as SENG480B when different topics  
+# - AWR satisfied
+#
+# Might be necessary to link the requirement to an
+# corresponding expression 
+#
+#
+#
+#
+#
+#
 
 class RequirementType(Enum):
     PREREQUISITE = 1

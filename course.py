@@ -10,6 +10,8 @@ Notes:
 - The requirements of a course are independent of any offerings of the course.
 
 """
+# TODO: Determine how to handle equivalent courses
+# For e.x: 
 class Course():
     
     def __init__(self, institution, courseCode, name, credits, requirements, details):
