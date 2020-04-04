@@ -1,7 +1,9 @@
 
 import datetime
+from aenum import MultiValueEnum
 from enum import Enum
 import jsonschema
+import schema
 
 # https://json-schema.org/understanding-json-schema/
 """
@@ -18,30 +20,7 @@ Provides utility functions that help evaluate section schedules. Namely:
 """
 
 class Section():
-    SCHEMA =  {
-        "type": "object",
-        "properties": {
-            "name": {
-                "type": "string",
-                "pattern": "^[ABT]\\d{2}$"
-            },
-            "type": {
-                "type": "string",
-                "enum": ["lecture", "lab", "tutorial"]
-            },
-            "crn": {
-                "type": "integer"
-            },
-            "meetings": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
-                
-            }
-        },
-        "required": ["name", "type", "crn", "meetings"]
-    }
+    SCHEMA = schema.SECTION_SCHEMA
 
     """ 
     The class is responsible for validating the arguments and storing 
@@ -59,7 +38,6 @@ class Section():
     Takes a Section object, and determines if any of the meetings conflict
     at any point in time.
     """
-    ## TESTED: NO
     def doesSectionConflict(self, section):
         assert type(section) == Section
 
@@ -72,57 +50,13 @@ class Section():
         return False
 
 class SectionMeeting():
-    SCHEMA = {
-        "type": "object",
-        "properties": {
-            "days": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "enum": ["M","T","W","R","F"]
-                }
-            },
-            "location": {
-                "type": "string"
-            },
-            "date range": {
-                "type": "object",
-                "properties": {
-                    "start": {
-                        "type": "string",
-                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                    },
-                    "end": {
-                        "type": "string",
-                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                    }
-                },
-                "required": ["start", "end"]
-            },
-            "times": {
-                "type": "object",
-                "properties": {
-                    "start": {
-                        "type": "string",
-                        "pattern": "^\\d{2}:\\d{2}$"
-                    },
-                    "end": {
-                        "type": "string",
-                        "pattern": "^\\d{2}:\\d{2}$"
-                    }
-                },
-                "required": ["start", "end"]
-            }
-        },
-        "required": ["days", "location", "date range", "times"]
-    }
-
+    SCHEMA = schema.SECTION_MEETING_SCHEMA
 
     def __init__(self, jsonData):
         jsonschema.validate(jsonData, self.SCHEMA)
 
         # Do some sort of validation here
-        self.days = [WeekdayString(day) for day in jsonData["days"]] 
+        self.days = [Weekday(day) for day in jsonData["days"]] 
         self.location = jsonData["location"]
 
         # Parse meeting dates
@@ -145,38 +79,23 @@ class SectionMeeting():
     Determines if the given meeting conflicts with the current meeting
     at any point in time.
     """
-    ## TESTED: NO
     def doesMeetingConflict(self, meeting):
-        assert type(meeting) == SectionMeeting
-        
-        if meeting.dates["end"] < self.dates["start"] \
-            or meeting.dates["start"] > self.dates["end"]:
+        assert type(meeting) == SectionMeeting 
+
+        if not SectionMeeting.doesDateConflict(self.dates, meeting.dates):
             # Skip if the date ranges don't overlap
             return False
 
         # If the start and end dates overlap for 6 days or less, then
         # we must only check the specific days they overlap for time 
         # conflicts.
-
-        # First case where overlap is less than 7 days
-        if (meeting.dates["end"] - self.dates["start"]) < 7:
-            # Only compare the overlapping weekdays where both meetings are offered
-            overlappingWeekdays = SectionMeeting.getWeekdaysInDateRange(self.dates["start"], meeting.dates["end"])
-            weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
-            # If any weekdays are to compare, then same time conflict between all those weekdays
-            if len(weekdaysToCompare) == 0:
-                return False
-
-            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
-                return True 
-
-        # Second case where overlap is less than 7 days
-        elif (self.dates["end"] - meeting.dates["start"]) < 7:
+        if abs(meeting.dates["end"] - self.dates["start"]) < datetime.timedelta(days=7) \
+            or abs(self.dates["end"] - meeting.dates["start"]) < datetime.timedelta(days=7):
             overlappingWeekdays = SectionMeeting.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
-            if len(weekdaysToCompare) == 0:
-                return False
 
+            if len(weekdaysToCompare) == 0:
+                return False 
             if SectionMeeting.doesTimeConflict(self.times, meeting.times):
                 return True
 
@@ -198,15 +117,32 @@ class SectionMeeting():
     def getWeekdaysInDateRange(dateOne, dateTwo):
         assert type(dateOne) == datetime.date 
         assert type(dateTwo) == datetime.date 
-        assert dateTwo >= dateOne 
+
+        if dateTwo < dateOne:
+            earlierTime = dateTwo
+            laterTime = dateOne
+        else:
+            earlierTime = dateOne 
+            laterTime = dateTwo 
 
         weekdays = []
         for _ in range(7):
-            weekdays.append(Weekday(dateOne.weekday())) 
-            if dateOne == dateTwo:
+            weekdays.append(Weekday(earlierTime.weekday())) 
+            if earlierTime == laterTime:
                 return weekdays
-            dateOne = dateOne + datetime.timedelta(days=1)
+            earlierTime = earlierTime + datetime.timedelta(days=1)
         return weekdays
+
+    """
+    Takes two variables and determines if the dates conflict
+    """
+    @staticmethod 
+    def doesDateConflict(dateOne, dateTwo):
+        # TODO: Validation
+        if dateOne["end"] >= dateTwo["start"] \
+            and dateOne["start"] <= dateTwo["end"]:
+            return True
+        return False
 
     """
     Takes two variables, each a dictionary with "start" and "end" datetime.time elements
@@ -225,20 +161,11 @@ class SectionType(Enum):
     LAB = "lab"
     TUTORIAL = "tutorial"
 
-class Weekday(Enum):
-    MONDAY = 0
-    TUESDAY = 1
-    WEDNESDAY = 2
-    THURSDAY = 3 
-    FRIDAY = 4
-    SATURDAY = 5
-    SUNDAY = 6
-
-class WeekdayString(Enum):
-    MONDAY = "M"
-    TUESDAY = "T"
-    WEDNESDAY = "W"
-    THURSDAY = "R" 
-    FRIDAY = "F"
-    SATURDAY = "S"
-    SUNDAY = "Z"   
+class Weekday(MultiValueEnum):
+    MONDAY = 0, "M"
+    TUESDAY = 1, "T"
+    WEDNESDAY = 2, "W"
+    THURSDAY = 3, "R"
+    FRIDAY = 4, "F"
+    SATURDAY = 5, "S"
+    SUNDAY = 6, "Z"

@@ -56,40 +56,163 @@ class SectionMeetingTests(unittest.TestCase):
 
         self.assertEqual(list, type(meeting.days))
         self.assertEqual(1, len(meeting.days))
-        self.assertEqual(WeekdayString.TUESDAY, meeting.days[0])
+        self.assertEqual(Weekday.TUESDAY, meeting.days[0])
         self.assertEqual("ECS 125", meeting.location)
 
         self.assertEqual(datetime.date(2020, 6, 5), meeting.dates["start"])
         self.assertEqual(datetime.date(2020, 7, 31), meeting.dates["end"])
         self.assertEqual(datetime.time(14, 30), meeting.times["start"])
-        self.assertEqual(datetime.time(16, 20), meeting.times["end"])
+        self.assertEqual(datetime.time(16, 20), meeting.times["end"]) 
 
-    def testDoesMeetingConflict(self):
-        jsonDataOne = {
-                    "days": ["T", "W", "F"],
-                    "location": "ECS 125",
-                    "date range": {
-                        "start": "2020-06-05",
-                        "end":   "2020-07-31"
-                    },
-                    "times": {
-                        "start": "14:30",
-                        "end":   "16:20"
-                    }
-        }
-
-        jsonDataTwo = {
-                    "days": ["M", "W", "R"],
+    def testDoesMeetingConflictConflictingMeetings(self):
+        meetingOne = {
+                    "days": ["M", "R"],
                     "location": "ECS 123",
                     "date range": {
-                        "start": "2020-06-05",
+                        "start": "2020-05-04",
                         "end":   "2020-07-31"
                     },
                     "times": {
-                        "start": "14:30",
-                        "end":   "16:20"
+                        "start": "10:00",
+                        "end":   "11:20"
                     }
         }
+
+        meetingTwo = {
+                    "days": ["M", "W", "F"],
+                    "location": "ECS 125",
+                    "date range": {
+                        "start": "2020-05-04",
+                        "end":   "2020-07-31"
+                    },
+                    "times": {
+                        "start": "10:30",
+                        "end":   "12:00"
+                    }
+        }
+
+        sectionMeetingOne = SectionMeeting(meetingOne)
+        sectionMeetingTwo = SectionMeeting(meetingTwo)
+
+        self.assertTrue(sectionMeetingOne.doesMeetingConflict(sectionMeetingTwo))
+
+    def testDoesMeetingConflictNonConflictingMeetingsLessThanSevenDays(self):
+        # This tests the behavior of overlapping meetings. In this case,
+        # overlaps by 3 days.
+        # 
+        #  Day     |  Jun 16 | Jun 17  |  Jun 18  |
+        #  Weekday |   Wed   |  Thu    |    Fri   |
+        #  Meet. 1 |         |    X    |          |
+        #  Meet. 2 |    X    |         |     X    |
+        #
+        # No times actually overlap. Therefore we expect no conflicts
+        
+        meetingOne = {
+                    "days": ["M", "R"],
+                    "location": "ECS 123",
+                    "date range": {
+                        "start": "2020-05-04",
+                        "end":   "2020-06-18"
+                    },
+                    "times": {
+                        "start": "10:00",
+                        "end":   "11:20"
+                    }
+        }
+
+        meetingTwo = {
+                    "days": ["M", "W", "F"],
+                    "location": "ECS 125",
+                    "date range": {
+                        "start": "2020-06-16",
+                        "end":   "2020-07-31"
+                    },
+                    "times": {
+                        "start": "10:30",
+                        "end":   "12:00"
+                    }
+        }
+
+        sectionMeetingOne = SectionMeeting(meetingOne)
+        sectionMeetingTwo = SectionMeeting(meetingTwo)
+
+        self.assertFalse(sectionMeetingOne.doesMeetingConflict(sectionMeetingTwo))  
+        #self.assertFalse(sectionMeetingTwo.doesMeetingConflict(sectionMeetingOne))      
+
+    def testDoesMeetingConflictConflictingMeetingsLessThanSevenDays(self):
+        # This tests the behavior of overlapping meetings. In this case,
+        # overlaps by 3 days.
+        # 
+        #  Day     |  Jun 16 | Jun 17  |  Jun 18  |
+        #  Weekday |   Wed   |  Thu    |    Fri   |
+        #  Meet. 1 |    X    |         |          |
+        #  Meet. 2 |    X    |         |     X    |
+        #
+        # No times actually overlap. Therefore we expect no conflicts
+        
+        meetingOne = {
+                    "days": ["M", "W"],
+                    "location": "ECS 123",
+                    "date range": {
+                        "start": "2020-05-04",
+                        "end":   "2020-06-18"
+                    },
+                    "times": {
+                        "start": "10:00",
+                        "end":   "11:20"
+                    }
+        }
+
+        meetingTwo = {
+                    "days": ["M", "W", "F"],
+                    "location": "ECS 125",
+                    "date range": {
+                        "start": "2020-06-16",
+                        "end":   "2020-07-31"
+                    },
+                    "times": {
+                        "start": "10:30",
+                        "end":   "12:00"
+                    }
+        }
+
+        sectionMeetingOne = SectionMeeting(meetingOne)
+        sectionMeetingTwo = SectionMeeting(meetingTwo)
+
+        self.assertTrue(sectionMeetingOne.doesMeetingConflict(sectionMeetingTwo))  
+        #self.assertTrue(sectionMeetingTwo.doesMeetingConflict(sectionMeetingOne))      
+
+    def testDoesMeetingConflictNonConflictingMeetingsSeparateDates(self):
+        meetingOne = {
+                    "days": ["M", "R"],
+                    "location": "ECS 123",
+                    "date range": {
+                        "start": "2020-05-04",
+                        "end":   "2020-07-31"
+                    },
+                    "times": {
+                        "start": "10:00",
+                        "end":   "11:20"
+                    }
+        }
+
+        meetingTwo = {
+                    "days": ["M", "W", "F"],
+                    "location": "ECS 125",
+                    "date range": {
+                        "start": "2020-08-01",
+                        "end":   "2020-08-31"
+                    },
+                    "times": {
+                        "start": "10:30",
+                        "end":   "12:00"
+                    }
+        }     
+
+        sectionMeetingOne = SectionMeeting(meetingOne)
+        sectionMeetingTwo = SectionMeeting(meetingTwo)
+
+        self.assertFalse(sectionMeetingOne.doesMeetingConflict(sectionMeetingTwo))   
 
     def testGetWeekdaysInDateRangeValidThreeDaySpan(self):
         dateOne = datetime.date(2020, 8, 18)
@@ -98,6 +221,43 @@ class SectionMeetingTests(unittest.TestCase):
         expectedResult = [Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY]
         actualResult = SectionMeeting.getWeekdaysInDateRange(dateOne, dateTwo)
         self.assertListEqual(expectedResult, actualResult)
+
+    def testGetWeekdaysInDateRangeValidThreeDaySpanReversed(self):
+        dateOne = datetime.date(2020, 8, 21)
+        dateTwo = datetime.date(2020, 8, 18)
+
+        expectedResult = [Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY]
+        actualResult = SectionMeeting.getWeekdaysInDateRange(dateOne, dateTwo)
+        self.assertListEqual(expectedResult, actualResult)
+
+    def testGetWeekdaysInDateRangeValidSevenDaySpan(self):
+        dateOne = datetime.date(2020, 8, 19)
+        dateTwo = datetime.date(2020, 8, 25)
+
+        expectedResult = [Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY, Weekday.SATURDAY, Weekday.SUNDAY, Weekday.MONDAY, Weekday.TUESDAY]
+        actualResult = SectionMeeting.getWeekdaysInDateRange(dateOne, dateTwo)
+        self.assertListEqual(expectedResult, actualResult) 
+
+    def testGetWeekdaysInDateRangeValidTenDaySpan(self):  
+        dateOne = datetime.date(2020, 8, 17)
+        dateTwo = datetime.date(2020, 8, 26)
+
+        expectedResult = [Weekday.MONDAY, Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY, Weekday.SATURDAY, Weekday.SUNDAY]
+        actualResult = SectionMeeting.getWeekdaysInDateRange(dateOne, dateTwo)
+        self.assertListEqual(expectedResult, actualResult)      
+
+    def testDoesDateConflictConflictingDates(self):
+        dateOne = {
+            "start": datetime.date(2020, 6, 5),
+            "end":   datetime.date(2020, 7, 31)
+        }
+
+        dateTwo = {
+            "start": datetime.date(2020, 7, 5),
+            "end":   datetime.date(2020, 8, 22)
+        }
+
+        self.assertTrue(SectionMeeting.doesDateConflict(dateOne, dateTwo))
 
     def testDoesTimeConflictConflictingTimes(self):
         timeOne = {
