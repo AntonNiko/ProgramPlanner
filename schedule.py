@@ -148,6 +148,7 @@ class SectionMeeting():
     Takes two variables, each a dictionary with "start" and "end" datetime.time elements
     """
     @staticmethod
+    #TODO: Test overlapping over days?
     def doesTimeConflict(timeOne, timeTwo):
         # TODO: Validation
         if timeOne["end"] > timeTwo["start"] \

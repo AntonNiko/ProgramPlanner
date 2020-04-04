@@ -36,15 +36,15 @@ class OfferingCourse(Course):
     def __init__(self, institution, courseCode, name, credits, requirements, details, sections):
         assert type(institution) == Institution
         assert type(courseCode) == CourseCode
-        assert type(name) == name
+        assert type(name) == str
         assert type(credits) == float
         assert type(requirements) == Requirements
         assert isinstance(details, CourseDetails)
         assert all(type(section) == Section for section in sections)
 
-        super(institution, courseCode, name, credits, requirements, details)
+        super().__init__(institution, courseCode, name, credits, requirements, details)
 
-        self.sections = {section["name"]: section for section in sections}
+        self.sections = {section.name: section for section in sections}
 
     """
     Determines if the given section conflicts with any sections of the offering. 
@@ -83,7 +83,7 @@ class OfferingTerm(Term):
         assert type(startDate) == datetime.date
         assert type(endDate) == datetime.date        
 
-        super(institution, year, termType)
+        super().__init__(institution, year, termType)
 
         self.startDate = startDate 
         self.endDate = endDate

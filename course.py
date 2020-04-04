@@ -15,15 +15,15 @@ class Course():
     def __init__(self, institution, courseCode, name, credits, requirements, details):
         assert type(institution) == Institution
         assert type(courseCode) == CourseCode
-        assert type(name) == name
+        assert type(name) == str
         assert type(credits) == float
         assert type(requirements) == Requirements
         assert isinstance(details, CourseDetails)
-        assert institution == details.institution
 
         self.institution = institution
         self.courseCode = courseCode
         self.name = name
+        self.credits = credits
         self.requirements = requirements
         self.details = details
 
@@ -48,6 +48,11 @@ class CourseCode():
     def isLevel(self, level):
         pass
 
+    def __eq__(self, other):
+        if (self.subject == other.subject) and (self.number == other.number):
+            return True 
+        return False
+
     def __str__(self):
         return self.subject + " " + self.number
 
@@ -65,9 +70,9 @@ is based on
 class UVicCourseDetails(CourseDetails):
 
     def __init__(self, hoursLectures, hoursLabs, hoursTutorials, notes):
-        assert type(hoursLectures) == int 
-        assert type(hoursLabs) == int
-        assert type(hoursTutorials) == int
+        assert type(hoursLectures) == float
+        assert type(hoursLabs) == float
+        assert type(hoursTutorials) == float
 
         self.hoursLectures = hoursLectures
         self.hoursLabs = hoursLabs
