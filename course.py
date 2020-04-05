@@ -1,5 +1,5 @@
 from institution import Institution
-from requirements import Requirements
+from requirement import Requirement
 
 """
 Represents the definition of a course at an institution, conceptualizes
@@ -11,7 +11,12 @@ Notes:
 
 """
 # TODO: Determine how to handle equivalent courses
-# For e.x: 
+# For e.x: EOS 210 and PHYS 210 (https://web.uvic.ca/calendar2020-01/CDs/EOS/210.html)
+# Refer to the same course!! Like a soft/hard link
+#
+# TODO: Determine how to handle deprecated
+#
+
 class Course():
     
     def __init__(self, institution, courseCode, name, credits, requirements, details):
@@ -19,7 +24,7 @@ class Course():
         assert type(courseCode) == CourseCode
         assert type(name) == str
         assert type(credits) == float
-        assert type(requirements) == Requirements
+        assert type(requirements) == Requirement
         assert isinstance(details, CourseDetails)
 
         self.institution = institution
@@ -36,7 +41,8 @@ IT IS the responsibility of this class to uniquely identify courses in an instit
 """ 
 class CourseCode():
     
-    def __init__(self, subject, number):
+    def __init__(self, courseCode):
+        subject, number = courseCode.split(" ")
         assert type(subject) == str 
         assert type(number)  == str
 

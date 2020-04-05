@@ -1,4 +1,3 @@
-
 import datetime
 from aenum import MultiValueEnum
 from enum import Enum

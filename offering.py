@@ -2,7 +2,7 @@ from course import Course, CourseCode, CourseDetails
 import datetime
 from institution import Institution
 from schedule import Section
-from requirements import Requirements
+from requirement import Requirement
 from term import Term, TermTypes
 
 
@@ -38,7 +38,7 @@ class OfferingCourse(Course):
         assert type(courseCode) == CourseCode
         assert type(name) == str
         assert type(credits) == float
-        assert type(requirements) == Requirements
+        assert type(requirements) == Requirement
         assert isinstance(details, CourseDetails)
         assert all(type(section) == Section for section in sections)
 
@@ -110,7 +110,7 @@ class OfferingTerm(Term):
     """ 
     Given a section, determine if it can be added to the current term offering.
 
-    First checks if the course falls within the same range. If it does fall within the 
+    First checks if the course falls withinyhe same range. If it does fall within the 
     same range, then checks if the times conflict.
     """
     def isSectionTimeAvailable(self, offering, sectionName):
