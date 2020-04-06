@@ -1,4 +1,4 @@
-from course import CourseCode
+#from course import CourseCode
 from enum import Enum
 import jsonschema
 import schema
@@ -20,9 +20,9 @@ class ExpressionType(Enum):
     CONDITIONAL = 2
     LIST = 3
     CREDIT_RESTRICTION = 4
-    NO_CREDIT_WARNING = 5
-    RECOMMENDATION_WARNING = 6
-    REGISTRATION_RESTRICTION = 7
+    REGISTRATION_RESTRICTION = 5
+    NO_CREDIT_WARNING = 6
+    RECOMMENDATION_WARNING = 7
     YEAR_STANDING = 8
     AWR_SATISFIED = 9
 
@@ -42,6 +42,8 @@ class Requirement():
     def __init__(self, jsonRequirements):
         assert type(jsonRequirements) == list 
 
+        self.expressions = [Expression.buildAndGetExpression(expressionJson) for expressionJson in jsonRequirements]
+
 
 class CourseExpression():
     SCHEMA = schema.COURSE_EXPRESSION_SCHEMA
@@ -50,7 +52,7 @@ class CourseExpression():
         jsonschema.validate(jsonExpression, self.SCHEMA)
 
         self.expressionType = ExpressionType.COURSE
-        self.courseCode = CourseCode(jsonExpression["code"])
+        self.courseCode = jsonExpression["code"]
         self.requisiteType = RequisiteType(jsonExpression["requisiteType"])
 
     @staticmethod 
@@ -93,44 +95,20 @@ class ListExpression():
         return ListExpression(jsonExpression)
 
 
-class CreditRestrictionExpression():
-
-    def __init__(self, jsonExpression):
-        pass
-
-    @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        pass
-
-
-class NoCreditWarningExpression():
-
-    def __init__(self, jsonExpresion):
-        pass
-
-    @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        pass
-
-
-class RecommendationWarningExpression():
-
-    def __init__(self, jsonExpression):
-        pass
-
-    @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        pass
-
-
+# TODO: Restrict to one expression, or a list of expressions? 
 class RegistrationRestrictionExpression():  
+    SCHEMA = schema.REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA
 
     def __init__(self, jsonExpression):
-        pass
+        jsonschema.validate(jsonExpression, RegistrationRestrictionExpression.SCHEMA)
+
+        self.expressionType = ExpressionType.REGISTRATION_RESTRICTION
+        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
 
     @staticmethod
     def buildAndGetExpression(jsonExpression):
-        pass
+        jsonschema.validate(jsonExpression, RegistrationRestrictionExpression.SCHEMA)
+        return RegistrationRestrictionExpression(jsonExpression)
 
 
 class YearStandingExpression():
@@ -139,6 +117,7 @@ class YearStandingExpression():
     def __init__(self, jsonExpression):
         jsonschema.validate(jsonExpression, YearStandingExpression.SCHEMA)
 
+        self.expressionType = ExpressionType.YEAR_STANDING
         self.type = jsonExpression["type"]
         self.threshold = jsonExpression["threshold"]
 
@@ -158,18 +137,47 @@ class AwrSatisfiedExpression():
         pass
 
 
+class NoCreditWarningExpression():
+    SCHEMA = schema.NO_CREDIT_WARNING_EXPRESSION_SCHEMA
+
+    def __init__(self, jsonExpression):
+        jsonschema.validate(jsonExpression, NoCreditWarningExpression.SCHEMA)
+
+        self.expressionType = ExpressionType.NO_CREDIT_WARNING
+        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
+
+    @staticmethod
+    def buildAndGetExpression(jsonExpression):
+        jsonschema.validate(jsonExpression, NoCreditWarningExpression.SCHEMA)
+        return NoCreditWarningExpression(jsonExpression)
+
+
+class RecommendationWarningExpression():
+    SCHEMA = schema.RECOMMENDATION_WARNING_EXPRESSION_SCHEMA
+
+    def __init__(self, jsonExpression):
+        jsonschema.validate(jsonExpression, RecommendationWarningExpression.SCHEMA)
+
+        self.expressionType = ExpressionType.RECOMMENDATION_WARNING
+        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
+
+    @staticmethod
+    def buildAndGetExpression(jsonExpression):
+        jsonschema.validate(jsonExpression, RecommendationWarningExpression.SCHEMA)
+        return RecommendationWarningExpression(jsonExpression)
+
+
 class Expression():
     SCHEMA = schema.EXPRESSION_SCHEMA
     EXPRESSION_TYPE_MAP = {
         "COURSE": CourseExpression,
         "CONDITIONAL": ConditionalExpression,
         "LIST": ListExpression,
-        "CREDIT_RESTRICTION": CreditRestrictionExpression,
-        "NO_CREDIT_WARNING": NoCreditWarningExpression,
-        "RECOMMENDATION_WARNING": RecommendationWarningExpression,
         "REGISTRATION_RESTRICTION": RegistrationRestrictionExpression,
         "YEAR_STANDING": YearStandingExpression,
-        "AWR_STANDING": AwrSatisfiedExpression
+        "AWR_STANDING": AwrSatisfiedExpression,
+        "NO_CREDIT_WARNING": NoCreditWarningExpression,
+        "RECOMMENDATION_WARNING": RecommendationWarningExpression
     }
 
     @staticmethod
@@ -188,13 +196,25 @@ class ConditionType(Enum):
     AND = "AND"
     OR = "OR"
 
-# We have an expression of SOME type. We figure out what the type of the expression is by 
-# mapping the value of `expressionType` to the expression type
-#
-#
-#
-
 if __name__ == "__main__":
+    testExpression = {
+        "expressionType": "CONDITIONAL",
+        "expressionOne": {
+            "expressionType": "COURSE",
+            "code": "CSC 110",
+            "requisiteType": "P"
+        },
+        "expressionTwo": {
+            "expressionType": "COURSE",
+            "code": "CSC 111",
+            "requisiteType": "C"
+        },
+        "condition": "OR" # Can be OR or AND
+    }
+
+    e = Expression.buildAndGetExpression(testExpression)
+
+"""
     testRequirements = [
         {
             "expressionType": "CONDITIONAL",
@@ -232,12 +252,12 @@ if __name__ == "__main__":
             "code": "ENGR 112",
             "requisiteType": "P"
         },
-        {
-            "expressionType": "CREDIT_RESTRICTION", # Cannot take if already have credit 
-            "expression": {
+        #{
+        #    "expressionType": "CREDIT_RESTRICTION", # Cannot take if already have credit 
+        #    "expression": {
                 # Any expression type, ignores prerequisite/corequisites
-            }
-        },
+        #    }
+        #},
         {
             "expressionType": "NO_CREDIT_WARNING", # Cannot get credit if already have credit
             "expression": {
@@ -251,7 +271,7 @@ if __name__ == "__main__":
             }
         },
         {
-            "expressionType": "REGISTRSATION_RESTRICTION", # Basically NOT
+            "expressionType": "REGISTRSATION_RESTRICTION", # Basically NOT. To allow for "cannot take if also registered in...".  CREDIT_RESTRICTION can be fulfilled by this
             "expression": {
                 # Any expression type, ignores prerequisite/corequisites
             }
@@ -265,21 +285,4 @@ if __name__ == "__main__":
             "expressionType": "AWR_SATISFIED"
         }
     ]
-
-    #r = Requirement(testRequirements)
-
-    testExpression = {
-        "expressionType": "CONDITIONAL",
-        "expressionOne": {
-            "expressionType": "COURSE",
-            "code": "CSC 110",
-            "requisiteType": "P"
-        },
-        "expressionTwo": {
-            "expressionType": "COURSE",
-            "code": "CSC 111",
-            "requisiteType": "C"
-        },
-        "condition": "OR" # Can be OR or AND
-    }
-    e = Expression(testExpression)
+"""

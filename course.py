@@ -34,7 +34,7 @@ class Course():
         self.requirements = requirements
         self.details = details
 
-"""
+""" 
 Represents the course's abbreviation and number
 
 IT IS the responsibility of this class to uniquely identify courses in an institution

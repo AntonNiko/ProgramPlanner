@@ -10,6 +10,12 @@ class TermTypes(Enum):
 
 """
 Represents a term in which its details are currently unknown. 
+- Stores references to active courses
+
+- Stores the states of the term. For example:
+     * Active credits
+     * Number of active courses
+
 """
 class Term():
     def __init__(self, institution, year, termType):
@@ -17,7 +23,13 @@ class Term():
         assert type(year) == datetime.date.year 
         assert type(termType) == TermTypes
 
-    def addCourse(self):
+    """
+    Contains a reference to a `Course` object. 
+    """
+    def addCourse(self, course):
         # This is supposed to only be called if self is a Term, not 
         # and Offering Term 
         assert type(self) == Term
+
+    def removeCourse(self, courseCode):
+        pass

@@ -4,7 +4,7 @@ sys.path.append('..')
 from course import CourseCode, CourseDetails, UVicCourseDetails
 from institution import Institution
 from offering import OfferingCourse
-from requirements import Requirements
+from requirement import Requirement
 from schedule import Section
 import unittest
 
@@ -13,10 +13,10 @@ class OfferingCourseTests(unittest.TestCase):
     
     def testConstructorValidParameters(self):
         institution = Institution.UNIVERSITY_OF_VICTORIA
-        courseCode = CourseCode("ENGR", "110")
+        courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirements(None)
+        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({
@@ -43,7 +43,7 @@ class OfferingCourseTests(unittest.TestCase):
         offering = OfferingCourse(institution, courseCode, name, credits, requirements, details, sections)
 
         self.assertEqual(Institution.UNIVERSITY_OF_VICTORIA, offering.institution)
-        self.assertEqual(CourseCode("ENGR", "110"), offering.courseCode)
+        self.assertEqual(CourseCode("ENGR 110"), offering.courseCode)
         self.assertEqual("Design and Communication I", offering.name)
         self.assertEqual(2.5, offering.credits)
         #TODO: Requirement validation
@@ -52,10 +52,10 @@ class OfferingCourseTests(unittest.TestCase):
 
     def testDoesSectionConflictConflictingSection(self):
         institution = Institution.UNIVERSITY_OF_VICTORIA
-        courseCode = CourseCode("ENGR", "110")
+        courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirements(None)
+        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({
@@ -104,10 +104,10 @@ class OfferingCourseTests(unittest.TestCase):
 
     def testDoesSectionConflictConflictingListSections(self):
         institution = Institution.UNIVERSITY_OF_VICTORIA
-        courseCode = CourseCode("ENGR", "110")
+        courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirements(None)
+        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({

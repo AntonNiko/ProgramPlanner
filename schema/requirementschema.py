@@ -58,6 +58,15 @@ LIST_EXPRESSION_SCHEMA = {
     "required": ["threshold", "type", "expressions"]
 }
 
+REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "expression": {
+            "type": "object"
+        }
+    }
+}
+
 YEAR_STANDING_EXPRESSION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -67,6 +76,28 @@ YEAR_STANDING_EXPRESSION_SCHEMA = {
         },
         "threshold": {
             "type": "integer"
+        }
+    }
+}
+
+AWR_SATISFIED_EXPRESSION_SCHEMA = {
+    "type": "object",
+}
+
+NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "expression": {
+            "type": "object"
+        }
+    }
+}
+
+RECOMMENDATION_WARNING_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "expression": {
+            "type": "object"
         }
     }
 }
