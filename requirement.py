@@ -3,6 +3,16 @@ from enum import Enum
 import jsonschema
 import schema
 
+
+
+"""
+This class provides the functionality to check if the 
+"""
+class RequirementManager():
+
+    def __init__(self):
+        pass
+
 # THE REQUIREMENTS MUST BE A LIST OF EXPRESSIONS. Each element of the list is a requirement statement
 # Possible list of requirements expression that must be implemented
 

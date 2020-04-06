@@ -1,5 +1,6 @@
 from institution import Institution
 from requirement import Requirement
+from schedule import Section
 
 """
 Represents the definition of a course at an institution, conceptualizes
@@ -33,6 +34,65 @@ class Course():
         self.credits = credits
         self.requirements = requirements
         self.details = details
+
+"""
+
+OfferingTerm -> OfferingCourse
+Term -> Course
+
+OfferingTerm exists if and only if OfferingCourse exists
+If OfferingTerm does not exist, then Course exists
+
+Only makes sense for OfferingTerm(Term) and OfferingCourse(Course)
+
+`Term` does not know specific dates. We only know that if a Term has a different
+term type, then dates are assumed to be mutually exclusive
+
+"""
+
+
+"""
+Represents a course offering at a specific institution, given a course object
+and its related term. 
+
+Must also include its section schedule
+
+The responsibility of this class is to define a specific course offering and 
+provide the means to help schedule
+"""
+class OfferingCourse(Course):
+    
+    def __init__(self, institution, courseCode, name, credits, requirements, details, sections):
+        assert type(institution) == Institution
+        assert type(courseCode) == CourseCode
+        assert type(name) == str
+        assert type(credits) == float
+        assert type(requirements) == Requirement
+        assert isinstance(details, CourseDetails)
+        assert all(type(section) == Section for section in sections)
+
+        super().__init__(institution, courseCode, name, credits, requirements, details)
+
+        self.sections = {section.name: section for section in sections}
+
+    """
+    Determines if the given section conflicts with any sections of the offering. 
+
+    If sectionName is not provided, then determines for any sections
+    If sectionName is provided, then determines for that specific section
+    """
+    def doesSectionConflict(self, section, sectionName=None):
+        assert type(section) == Section
+        assert (sectionName == None) or (type(sectionName) == str) 
+
+        if sectionName != None:
+            return self.sections[sectionName].doesSectionConflict(section)
+        
+        for name in self.sections:
+            if self.sections[name].doesSectionConflict(section) == True:
+                return True
+        return False
+
 
 """ 
 Represents the course's abbreviation and number
