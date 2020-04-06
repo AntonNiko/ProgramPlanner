@@ -3,10 +3,8 @@ from enum import Enum
 import jsonschema
 import schema
 
-
-
 """
-This class provides the functionality to check if the 
+This class provides the functionality to check if a requirement is satisfied.
 """
 class RequirementManager():
 
@@ -63,7 +61,11 @@ class CourseExpression():
 
         self.expressionType = ExpressionType.COURSE
         self.courseCode = jsonExpression["code"]
-        self.requisiteType = RequisiteType(jsonExpression["requisiteType"])
+
+        if "requisiteType" not in jsonExpression:
+            self.requisiteType = RequisiteType.PREREQUISITE
+        else:
+            self.requisiteType = RequisiteType(jsonExpression["requisiteType"])
 
     @staticmethod 
     def buildAndGetExpression(jsonExpression):

@@ -31,7 +31,7 @@ class Sequence():
         self.activeTerms[year][termType] = Term(year, termType)
         
     """
-    Removes a term based on its term ID? 
+    Removes a term 
     """
     def removeTerm(self, year, termType):
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
@@ -88,5 +88,4 @@ class Sequence():
             # Term does not exist
             return 
 
-
-
+        assert type(self.activeTerms[year][termType]) == OfferingTerm

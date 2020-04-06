@@ -15,18 +15,27 @@ Represents any undergraduate program at UVic, and its requirements (https://www.
 """
 class UVicProgram(Program):
     def __init__(self, institution):
-        super(Institution.UNIVERSITY_OF_VICTORIA)
+        # TODO: Json schema validation
+
+        super().__init__(Institution.UNIVERSITY_OF_VICTORIA)
 
         self.minimumCourseworkUnits = 60
         self.residencyUnits = 30
-        self.academicWritingRequirement = {}
+        self.academicWritingRequirement = [
+            "ENGL 135",
+            "ENGL 146",
+            "ENGL 147",
+            "ENGR 110"
+        ]
 
 """
 A class that represents any program at UVic offered by the Faculty of Engineering (Undegraduate Calendar p.99), and its requirements.
 """
 class UVicEngineeringProgram(UVicProgram):
     def __init__(self, programJson):
-        super(Institution.UNIVERSITY_OF_VICTORIA)
+        # TODO: Json schema validation
+
+        super().__init__(Institution.UNIVERSITY_OF_VICTORIA)
 
         self.name = programJson["name"]
         self.degree = programJson["degree"]
@@ -46,7 +55,7 @@ class UVicEngineeringProgram(UVicProgram):
 #   "Degree": "BSeng"
 #   "Honours": {},
 #   "Options": {},
-#   "General": ?
+#   "General": {}
 #   "Specialization Areas": {},
 #   "Specializations": {
 #     "Performance and Scalability": {}

@@ -22,6 +22,9 @@ class Term():
         assert type(year) == datetime.date.year 
         assert type(termType) == TermTypes
 
+        self.activeCredits = 0
+        self.activeCourses = 0
+
     """
     Contains a reference to a `Course` object. 
     """

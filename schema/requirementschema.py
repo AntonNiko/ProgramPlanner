@@ -19,7 +19,7 @@ COURSE_EXPRESSION_SCHEMA = {
             "enum": ["P","C"]
         }
     },
-    "required": ["code", "requisiteType"]
+    "required": ["code"]
 }
 
 CONDITIONAL_EXPRESSION_SCHEMA = {

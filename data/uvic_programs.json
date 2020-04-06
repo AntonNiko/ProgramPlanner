@@ -1,0 +1,212 @@
+{
+    "Faculty of Engineering": {
+        "Software Engineering": {
+            "Degree": "BSEng",
+            "Honours": null,
+            "Options": null,
+            "General": {
+                "Year 1": [
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 111"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 115"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ENGR 110"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ENGR 120"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ENGR 130"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ENGR 141"
+                    },
+                    {
+                        "expressionType": "CONDITIONAL",
+                        "expressionOne": {
+                            "expressionType": "COURSE",
+                            "code": "MATH 100"
+                        },
+                        "expressionTwo": {
+                            "expressionType": "COURSE",
+                            "code": "MATH 109"
+                        },
+                        "condition": "OR"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "MATH 101"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "MATH 110"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "PHYS 110"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "PHYS 111"
+                    }
+                ],
+                "Year 2": [
+                    {
+                        "expressionType": "CONDITIONAL",
+                        "expressionOne": {
+                            "expressionType": "COURSE",
+                            "code": "ECE 255"
+                        },
+                        "expressionTwo": {
+                            "expressionType": "COURSE",
+                            "code": "CSC 230"
+                        },
+                        "condition": "OR"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CHEM 101"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 225"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ECE 260"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ECE 310"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ECON 180"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "MATH 122"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 265"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 275"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 310"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "STAT 260"
+                    }
+                ],
+                "Year 3": [
+                    {
+                        "expressionType": "CONDITIONAL",
+                        "expressionOne": {
+                            "expressionType": "COURSE",
+                            "code": "ECE 355"
+                        },
+                        "expressionTwo": {
+                            "expressionType": "COURSE",
+                            "code": "CSC 355"
+                        },
+                        "condition": "OR"
+                    },
+                    {
+                        "expressionType": "CONDITIONAL",
+                        "expressionOne": {
+                            "expressionType": "COURSE",
+                            "code": "ECE 458"
+                        },
+                        "expressionTwo": {
+                            "expressionType": "COURSE",
+                            "code": "CSC 361"
+                        },
+                        "condition": "OR"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 226"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 320"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 360"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "CSC 370"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "ECE 360"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 321"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 350"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 360"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 371"
+                    }
+                ],
+                "Year 4": [
+                    {
+                        "expressionType": "CONDITIONAL",
+                        "expressionOne": {
+                            "expressionType": "COURSE",
+                            "code": "ECE 455"
+                        },
+                        "expressionTwo": {
+                            "expressionType": "COURSE",
+                            "code": "CSC 460"
+                        },
+                        "condition": "OR"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 401"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 426"
+                    },
+                    {
+                        "expressionType": "COURSE",
+                        "code": "SENG 499"
+                    }
+                ]
+            },
+            "Specializations": {},
+            "Co-op": true,
+            "Electives": {
+                
+            }
+        }
+    }
+}
