@@ -1,5 +1,6 @@
 #from course import CourseCode
 from enum import Enum
+import json
 import jsonschema
 import schema
 
@@ -14,25 +15,29 @@ class RequirementManager():
 # THE REQUIREMENTS MUST BE A LIST OF EXPRESSIONS. Each element of the list is a requirement statement
 # Possible list of requirements expression that must be implemented
 
-# Other exceptional expressions:
+# Other exceptional expressions to implement:
 #
 # - COURSE can only be taken once
 # - Courses such as SENG480B when different topics  
 # - "3.0 units in 200 or 300-level MATH or STAT courses"
+# - Minimum units / no more than X units (FIRST)
+# 
 #
 # Include recommendations? I think so since this is the best place for that, to tie it to requirements in case,
 # and to inform user
 
 class ExpressionType(Enum):
-    COURSE = 1
-    CONDITIONAL = 2
-    LIST = 3
-    CREDIT_RESTRICTION = 4
+    REFERENCE = 1
+    COURSE = 2
+    CONDITIONAL = 3
+    LIST = 4
     REGISTRATION_RESTRICTION = 5
-    NO_CREDIT_WARNING = 6
-    RECOMMENDATION_WARNING = 7
-    YEAR_STANDING = 8
-    AWR_SATISFIED = 9
+    YEAR_STANDING = 6
+    UNITS = 7
+    AWR_SATISFIED = 8
+    NO_CREDIT_WARNING = 9
+    RECOMMENDATION_WARNING = 10
+    
 
 """ 
 Represents the requirement that must be satisfied to take a course. An instance of this 
@@ -45,12 +50,57 @@ Do we pass in the entire sequence in here to find out if it is satisfied? Probab
 in the sequence object. It already has all the info it needs. Can call a requirement 
 intepreter/manager or something
 
+
+
+- The main purpose of the expressions is to determine if requirements are met.
+- It is misleading to have one of these expressions to be specifically only for storage.
+- 
+
 """
 class Requirement():
     def __init__(self, jsonRequirements):
         assert type(jsonRequirements) == list 
 
         self.expressions = [Expression.buildAndGetExpression(expressionJson) for expressionJson in jsonRequirements]
+
+"""
+This is effectively a pointer to another expression. The location of the expression is specified.
+
+__init__: Fetches simply the expression without de-referencing the object
+buildAndGetExpression: Meant to return an instance of ReferenceExpression without de-referencing
+
+
+"""
+class ReferenceExpression():
+    SCHEMA = schema.REFERENCE_EXPRESSION_SCHEMA
+
+    def __init__(self, jsonExpression):
+        jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
+
+        self.expressionType = ExpressionType.REFERENCE
+        self.referenceFile = jsonExpression["referenceFile"]
+        self.referencePointer = jsonExpression["referenceName"] 
+
+    """
+    With the initialized ReferenceExpression instance, dereference and get its json expression
+
+    The only mechanism implementation is a referenceFile and referenceName
+    """
+    # TODO: Explore polymorphic implementations in term of fetching data
+    # TODO: This knows too much about file handling!!!! Move that elsewhere
+    def getJsonExpression(self):
+        with open(self.referenceFile) as f:
+            jsonData = json.loads(f.read())
+        jsonExpression = jsonData[self.referencePointer]
+        return jsonExpression
+
+    """
+    Does this have any point? We just return the same thing that __init__ does.
+    Maybe by the semantics of the reference we return the de-referenced expression?
+    """
+    @staticmethod 
+    def buildAndGetExpression(jsonExpression):
+        jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
 
 
 class CourseExpression():
@@ -89,7 +139,17 @@ class ConditionalExpression():
         jsonschema.validate(jsonExpression, ConditionalExpression.SCHEMA)
         return ConditionalExpression(jsonExpression)
 
+"""
 
+Aside: Having simply a list of expressions, without context, has no purpose. What exactly is the point
+of it? The context that I see is only that a list complements a List Expression, no 
+other expression.
+
+The list storage will be directly coupled to the List expression.
+
+- jsonExpression["expressions"] *can* be a reference to a list, or just a list
+
+"""
 class ListExpression():
     SCHEMA = schema.LIST_EXPRESSION_SCHEMA
 
@@ -98,8 +158,17 @@ class ListExpression():
 
         self.expressionType = ExpressionType.LIST 
         self.threshold = jsonExpression["threshold"]
-        self.type = jsonExpression["type"]
-        self.expressions = [Expression.buildAndGetExpression(expression) for expression in jsonExpression["expressions"]]
+        self.type = jsonExpression["type"] # TODO: Abstract away from the value to an ENUM?
+
+        # If the type of "expressions" is not reference we de-reference
+        if type(jsonExpression["expression"]) != list:
+            reference = ReferenceExpression(jsonExpression["expression"])
+            expressions = reference.getJsonExpression()
+        else:
+            expressions = jsonExpression["expressions"]
+
+        # At this point, `expressions` is assumed to be a list
+        self.expressions = [Expression.buildAndGetExpression(expression) for expression in expressions]
 
     @staticmethod 
     def buildAndGetExpression(jsonExpression):
@@ -137,6 +206,22 @@ class YearStandingExpression():
     def buildAndGetExpression(jsonExpression):
         jsonschema.validate(jsonExpression, YearStandingExpression.SCHEMA)
         return YearStandingExpression(jsonExpression)
+
+
+class UnitsExpression():
+    SCHEMA = schema.UNITS_EXPRESSION_SCHEMA
+
+    def __init__(self, jsonExpression):
+        jsonschema.validate(jsonExpression, UnitsExpression.SCHEMA)
+
+        self.expressionType = ExpressionType.UNITS
+        self.type = jsonExpression["type"]
+        self.threshold = jsonExpression["threshold"]
+
+    @staticmethod
+    def buildAndGetExpression(jsonExpression):
+        jsonschema.validate(jsonExpression, UnitsExpression.SCHEMA) 
+        return UnitsExpression(jsonExpression)
 
 
 class AwrSatisfiedExpression():
@@ -182,11 +267,13 @@ class RecommendationWarningExpression():
 class Expression():
     SCHEMA = schema.EXPRESSION_SCHEMA
     EXPRESSION_TYPE_MAP = {
+        "REFERENCE": ReferenceExpression,
         "COURSE": CourseExpression,
         "CONDITIONAL": ConditionalExpression,
         "LIST": ListExpression,
         "REGISTRATION_RESTRICTION": RegistrationRestrictionExpression,
         "YEAR_STANDING": YearStandingExpression,
+        "UNITS": UnitsExpression,
         "AWR_STANDING": AwrSatisfiedExpression,
         "NO_CREDIT_WARNING": NoCreditWarningExpression,
         "RECOMMENDATION_WARNING": RecommendationWarningExpression

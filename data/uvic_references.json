@@ -1,0 +1,59 @@
+{
+    "MINIMUM_COURSEWORK_UNITS": {
+        "expressionType": "UNIT",
+        "threshold": 60,
+        "type": "geq",
+        "expressions": []
+    },
+    "ACADEMIC_WRITING_REQUIREMENT": {
+        "expressionType": "LIST",
+        "threshold": 1,
+        "type": "geq",
+        "expressions": [
+            {
+                "expressionType": "COURSE",
+                "code": "ENGL 135"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGL 146"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGL 147"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGR 110"
+            }
+        ]
+    },
+    "BENG_BSENG_COMP_STUDIES_ELECTIVES": [
+        {
+            "expressionType": "COURSE",
+            "code": "ADMN 200"
+        },
+        {
+            "expressionType": "COURSE",
+            "code": "THEA 150"
+        },
+        {
+            "expressionType": "COURSE",
+            "code": "RS 200A"
+        }
+    ],
+    "BSENG_NAT_SCI_ELECTIVES": [
+        {
+            "expressionType": "COURSE",
+            "code": "ASTR 101"
+        },
+        {
+            "expressionType": "COURSE",
+            "code": "ASTR 102"
+        },
+        {
+            "expressionType": "COURSE",
+            "code": "PHYS 216"
+        }
+    ]
+}

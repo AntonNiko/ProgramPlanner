@@ -200,6 +200,18 @@
                         "expressionType": "COURSE",
                         "code": "SENG 499"
                     }
+                ],
+                "Other": [
+                    {
+
+                        "expressionType": "LIST",
+                        "threshold": 2,
+                        "type": "geq",
+                        "expressions": {
+                            "expressionType": "REFERENCE",
+                            "referencePointer": "BENG_BSENG_COMP_STUDIES_ELECTIVES"
+                        }
+                    }
                 ]
             },
             "Specializations": {},

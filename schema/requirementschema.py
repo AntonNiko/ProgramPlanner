@@ -8,6 +8,19 @@ EXPRESSION_SCHEMA = {
     "required": ["expressionType"]
 }
 
+REFERENCE_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "referenceFile": {
+            "type": "string"
+        },
+        "referenceName": {
+            "type": "string"
+        }
+    },
+    "required": ["referencePointer"]
+}
+
 COURSE_EXPRESSION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -35,7 +48,8 @@ CONDITIONAL_EXPRESSION_SCHEMA = {
             "type": "string",
             "enum": ["OR", "AND"]
         }
-    }
+    },
+    "required": ["expressionOne", "expressionTwo", "condition"]
 } 
 
 LIST_EXPRESSION_SCHEMA = {
@@ -49,10 +63,15 @@ LIST_EXPRESSION_SCHEMA = {
             "enum": ["lt", "leq", "eq", "geq", "gt"]
         },
         "expressions": {
-            "type": "array",
-            "items": {
-                "type": "object"
-            }
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                REFERENCE_EXPRESSION_SCHEMA
+            ]    
         }
     },
     "required": ["threshold", "type", "expressions"]
@@ -64,7 +83,8 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
         "expression": {
             "type": "object"
         }
-    }
+    },
+    "required": ["expression"]
 }
 
 YEAR_STANDING_EXPRESSION_SCHEMA = {
@@ -76,6 +96,24 @@ YEAR_STANDING_EXPRESSION_SCHEMA = {
         },
         "threshold": {
             "type": "integer"
+        }
+    },
+    "required": ["type", "threshold"]
+}
+
+# Doesn't make sense to have a list as "expressions". The semantics would get wildly complicated 
+UNITS_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "enum": ["lt", "leq", "eq", "geq", "gt"]
+        },
+        "threshold": {
+            "type": "number"
+        },
+        "expression": {
+            "type": "object"
         }
     }
 }
@@ -90,7 +128,8 @@ NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {
         "expression": {
             "type": "object"
         }
-    }
+    },
+    "required": ["expression"]
 }
 
 RECOMMENDATION_WARNING_EXPRESSION_SCHEMA = {
@@ -99,5 +138,6 @@ RECOMMENDATION_WARNING_EXPRESSION_SCHEMA = {
         "expression": {
             "type": "object"
         }
-    }
+    },
+    "required": ["expression"]
 }

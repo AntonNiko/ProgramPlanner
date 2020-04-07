@@ -1,3 +1,5 @@
+from requirement import Expression
+import json
 from institution import Institution
 
 """
@@ -14,6 +16,13 @@ class Program():
 Represents any undergraduate program at UVic, and its requirements (https://www.uvic.ca/services/advising/choose-plan/degree-basics/index.php).
 """
 class UVicProgram(Program):
+    MINIMUM_COURSEWORK_UNITS = 60
+    MINIMUM_RESIDENCY_UNITS = 30
+    
+    @staticmethod
+    def get():
+        return []
+
     def __init__(self, institution):
         # TODO: Json schema validation
 
@@ -21,12 +30,16 @@ class UVicProgram(Program):
 
         self.minimumCourseworkUnits = 60
         self.residencyUnits = 30
-        self.academicWritingRequirement = [
-            "ENGL 135",
-            "ENGL 146",
-            "ENGL 147",
-            "ENGR 110"
-        ]
+        self.academicWritingRequirement = UVicProgram.getAcademicWritingRequirementsExpression()
+
+    @staticmethod
+    # TODO: MOVE THIS NON-POLYMORPHIC STUFF ELSEWHERE
+    def getAcademicWritingRequirementsExpression():
+        with open("data/uvic_references.json") as f:
+            jsonExpression = json.loads(f.read())
+        return Expression.buildAndGetExpression(jsonExpression)
+
+        
 
 """
 A class that represents any program at UVic offered by the Faculty of Engineering (Undegraduate Calendar p.99), and its requirements.
