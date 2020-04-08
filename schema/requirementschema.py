@@ -101,7 +101,8 @@ YEAR_STANDING_EXPRESSION_SCHEMA = {
     "required": ["type", "threshold"]
 }
 
-# Doesn't make sense to have a list as "expressions". The semantics would get wildly complicated 
+# Makes sense to have list of expressions, since the semantics of this expression define that 
+# Any expression that is satisfied, "counts" towards this unit
 UNITS_EXPRESSION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -112,14 +113,49 @@ UNITS_EXPRESSION_SCHEMA = {
         "threshold": {
             "type": "number"
         },
-        "expression": {
-            "type": "object"
-        }
+        "expressions": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        }                  
     }
 }
 
 AWR_SATISFIED_EXPRESSION_SCHEMA = {
     "type": "object",
+}
+
+UMBRELLA_EXPRESSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "level": {
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "subject": {
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        }
+    }
 }
 
 NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {

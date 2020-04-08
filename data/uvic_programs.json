@@ -172,7 +172,7 @@
                     },
                     {
                         "expressionType": "COURSE",
-                        "code": "SENG 371"
+                        "code": "SENG 371 "
                     }
                 ],
                 "Year 4": [
@@ -209,7 +209,8 @@
                         "type": "geq",
                         "expressions": {
                             "expressionType": "REFERENCE",
-                            "referencePointer": "BENG_BSENG_COMP_STUDIES_ELECTIVES"
+                            "pointer": "uvic_programs",
+                            "identifier": "BENG_BSENG_COMP_STUDIES_ELECTIVES"
                         }
                     }
                 ]

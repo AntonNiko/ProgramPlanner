@@ -1,3 +1,4 @@
+from data import Data
 from requirement import Expression
 import json
 from institution import Institution
@@ -12,33 +13,18 @@ class Program():
 
         self.institution = institution
 
+
 """
 Represents any undergraduate program at UVic, and its requirements (https://www.uvic.ca/services/advising/choose-plan/degree-basics/index.php).
 """
 class UVicProgram(Program):
-    MINIMUM_COURSEWORK_UNITS = 60
-    MINIMUM_RESIDENCY_UNITS = 30
-    
-    @staticmethod
-    def get():
-        return []
-
     def __init__(self, institution):
         # TODO: Json schema validation
 
         super().__init__(Institution.UNIVERSITY_OF_VICTORIA)
 
-        self.minimumCourseworkUnits = 60
-        self.residencyUnits = 30
-        self.academicWritingRequirement = UVicProgram.getAcademicWritingRequirementsExpression()
-
-    @staticmethod
-    # TODO: MOVE THIS NON-POLYMORPHIC STUFF ELSEWHERE
-    def getAcademicWritingRequirementsExpression():
-        with open("data/uvic_references.json") as f:
-            jsonExpression = json.loads(f.read())
-        return Expression.buildAndGetExpression(jsonExpression)
-
+        self.academicWritingRequirement = Expression.buildAndGetExpression(Data.getAcademicWritingRequirements())
+        self.minimumCourseworkUnits = Expression.buildAndGetExpression(Data.getMinimumCourseWorkUnits())
         
 
 """

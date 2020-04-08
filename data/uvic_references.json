@@ -3,7 +3,13 @@
         "expressionType": "UNIT",
         "threshold": 60,
         "type": "geq",
-        "expressions": []
+        "expressions": [
+            {
+                "expressionType": "UMBRELLA",
+                "level": [100, 200, 300, 400],
+                "subject": null
+            }
+        ]
     },
     "ACADEMIC_WRITING_REQUIREMENT": {
         "expressionType": "LIST",
