@@ -1,3 +1,5 @@
+from course import OfferingCourse
+from requirement import RequirementManager
 from term import OfferingTerm, Term
 
 """
@@ -17,6 +19,7 @@ SEQUENCE:
 class Sequence():
     def __init__(self):
         self.activeTerms = {}
+        self.requirementManager = RequirementManager()
 
     """
     Adds an empty term. 
@@ -62,6 +65,7 @@ class Sequence():
 
         assert type(self.activeTerms[year][termType]) == Term
 
+
     """
     Removes a course, probably with its `CourseCode` object
     """
@@ -73,12 +77,17 @@ class Sequence():
     """
     Adds a section offering, given a `Section` object
     """
-    def addOfferingSection(self, year, termType, section):
+    def addOfferingSection(self, year, termType, offering, section):
+        assert type(offering) == OfferingCourse
+        assert type(section) == str
+
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
             # Term does not exist
             return 
 
-        assert type(self.activeTerms[year][termType]) == OfferingTerm
+        assert type(self.activeTerms[year][termType]) == OfferingTerm 
+
+
 
     """
     Removes a section offering, probably with its course code and section name

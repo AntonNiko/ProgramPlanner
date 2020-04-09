@@ -11,14 +11,14 @@ EXPRESSION_SCHEMA = {
 REFERENCE_EXPRESSION_SCHEMA = {
     "type": "object",
     "properties": {
-        "referenceFile": {
+        "group": {
             "type": "string"
         },
-        "referenceName": {
+        "identifier": {
             "type": "string"
         }
     },
-    "required": ["referencePointer"]
+    "required": ["group", "identifier"]
 }
 
 COURSE_EXPRESSION_SCHEMA = {
@@ -119,7 +119,8 @@ UNITS_EXPRESSION_SCHEMA = {
                 "type": "object"
             }
         }                  
-    }
+    },
+    "required": ["type", "threshold", "expressions"]
 }
 
 AWR_SATISFIED_EXPRESSION_SCHEMA = {
@@ -155,7 +156,8 @@ UMBRELLA_EXPRESSION_SCHEMA = {
                 }
             ]
         }
-    }
+    },
+    "required": ["level", "subject"]
 }
 
 NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {

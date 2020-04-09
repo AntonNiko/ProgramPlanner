@@ -1,4 +1,4 @@
-from course import OfferingCourse
+from course import Course, OfferingCourse
 import datetime
 from enum import Enum
 
@@ -24,17 +24,26 @@ class Term():
 
         self.activeCredits = 0
         self.activeCourses = 0
+        self.activeCourses = {}
 
     """
-    Contains a reference to a `Course` object. 
+    Contains a reference to a `Course` object. Does not check requirements as that's 
+    composed in `sequence`.
     """
     def addCourse(self, course):
-        # This is supposed to only be called if self is a Term, not 
-        # and Offering Term 
         assert type(self) == Term
+        assert type(course) == Course
+
+        self.activeCourses[course.courseCode] = course
 
     def removeCourse(self, courseCode):
-        pass
+        assert type(self) == Term
+
+        if courseCode not in self.activeCourses:
+            # TODO: Deal with non-existant course
+            pass
+        else:
+            del self.activeCourses[courseCode]
 
 """
 Represents a container to organize offerings into a specific term. Instances
@@ -65,6 +74,7 @@ class OfferingTerm(Term):
 
     section == "A01" or "A02" or "B10" or "T05" ...
 
+    Does not check if requirements are met
     """
     def addSection(self, offering, sectionName):
         assert type(offering) == OfferingCourse 
@@ -73,6 +83,7 @@ class OfferingTerm(Term):
         if self.isSectionTimeAvailable(offering, sectionName):
             if offering not in self.activeOfferings:
                 self.activeOfferings[offering] = {}
+            # TODO: Deal with if already exists
             self.activeOfferings[offering][sectionName] = offering.sections[sectionName]
         else: 
             # Cannot add course

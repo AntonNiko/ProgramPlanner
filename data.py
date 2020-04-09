@@ -20,20 +20,20 @@ class Data():
 
     @staticmethod
     def getAcademicWritingRequirements():
-        awrPointer = "uvic_programs"
+        awrGroup = "uvic_programs"
         awrIdentifier = "BENG_BSENG_COMP_STUDIES_ELECTIVES"
 
-        dataLocation = Data.DATA_FOLDER + awrPointer + Data.DATA_EXTENSION
+        dataLocation = Data.DATA_FOLDER + awrGroup + Data.DATA_EXTENSION
         with open(dataLocation) as f:
             jsonExpression = json.loads(f.read())[awrIdentifier]
         return jsonExpression
 
     @staticmethod 
     def getMinimumCourseWorkUnits():
-        minimumCourseworkPointer = "uvic_programs"
+        minimumCourseworkGroup = "uvic_programs"
         minimumCourseworkIdentifier = "MINIMUM_COURSEWORK_UNITS"
 
-        dataLocation = Data.DATA_FOLDER + minimumCourseworkPointer + Data.DATA_EXTENSION
+        dataLocation = Data.DATA_FOLDER + minimumCourseworkGroup + Data.DATA_EXTENSION
         with open(dataLocation) as f:
             jsonExpression = json.loads(f.read())[minimumCourseworkIdentifier]
         return jsonExpression

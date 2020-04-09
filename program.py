@@ -1,7 +1,7 @@
 from data import Data
-from requirement import Expression
+from expression import Expression
 import json
-from institution import Institution
+from utils import Institution
 
 """
 An abstract class that represents a program at an institution. This is intended to be inherited

@@ -1,6 +1,7 @@
-from institution import Institution
-from requirement import Requirement
+from expression import Expression
+import re
 from schedule import Section
+from utils import Institution, NumberOperations
 
 """
 Represents the definition of a course at an institution, conceptualizes
@@ -25,7 +26,7 @@ class Course():
         assert type(courseCode) == CourseCode
         assert type(name) == str
         assert type(credits) == float
-        assert type(requirements) == Requirement
+        #assert type(requirements) == Requirement
         assert isinstance(details, CourseDetails)
 
         self.institution = institution
@@ -67,7 +68,7 @@ class OfferingCourse(Course):
         assert type(courseCode) == CourseCode
         assert type(name) == str
         assert type(credits) == float
-        assert type(requirements) == Requirement
+        #assert type(requirements) == Requirement
         assert isinstance(details, CourseDetails)
         assert all(type(section) == Section for section in sections)
 
@@ -114,7 +115,13 @@ class CourseCode():
     Input must be either 100,200,300,400
     """
     def isLevel(self, level):
-        pass
+        assert level in [0,100,200,300,400]
+
+        courseNumber = int(re.search(r'\d{3}', self.number).group(0))
+        courseLevel = NumberOperations.roundDownToNearestHundred(courseNumber)
+        if level == courseLevel:
+            return True 
+        return False
 
     def __eq__(self, other):
         if (self.subject == other.subject) and (self.number == other.number):
