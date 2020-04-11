@@ -62,8 +62,11 @@ class Sequence():
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
             # Term does not exist
             return       
-
         assert type(self.activeTerms[year][termType]) == Term
+
+        # Check if requirement fulfilled
+        if not self.requirementManager.isRequirementSatisfied(self.activeTerms, course.requirement):
+            return
 
 
     """
@@ -87,8 +90,6 @@ class Sequence():
 
         assert type(self.activeTerms[year][termType]) == OfferingTerm 
 
-
-
     """
     Removes a section offering, probably with its course code and section name
     """
@@ -98,3 +99,21 @@ class Sequence():
             return 
 
         assert type(self.activeTerms[year][termType]) == OfferingTerm
+
+    """
+    Returns a subset of the active terms based on specified first and lest terms.
+    If none supplied, just returns the entire thing.
+
+    Abstracts away from each term's implementation by only returning a list of 
+    active courses
+    """
+    #def getCourseSequence(self, first=None, last=None):
+        # first and last are a list of two elements: [datetime.date.year, TermType]
+        # TODO: Determine later how to return only range of terms
+
+    #    courseSequence = {}
+    #    for year in self.activeTerms:
+    #        courseSequence[year] = {}
+    #        for term in self.activeTerms[year]:
+    #            courseSequence[year][term] = self.activeTerms[year][term].getActiveCoursesCodes()
+    #    return courseSequence

@@ -1,4 +1,3 @@
-from expression import Expression
 import re
 from schedule import Section
 from utils import Institution, NumberOperations
@@ -16,12 +15,12 @@ Notes:
 # For e.x: EOS 210 and PHYS 210 (https://web.uvic.ca/calendar2020-01/CDs/EOS/210.html)
 # Refer to the same course!! Like a soft/hard link
 #
-# TODO: Determine how to handle deprecated
+# TODO: Determine how to handle deprecated courses
 #
 
 class Course():
     
-    def __init__(self, institution, courseCode, name, credits, requirements, details):
+    def __init__(self, institution, courseCode, name, credits, requirement, details):
         assert type(institution) == Institution
         assert type(courseCode) == CourseCode
         assert type(name) == str
@@ -33,8 +32,11 @@ class Course():
         self.courseCode = courseCode
         self.name = name
         self.credits = credits
-        self.requirements = requirements
+        self.requirement = requirement
         self.details = details
+
+    def __str__(self):
+        return str(self.courseCode)
 
 """
 
@@ -63,7 +65,7 @@ provide the means to help schedule
 """
 class OfferingCourse(Course):
     
-    def __init__(self, institution, courseCode, name, credits, requirements, details, sections):
+    def __init__(self, institution, courseCode, name, credits, requirement, details, sections):
         assert type(institution) == Institution
         assert type(courseCode) == CourseCode
         assert type(name) == str
@@ -72,7 +74,7 @@ class OfferingCourse(Course):
         assert isinstance(details, CourseDetails)
         assert all(type(section) == Section for section in sections)
 
-        super().__init__(institution, courseCode, name, credits, requirements, details)
+        super().__init__(institution, courseCode, name, credits, requirement, details)
 
         self.sections = {section.name: section for section in sections}
 

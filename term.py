@@ -4,9 +4,15 @@ from enum import Enum
 
 
 class TermTypes(Enum):
-    FALL_TERM   = 1
-    SPRING_TERM = 2
-    SUMMER_TERM = 3
+    SPRING_TERM   = 1
+    SUMMER_TERM = 2
+    FALL_TERM = 3
+
+    def __gt__(self, other):
+        return True if self.value > other.value else False
+
+    def __ge__(self, other):
+        return True if self.value >= other.value else False
 
 """
 Represents a term in which its details are currently unknown. 
@@ -17,13 +23,16 @@ Represents a term in which its details are currently unknown.
      * Number of active courses
 
 """
+# TODO: Ensure there is a way to get list of active Courses
 class Term():
     def __init__(self, year, termType):
-        assert type(year) == datetime.date.year 
+        assert type(year) == int
         assert type(termType) == TermTypes
 
-        self.activeCredits = 0
-        self.activeCourses = 0
+        #self.activeCredits = 0
+        #self.activeCourses = 0
+
+        # The key type will be a string which is the course code
         self.activeCourses = {}
 
     """
@@ -34,16 +43,20 @@ class Term():
         assert type(self) == Term
         assert type(course) == Course
 
-        self.activeCourses[course.courseCode] = course
+        self.activeCourses[str(course)] = course
 
     def removeCourse(self, courseCode):
         assert type(self) == Term
+        assert type(courseCode) == str
 
         if courseCode not in self.activeCourses:
-            # TODO: Deal with non-existant course
+            # TODO: Deal with non-existent course
             pass
         else:
             del self.activeCourses[courseCode]
+
+    def getActiveCoursesCodes(self):
+        return list(self.activeCourses)
 
 """
 Represents a container to organize offerings into a specific term. Instances
@@ -55,10 +68,13 @@ IT IS to determine if the offering can be added for this term
 IT IS NOT to determine if the offering added has its requirements fulfilled 
 
 """
+# TODO: Make sure that course code is accessible for expression validation
+# TODO: Try to ensure activeOffering and activeCourses are as consistent to each other as possible
+# TODO: Provide a method to be called to get list of all active courses
 class OfferingTerm(Term):
     
     def __init__(self, year, termType, startDate, endDate):
-        assert type(year) == datetime.date.year
+        assert type(year) == int
         assert type(termType) == TermTypes 
         assert type(startDate) == datetime.date
         assert type(endDate) == datetime.date        
@@ -82,9 +98,10 @@ class OfferingTerm(Term):
 
         if self.isSectionTimeAvailable(offering, sectionName):
             if offering not in self.activeOfferings:
+
                 self.activeOfferings[offering] = {}
             # TODO: Deal with if already exists
-            self.activeOfferings[offering][sectionName] = offering.sections[sectionName]
+            self.activeOfferings[str(offering)][sectionName] = offering.sections[sectionName]
         else: 
             # Cannot add course
             pass
@@ -92,7 +109,7 @@ class OfferingTerm(Term):
     """ 
     Given a section, determine if it can be added to the current term offering.
 
-    First checks if the course falls withinyhe same range. If it does fall within the 
+    First checks if the course falls within the same range. If it does fall within the 
     same range, then checks if the times conflict.
     """
     def isSectionTimeAvailable(self, offering, sectionName):
@@ -121,3 +138,6 @@ class OfferingTerm(Term):
         del self.activeOfferings[offering][section] 
         if len(self.activeOfferings[offering]) == 0:
             del self.activeOfferings[offering]
+
+    def getActiveCoursesCodes(self):
+        return list(self.activeOfferings)

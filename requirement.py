@@ -11,7 +11,11 @@ class RequirementManager():
     """
     A requirement is a list of expressions. 
     """
-    def isRequirementSatisfied(self, terms, requirement):
-        assert type(terms) == dict  
+    def isRequirementSatisfied(self, activeTerms, requirement):
         for expression in requirement:
-            assert type(expression) == Expression
+            assert type(expression) == Expression 
+
+        # Check if each expression is satisfied. If not satisfied, then exception?
+        for expression in requirement:
+            if not expression.isExpressionSatisfied(activeTerms):
+                pass
