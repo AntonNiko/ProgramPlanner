@@ -11,7 +11,8 @@ class RequirementManager():
     """
     A requirement is a list of expressions. 
     """
-    def isRequirementSatisfied(self, activeTerms, requirement):
+    @staticmethod
+    def isRequirementSatisfied(activeTerms, requirement):
         for expression in requirement:
             assert type(expression) == Expression 
 

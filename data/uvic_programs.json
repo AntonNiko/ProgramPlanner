@@ -1,225 +1,246 @@
 {
     "Faculty of Engineering": {
+        "Computer Science": {
+            "Degree": "BSc",
+            "Honours": {
+                
+            },
+            "General Requirements": [],
+            "Specializations": []
+            
+        },
+        "Computer Engineering": {
+            "Degree": "BEng",
+            "Honours": {},
+            "Options": {
+                "Biomedical": []
+            },
+            "General Requirements": [],
+            "Specializations": {
+
+            },
+            "Co-op": {
+                "expressionType": "REFERENCE"
+            },
+            "Electives": {
+                "Communications": [],
+                "Computational Intelligence": []
+            }
+        },
         "Software Engineering": {
             "Degree": "BSEng",
-            "Honours": null,
-            "Options": null,
-            "General": {
-                "Year 1": [
-                    {
+            "Honours": {},
+            "Options": {},
+            "General Requirements": [
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 111"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 115"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ENGR 110"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ENGR 120"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ENGR 130"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ENGR 141"
+                },
+                {
+                    "expressionType": "CONDITIONAL",
+                    "expressionOne": {
                         "expressionType": "COURSE",
-                        "code": "CSC 111"
+                        "code": "MATH 100"
                     },
-                    {
+                    "expressionTwo": {
                         "expressionType": "COURSE",
-                        "code": "CSC 115"
+                        "code": "MATH 109"
                     },
-                    {
+                    "condition": "OR"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "MATH 101"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "MATH 110"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "PHYS 110"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "PHYS 111"
+                },
+                {
+                    "expressionType": "CONDITIONAL",
+                    "expressionOne": {
                         "expressionType": "COURSE",
-                        "code": "ENGR 110"
+                        "code": "ECE 255"
                     },
-                    {
+                    "expressionTwo": {
                         "expressionType": "COURSE",
-                        "code": "ENGR 120"
+                        "code": "CSC 230"
                     },
-                    {
+                    "condition": "OR"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CHEM 101"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 225"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ECE 260"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ECE 310"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ECON 180"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "MATH 122"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 265"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 275"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 310"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "STAT 260"
+                },
+                {
+                    "expressionType": "CONDITIONAL",
+                    "expressionOne": {
                         "expressionType": "COURSE",
-                        "code": "ENGR 130"
+                        "code": "ECE 355"
                     },
-                    {
+                    "expressionTwo": {
                         "expressionType": "COURSE",
-                        "code": "ENGR 141"
+                        "code": "CSC 355"
                     },
-                    {
-                        "expressionType": "CONDITIONAL",
-                        "expressionOne": {
-                            "expressionType": "COURSE",
-                            "code": "MATH 100"
-                        },
-                        "expressionTwo": {
-                            "expressionType": "COURSE",
-                            "code": "MATH 109"
-                        },
-                        "condition": "OR"
-                    },
-                    {
+                    "condition": "OR"
+                },
+                {
+                    "expressionType": "CONDITIONAL",
+                    "expressionOne": {
                         "expressionType": "COURSE",
-                        "code": "MATH 101"
+                        "code": "ECE 458"
                     },
-                    {
+                    "expressionTwo": {
                         "expressionType": "COURSE",
-                        "code": "MATH 110"
+                        "code": "CSC 361"
                     },
-                    {
+                    "condition": "OR"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 226"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 320"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 360"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "CSC 370"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "ECE 360"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 321"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 350"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 360"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 371 "
+                },
+                {
+                    "expressionType": "CONDITIONAL",
+                    "expressionOne": {
                         "expressionType": "COURSE",
-                        "code": "PHYS 110"
+                        "code": "ECE 455"
                     },
-                    {
+                    "expressionTwo": {
                         "expressionType": "COURSE",
-                        "code": "PHYS 111"
-                    }
-                ],
-                "Year 2": [
-                    {
-                        "expressionType": "CONDITIONAL",
-                        "expressionOne": {
-                            "expressionType": "COURSE",
-                            "code": "ECE 255"
-                        },
-                        "expressionTwo": {
-                            "expressionType": "COURSE",
-                            "code": "CSC 230"
-                        },
-                        "condition": "OR"
+                        "code": "CSC 460"
                     },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CHEM 101"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CSC 225"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "ECE 260"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "ECE 310"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "ECON 180"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "MATH 122"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 265"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 275"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 310"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "STAT 260"
-                    }
-                ],
-                "Year 3": [
-                    {
-                        "expressionType": "CONDITIONAL",
-                        "expressionOne": {
-                            "expressionType": "COURSE",
-                            "code": "ECE 355"
-                        },
-                        "expressionTwo": {
-                            "expressionType": "COURSE",
-                            "code": "CSC 355"
-                        },
-                        "condition": "OR"
-                    },
-                    {
-                        "expressionType": "CONDITIONAL",
-                        "expressionOne": {
-                            "expressionType": "COURSE",
-                            "code": "ECE 458"
-                        },
-                        "expressionTwo": {
-                            "expressionType": "COURSE",
-                            "code": "CSC 361"
-                        },
-                        "condition": "OR"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CSC 226"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CSC 320"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CSC 360"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "CSC 370"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "ECE 360"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 321"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 350"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 360"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 371 "
-                    }
-                ],
-                "Year 4": [
-                    {
-                        "expressionType": "CONDITIONAL",
-                        "expressionOne": {
-                            "expressionType": "COURSE",
-                            "code": "ECE 455"
-                        },
-                        "expressionTwo": {
-                            "expressionType": "COURSE",
-                            "code": "CSC 460"
-                        },
-                        "condition": "OR"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 401"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 426"
-                    },
-                    {
-                        "expressionType": "COURSE",
-                        "code": "SENG 499"
-                    }
-                ],
-                "Other": [
-                    {
+                    "condition": "OR"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 401"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 426"
+                },
+                {
+                    "expressionType": "COURSE",
+                    "code": "SENG 499"
+                },
+                {
 
-                        "expressionType": "LIST",
-                        "threshold": 2,
-                        "type": "geq",
-                        "expressions": {
-                            "expressionType": "REFERENCE",
-                            "group": "uvic_references",
-                            "identifier": "BENG_BSENG_COMP_STUDIES_ELECTIVES"
-                        }
+                    "expressionType": "LIST",
+                    "threshold": 2,
+                    "type": "geq",
+                    "expressions": {
+                        "expressionType": "REFERENCE",
+                        "group": "uvic_references",
+                        "identifier": "BENG_BSENG_COMP_STUDIES_ELECTIVES"
                     }
-                ]
+                }
+            ],
+            "Specializations": {
+
             },
-            "Specializations": {},
-            "Co-op": true,
-            "Electives": {
-                
-            }
+            "Co-op": {
+                "expressionType": "REFERENCE"
+            },
+            "Electives": [
+
+            ]
         }
     }
 }

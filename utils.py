@@ -6,8 +6,8 @@ class ConditionType(Enum):
     OR = "OR"
 
 class Institution(Enum):
-    UNIVERSITY_OF_VICTORIA = 1
-    CAMOSUN_COLLEGE = 2
+    UNIVERSITY_OF_VICTORIA = "UNIVERSITY_OF_VICTORIA"
+    CAMOSUN_COLLEGE = "CAMOSUN_COLLEGE"
 
 class NumberOperations():
 

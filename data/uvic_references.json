@@ -1,4 +1,6 @@
 {
+    "YEAR_STANDING": {
+    },
     "MINIMUM_COURSEWORK_UNITS": {
         "expressionType": "UNIT",
         "threshold": 60,
@@ -61,5 +63,28 @@
             "expressionType": "COURSE",
             "code": "PHYS 216"
         }
-    ]
+    ],
+    "ENG_COOP": {
+        "expressionType": "LIST",
+        "threshold": 4,
+        "type": "geq",
+        "expressions": [
+            {
+                "expressionType": "COURSE",
+                "code": "ENGR 001"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGR 002"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGR 003"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ENGR 004"
+            }
+        ]
+    }
 }

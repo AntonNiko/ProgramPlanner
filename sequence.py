@@ -19,7 +19,7 @@ SEQUENCE:
 class Sequence():
     def __init__(self):
         self.activeTerms = {}
-        self.requirementManager = RequirementManager()
+        #self.requirementManager = RequirementManager()
 
     """
     Adds an empty term. 
@@ -65,7 +65,7 @@ class Sequence():
         assert type(self.activeTerms[year][termType]) == Term
 
         # Check if requirement fulfilled
-        if not self.requirementManager.isRequirementSatisfied(self.activeTerms, course.requirement):
+        if not RequirementManager.isRequirementSatisfied(self.activeTerms, course.requirement):
             return
 
 

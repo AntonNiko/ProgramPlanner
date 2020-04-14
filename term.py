@@ -29,8 +29,8 @@ class Term():
         assert type(year) == int
         assert type(termType) == TermTypes
 
-        #self.activeCredits = 0
-        #self.activeCourses = 0
+        self.year = year 
+        self.termType = termType
 
         # The key type will be a string which is the course code
         self.activeCourses = {}

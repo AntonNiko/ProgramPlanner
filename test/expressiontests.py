@@ -195,6 +195,171 @@ class ConditionalExpressionTests(unittest.TestCase):
 
         self.assertRaises(jsonschema.exceptions.ValidationError, ConditionalExpression.buildAndGetExpression, jsonExpression)
 
+    def testExpressionSatisfiedValidCoursesOrCondition(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["CSC 115", "CSC 225", "ENGR 120", "ECON 180"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["CSC 226", "SENG 350", "SENG 480B", "SENG 275"]  
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "CONDITIONAL",
+            "expressionOne": {
+                "expressionType": "COURSE",
+                "code": "CSC 115",
+                "requisiteType": "P"
+            },
+            "expressionTwo": {
+                "expressionType": "COURSE",
+                "code": "CSC 116",
+                "requisiteType": "P"
+            },
+            "condition": "OR"
+        }
+
+        expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
+        self.assertTrue(expression.isExpressionSatisfied(activeTerms))
+
+    def testExpressionSatisfiedValidCoursesAndCondition(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["CSC 320", "CSC 360", "ENGR 297", "SENG 475"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["CSC 349A", "SENG 350", "SENG 480B", "SENG 275"]  
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "CONDITIONAL",
+            "expressionOne": {
+                "expressionType": "COURSE",
+                "code": "CSC 320",
+                "requisiteType": "P"
+            },
+            "expressionTwo": {
+                "expressionType": "COURSE",
+                "code": "CSC 360",
+                "requisiteType": "P"
+            },
+            "condition": "AND"
+        }  
+
+        expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
+        self.assertTrue(expression.isExpressionSatisfied(activeTerms))    
+
+    def testExpressionSatisfiedValidCourseOrConditonUnsatisfied(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["CSC 320", "CSC 360", "ENGR 297", "SENG 475"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["CSC 349A", "SENG 360", "SENG 480B", "SENG 275"]  
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "CONDITIONAL",
+            "expressionOne": {
+                "expressionType": "COURSE",
+                "code": "CSC 399",
+                "requisiteType": "P"
+            },
+            "expressionTwo": {
+                "expressionType": "COURSE",
+                "code": "SENG 350",
+                "requisiteType": "P"
+            },
+            "condition": "OR"
+        }  
+
+        expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
+        self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+
+    def testExpressionSatisfiedValidCourseOrConditionUnsatisfiedPrerequisite(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["CSC 320", "CSC 360", "ENGR 297", "SENG 475"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["CSC 399", "SENG 350", "SENG 480B", "SENG 275"]  
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "CONDITIONAL",
+            "expressionOne": {
+                "expressionType": "COURSE",
+                "code": "CSC 399",
+                "requisiteType": "P"
+            },
+            "expressionTwo": {
+                "expressionType": "COURSE",
+                "code": "SENG 350",
+                "requisiteType": "P"
+            },
+            "condition": "OR"
+        }      
+
+        expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
+        self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+
+    def testExpressionSatisfiedValidCourseAndConditionUnsatisfiedPrerequisite(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["CSC 320", "CSC 360", "ENGR 297", "SENG 475"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["CSC 399", "SENG 350", "SENG 480B", "SENG 275"]  
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "CONDITIONAL",
+            "expressionOne": {
+                "expressionType": "COURSE",
+                "code": "CSC 399",
+                "requisiteType": "P"
+            },
+            "expressionTwo": {
+                "expressionType": "COURSE",
+                "code": "CSC 360",
+                "requisiteType": "C"
+            },
+            "condition": "AND"
+        }                 
+
+        expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
+        self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+
 
 class ListExpressionTests(unittest.TestCase):
 

@@ -46,8 +46,6 @@ class OfferingCourseTests(unittest.TestCase):
         self.assertEqual(CourseCode("ENGR 110"), offering.courseCode)
         self.assertEqual("Design and Communication I", offering.name)
         self.assertEqual(2.5, offering.credits)
-        #TODO: Requirement validation
-        #TODO: Course Details validation ? maybe not here
         self.assertDictEqual({"A01": sections[0]}, offering.sections)
 
     def testDoesSectionConflictConflictingSection(self):

@@ -6,13 +6,13 @@ import schema
 from utils import ConditionType, RequisiteType, ThresholdType
 
 
-# THE REQUIREMENTS MUST BE A LIST OF EXPRESSIONS. Each element of the list is a requirement statement
-# Possible list of requirements expression that must be implemented
-
-# Other exceptional expressions to implement:
-#
+# A REQUIREMENT MUST BE A LIST OF EXPRESSIONS. Each element of the list is an expression
+# Other exceptional expressions that have to be implemented include:
 # - COURSE can only be taken once
-# - Courses such as SENG480B when different topics  
+# - Courses such as SENG480B when different topics can be taken more than once for credit
+# TODO: Should implement an `ExpressionResult` object that contains information about the evaluated expression.
+#       This allows us to include which specific expressions have not been satisfied, as well as attach messages
+#       that help diagnose the expression.
 
 class ExpressionType(Enum):
     REFERENCE = 1
@@ -183,7 +183,10 @@ class ListExpression():
         return ListExpression(jsonExpression)
 
 
-# TODO: Restrict to one expression, or a list of expressions? 
+"""
+This is basically a NOT operator on the result of any nested expression. If the nested expression is satisfied,
+then the result is not satisfied. If the nested expression is not satisfied, the result is satisfied.
+"""
 class RegistrationRestrictionExpression():  
     SCHEMA = schema.REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA
 
@@ -193,12 +196,21 @@ class RegistrationRestrictionExpression():
         self.expressionType = ExpressionType.REGISTRATION_RESTRICTION
         self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
 
+    def isExpressionSatisfied(self, activeTerms):
+        return not self.expression.isExpressionSatisfied(activeTerms)
+
     @staticmethod
     def buildAndGetExpression(jsonExpression):
         jsonschema.validate(jsonExpression, RegistrationRestrictionExpression.SCHEMA)
         return RegistrationRestrictionExpression(jsonExpression)
 
+"""
+This is used to determine if in the context of the `activeTerms` that is provided, whether or not the associated
+student is part of a range of a year standing.
 
+Since we don't want to keep the definition of the condition to be in this class, we use a reference that define 
+your year standing.
+"""
 class YearStandingExpression():
     SCHEMA = schema.YEAR_STANDING_EXPRESSION_SCHEMA
 
@@ -210,7 +222,7 @@ class YearStandingExpression():
         self.threshold = ThresholdType(jsonExpression["threshold"])
 
     """
-    Must calculate the number of units completed
+    Must calculate the number of units completed with help of `UnitsExpression`
     """
     def isExpressionSatisfied(self, activeTerms):
         pass
@@ -220,7 +232,10 @@ class YearStandingExpression():
         jsonschema.validate(jsonExpression, YearStandingExpression.SCHEMA)
         return YearStandingExpression(jsonExpression)
 
-
+"""
+Determines whether in the context of `activeTerms`, if the nested expression is satisfied in terms of 
+units completed.
+"""
 class UnitsExpression():
     SCHEMA = schema.UNITS_EXPRESSION_SCHEMA
 
@@ -231,10 +246,18 @@ class UnitsExpression():
         self.type = jsonExpression["type"]
         self.threshold = ThresholdType(jsonExpression["threshold"])
 
+        # Assert threshold is within range 0 to the length of list
+        assert self.threshold >= 0 and self.threshold <= len(jsonExpression["expressions"])
+
+        # At this point, `expressions` is assumed to be a list
+        self.expressions = [Expression.buildAndGetExpression(expression) for expression in jsonExpression["expressions"]]
+    
     """
     Must calculate the number of units completed in a possibly unbounded number of nested expressions.
     """
     def isExpressionSatisfied(self, activeTerms):
+        # TODO: Implement the `ExpressionResults` class to implement this. Otherwise, the alternative
+        # is to implement an `unitsSatisfied` for each expression. 
         pass 
     
     @staticmethod 
@@ -259,10 +282,15 @@ class AwrSatisfiedExpression():
         self.expression = Expression.buildAndGetExpression(Data.getAcademicWritingRequirements())
 
     """
-    Must get a reference to AWR.
+    Evaluates the ACADEMIC_WRITING_REQUIREMENT expression and returns its result
     """ 
     def isExpressionSatisfied(self, activeTerms):
-        pass
+        awrExpression = ReferenceExpression.buildAndGetExpression({
+            "group": "uvic_references",
+            "identifier": "ACADEMIC_WRITING_REQUIREMENT"
+        })
+
+        return awrExpression.isExpressionSatisfied(activeTerms)
 
     @staticmethod
     def buildAndGetExpression(jsonExpression):
