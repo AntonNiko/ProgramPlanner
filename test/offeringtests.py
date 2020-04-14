@@ -1,10 +1,8 @@
 import sys
 sys.path.append('..')
 
-from course import CourseCode, CourseDetails, UVicCourseDetails
-from institution import Institution
-from offering import OfferingCourse
-from requirement import Requirement
+from course import OfferingCourse, CourseCode, CourseDetails, UVicCourseDetails
+from utils import Institution
 from schedule import Section
 import unittest
 
@@ -16,7 +14,6 @@ class OfferingCourseTests(unittest.TestCase):
         courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({
@@ -40,7 +37,7 @@ class OfferingCourseTests(unittest.TestCase):
             })
         ]
 
-        offering = OfferingCourse(institution, courseCode, name, credits, requirements, details, sections)
+        offering = OfferingCourse(institution, courseCode, name, credits, None, details, sections)
 
         self.assertEqual(Institution.UNIVERSITY_OF_VICTORIA, offering.institution)
         self.assertEqual(CourseCode("ENGR 110"), offering.courseCode)
@@ -53,7 +50,6 @@ class OfferingCourseTests(unittest.TestCase):
         courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({
@@ -76,7 +72,7 @@ class OfferingCourseTests(unittest.TestCase):
                 ]
             })
         ]
-        offering = OfferingCourse(institution, courseCode, name, credits, requirements, details, sections)
+        offering = OfferingCourse(institution, courseCode, name, credits, None, details, sections)
 
         sectionToTest = Section({
             "name": "A01",
@@ -105,7 +101,6 @@ class OfferingCourseTests(unittest.TestCase):
         courseCode = CourseCode("ENGR 110")
         name = "Design and Communication I"
         credits = 2.5
-        requirements = Requirement(None)
         details = UVicCourseDetails(4.0, 2.0, 0.0, None)
         sections = [
             Section({
@@ -147,7 +142,7 @@ class OfferingCourseTests(unittest.TestCase):
                 ]
             })
         ]
-        offering = OfferingCourse(institution, courseCode, name, credits, requirements, details, sections)
+        offering = OfferingCourse(institution, courseCode, name, credits, None, details, sections)
 
         sectionToTest = Section({
             "name": "A01",
