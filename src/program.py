@@ -35,6 +35,9 @@ A class that represents any program at UVic offered by the Faculty of Engineerin
 # TODO: Refactor into a builder pattern
 class UVicEngineeringProgram(UVicProgram):
     SCHEMA = schema.UVIC_ENGINEERING_PROGRAM_SCHEMA
+    selectedOptions = {
+        
+    }
 
     def __init__(self, jsonProgram):
         jsonschema.validate(jsonProgram, self.SCHEMA)
@@ -95,7 +98,12 @@ class UVicEngineeringProgram(UVicProgram):
         self.combined = jsonProgram["Combined"]
 
     def areProgramRequirementsSatisfied(self, activeTerms):
-        pass
+        """
+        Checks if the program requirements are satisfied by checking every category
+        """
+
+        if self.honours != None:
+
 
 
 if __name__ == "__main__":

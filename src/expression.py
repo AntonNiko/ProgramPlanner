@@ -6,15 +6,35 @@ import schema
 from utils import ConditionType, RequisiteType, ThresholdType
 
 
-# A REQUIREMENT MUST BE A LIST OF EXPRESSIONS. Each element of the list is an expression
-# Other exceptional expressions that have to be implemented include:
-# - COURSE can only be taken once
-# - Courses such as SENG480B when different topics can be taken more than once for credit
+"""
+This is a collection of classes that help build requirements and evaluated if requirements are satisfied. The 
+nature of this module is that most classes within this will be used to build an expression. 
+
+It is important to define the semantics of this module:
+Expression: A class that represents one statement that must be fulfilled in order for the expression to be 
+            fulfilled. An expression, depending on the expression class, might have other nested expressions
+            that must be fulfilled before being satisfied itself.
+Requirement: A requirement is a list of expressions. This definition is used as a course may contain a list of 
+             requirements, each of which must be satisfied.
+
+
+Note: Although the classes in this module encapsulate the majority of the types of expressions that is provided 
+      at UVic, there are some expressions that have not been fully implemented yet. These include:
+
+      - Courses that can only be taken once
+      - Courses such as SENG 480B with different topics, where it can be re-taken for credit.
+"""
 # TODO: Should implement an `ExpressionResult` object that contains information about the evaluated expression.
 #       This allows us to include which specific expressions have not been satisfied, as well as attach messages
 #       that help diagnose the expression.
 
+
 class ExpressionType(Enum):
+    """
+    Identifier for the type of the expression that is being considered. Each expression shall be of one of 
+    these types, and have an attribute that references the type
+    """
+
     REFERENCE = 1
     COURSE = 2
     CONDITIONAL = 3
@@ -27,43 +47,71 @@ class ExpressionType(Enum):
     NO_CREDIT_WARNING = 10
     RECOMMENDATION_WARNING = 11
 
-"""
-This is effectively a pointer to another expression. The location of the expression is specified.
 
-__init__: Fetches simply the expression without de-referencing the object
-buildAndGetExpression: Meant to return an instance of ReferenceExpression without de-referencing
-"""
 class ReferenceExpression():
+    """
+    This expression represents a pointer to another expressions. The location of the expression 
+    is identified by a "group" and "identifier" attribute. These attributes are intended to be 
+    implementation agnostic.
+    """
     SCHEMA = schema.REFERENCE_EXPRESSION_SCHEMA
 
     def __init__(self, jsonExpression):
+        """
+        Returns an instance of this class. Does not return a de-referenced value to which the 
+        expression points to.
+
+        Args:
+            jsonExpression: A parsed JSON expression to be validated for this class
+        """
+
         jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
 
         self.expressionType = ExpressionType.REFERENCE
         self.group = jsonExpression["group"]
         self.identifier = jsonExpression["identifier"] 
 
-    """
-    With the initialized ReferenceExpression instance, dereference and get its JSON expression
-    """
     def getJsonExpression(self):
+        """
+        With the initialized ReferenceExpression instance, dereference it and return its JSON expression
+
+        Returns:
+            data: The parsed JSON expression from the "group" and "identifier" attributes
+        """
         return Data.getData(self.group, self.identifier)
 
-    """
-    We get back the right type of expression from a JSON expression
-    """
     @staticmethod 
     def buildAndGetExpression(jsonExpression):
+        """
+        With the provided JSON expression, rA parsed JSON expression to be validated for this classs the 
+        de-referenced, built expression
+
+        Args:
+            jsonExpression: A parsed JSON expression to be validated and used to build an expression
+        Returns:
+            expression: A built expression 
+        """
+
         jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
 
         expression = ReferenceExpression(jsonExpression)
         return Expression.buildAndGetExpression(expression.getJsonExpression())
 
-# To satisfy requirement, must check if course is present in the terms dictionary
+
 class CourseExpression():
+    """
+    This expression refers to a specific course, and its attributes, notably the prerequisite type.
+    """
+
     SCHEMA = schema.COURSE_EXPRESSION_SCHEMA
 
     def __init__(self, jsonExpression):
+        """
+        Returns an instance of this class that can be used to check if the expression is satisfied. 
+
+        Args:
+            jsonExpression: A parsed JSON expression to be validated and used to build the expression 
+        """
         jsonschema.validate(jsonExpression, self.SCHEMA)
 
         self.expressionType = ExpressionType.COURSE
@@ -75,6 +123,10 @@ class CourseExpression():
             self.requisiteType = RequisiteType(jsonExpression["requisiteType"])
 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+        """
+
         latestYear = max(activeTerms)
         latestActiveTerm = activeTerms[latestYear][max(activeTerms[latestYear])]
 
@@ -350,6 +402,12 @@ class RecommendationWarningExpression():
 
 
 class Expression():
+    """
+    This is the top-level class of an expression. The root of every expression is an `Expression`
+    object. The primary use of the class is for any user to call the `buildAndGetExpression()` 
+    function to build a full expression.
+    """
+
     SCHEMA = schema.EXPRESSION_SCHEMA
     EXPRESSION_TYPE_MAP = {
         "REFERENCE": ReferenceExpression,
@@ -366,6 +424,14 @@ class Expression():
     }
 
     def __init__(self, jsonExpression, message=None):
+        """
+        Returns an `Expression` object with a fully built expression
+
+        Args:
+            jsonExpression: A parsed JSON expression to be validated for this class
+            message (str): A message to be associated with this expression
+        """
+
         jsonschema.validate(jsonExpression, Expression.SCHEMA)
 
         expressionClass = Expression.EXPRESSION_TYPE_MAP[jsonExpression["expressionType"]]
