@@ -19,7 +19,6 @@ SEQUENCE:
 class Sequence():
     def __init__(self):
         self.activeTerms = {}
-        #self.requirementManager = RequirementManager()
 
     """
     Adds an empty term. 
