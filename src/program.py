@@ -1,5 +1,5 @@
 from data import Data
-from expression import Expression
+from expression import ExpressionFactory
 import json
 import jsonschema
 import schema
@@ -25,8 +25,8 @@ class UVicProgram(Program):
     def __init__(self):
         super().__init__(Institution.UNIVERSITY_OF_VICTORIA)
 
-        self.academicWritingRequirement = Expression.buildAndGetExpression(Data.getAcademicWritingRequirements())
-        self.minimumCourseworkUnits = Expression.buildAndGetExpression(Data.getMinimumCourseWorkUnits())
+        self.academicWritingRequirement = ExpressionFactory.buildAndGetExpression(Data.getAcademicWritingRequirements())
+        self.minimumCourseworkUnits = ExpressionFactory.buildAndGetExpression(Data.getMinimumCourseWorkUnits())
         
 
 """
@@ -51,7 +51,7 @@ class UVicEngineeringProgram(UVicProgram):
         if jsonProgram["Honours"] == None:
             self.honours = None
         else:
-            self.honours = [Expression.buildAndGetExpression(expression) for expression in jsonProgram["Honours"]]
+            self.honours = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonProgram["Honours"]]
 
         # Integral part of the program. Each option can be taken as part of the Major. Each option may or may
         # not be taken together with an honours option. May be null or a dictionary
@@ -60,10 +60,10 @@ class UVicEngineeringProgram(UVicProgram):
         else:
             self.options = {}
             for option in jsonProgram["Options"]:
-                self.options[option] = [Expression.buildAndGetExpression(expression) for expression in jsonProgram["Options"][option]]
+                self.options[option] = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonProgram["Options"][option]]
 
         # General Requirements are foundational to the program
-        self.generalRequirements = [Expression.buildAndGetExpression(expression) for expression in jsonProgram["General Requirements"]]
+        self.generalRequirements = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonProgram["General Requirements"]]
         
         # It is an optional part of the degree. Does not hinder satisfying program requirement. May be null or a dictionary
         self.specializations = jsonProgram["Specializations"]
@@ -73,7 +73,7 @@ class UVicEngineeringProgram(UVicProgram):
         else:
             self.specializations = {}
             for specialization in jsonProgram["Specializations"]:
-                self.specializations[specialization] = [Expression.buildAndGetExpression(expression) for expression in jsonProgram["Specializations"][specialization]]
+                self.specializations[specialization] = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonProgram["Specializations"][specialization]]
         
 
         # May be null or an expression. If present, the expression must be satisfied as part of the program
@@ -83,7 +83,7 @@ class UVicEngineeringProgram(UVicProgram):
         else:
             self.coop = {
                 "required": jsonProgram["Co-op"]["required"],
-                "expression": Expression.buildAndGetExpression(jsonProgram["Co-op"]["expression"])
+                "expression": ExpressionFactory.buildAndGetExpression(jsonProgram["Co-op"]["expression"])
             }
 
 
@@ -93,7 +93,7 @@ class UVicEngineeringProgram(UVicProgram):
         else:
             self.combined = {}
             for program in jsonProgram["Combined"]:
-                self.combined[program] = Expression.buildAndGetExpression(jsonProgram["Combined"][program])
+                self.combined[program] = ExpressionFactory.buildAndGetExpression(jsonProgram["Combined"][program])
 
         self.combined = jsonProgram["Combined"]
 
@@ -103,6 +103,7 @@ class UVicEngineeringProgram(UVicProgram):
         """
 
         if self.honours != None:
+            pass
 
 
 

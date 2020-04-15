@@ -24,10 +24,6 @@ Note: Although the classes in this module encapsulate the majority of the types 
       - Courses that can only be taken once
       - Courses such as SENG 480B with different topics, where it can be re-taken for credit.
 """
-# TODO: Should implement an `ExpressionResult` object that contains information about the evaluated expression.
-#       This allows us to include which specific expressions have not been satisfied, as well as attach messages
-#       that help diagnose the expression.
-
 
 class ExpressionType(Enum):
     """
@@ -35,96 +31,132 @@ class ExpressionType(Enum):
     these types, and have an attribute that references the type
     """
 
-    REFERENCE = 1
-    COURSE = 2
-    CONDITIONAL = 3
-    LIST = 4
-    REGISTRATION_RESTRICTION = 5
-    YEAR_STANDING = 6
-    UNITS = 7
-    AWR_SATISFIED = 8
-    UMBRELLA = 9
-    NO_CREDIT_WARNING = 10
-    RECOMMENDATION_WARNING = 11
+    REFERENCE = "REFERENCE"
+    COURSE = "COURSE"
+    CONDITIONAL = "CONDITIONAL"
+    LIST = "LIST"
+    REGISTRATION_RESTRICTION = "REGISTRATION_RESTRICTION"
+    YEAR_STANDING = "YEAR_STANDING"
+    UNITS = "UNITS"
+    AWR_SATISFIED = "AWR_SATISFIED"
+    UMBRELLA = "UMBRELLA"
+    NO_CREDIT_WARNING = "NO_CREDIT_WARNING"
+    RECOMMENDATION_WARNING = "RECOMMENDATION_WARNING"
 
 
-class ReferenceExpression():
+class ExpressionResult():
+    """
+    This class is intended to be injected into an `Expression` method to contain information on 
+    the result of the evaluation. 
+    """
+    pass
+
+
+class Expression():
+    """
+    This is the parent class of all possible expression types. Ensures by validating the JSON 
+    data that the subclass is indeed a valid expression.
+    """
+
+    SCHEMA = schema.EXPRESSION_SCHEMA
+
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, Expression.SCHEMA)
+
+        self.expressionType = ExpressionType(jsonData["expressionType"])
+        self.message = jsonData["message"]
+
+
+class ReferenceExpression(Expression):
     """
     This expression represents a pointer to another expressions. The location of the expression 
     is identified by a "group" and "identifier" attribute. These attributes are intended to be 
-    implementation agnostic.
+    agnostic of the data storage mechanism.
+
+    This class is unique among other expressions, since in the normal use case, we return the `Expression`
+    child that is pointed to by this reference.
     """
+
     SCHEMA = schema.REFERENCE_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
+    def __init__(self, jsonData):
         """
         Returns an instance of this class. Does not return a de-referenced value to which the 
         expression points to.
 
         Args:
-            jsonExpression: A parsed JSON expression to be validated for this class
+            jsonData: A parsed JSON expression to be validated for this class
         """
 
-        jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
+        jsonschema.validate(jsonData, ReferenceExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.REFERENCE
-        self.group = jsonExpression["group"]
-        self.identifier = jsonExpression["identifier"] 
+        super().__init__(jsonData)
 
-    def getJsonExpression(self):
+        self.group = jsonData["group"]
+        self.identifier = jsonData["identifier"] 
+
+    def getJsonData(self):
         """
         With the initialized ReferenceExpression instance, dereference it and return its JSON expression
 
         Returns:
             data: The parsed JSON expression from the "group" and "identifier" attributes
         """
+
         return Data.getData(self.group, self.identifier)
 
     @staticmethod 
-    def buildAndGetExpression(jsonExpression):
+    def buildAndGetExpression(jsonData):
         """
         With the provided JSON expression, rA parsed JSON expression to be validated for this classs the 
         de-referenced, built expression
 
         Args:
-            jsonExpression: A parsed JSON expression to be validated and used to build an expression
+            jsonData: A parsed JSON expression to be validated and used to build an expression
         Returns:
-            expression: A built expression 
+            expression: A built expression from the de-referenced JSON data
         """
 
-        jsonschema.validate(jsonExpression, ReferenceExpression.SCHEMA)
+        jsonschema.validate(jsonData, ReferenceExpression.SCHEMA)
 
-        expression = ReferenceExpression(jsonExpression)
-        return Expression.buildAndGetExpression(expression.getJsonExpression())
+        expression = ReferenceExpression(jsonData)
+        return ExpressionFactory.buildAndGetExpression(expression.getJsonData())
 
 
-class CourseExpression():
+class CourseExpression(Expression):
     """
-    This expression refers to a specific course, and its attributes, notably the prerequisite type.
+    This expression refers to a specific course and its attributes, notably the prerequisite associated with it.
     """
 
     SCHEMA = schema.COURSE_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
+    def __init__(self, jsonData):
         """
         Returns an instance of this class that can be used to check if the expression is satisfied. 
 
         Args:
-            jsonExpression: A parsed JSON expression to be validated and used to build the expression 
+            jsonData: A parsed JSON expression to be validated and used to build the expression 
         """
-        jsonschema.validate(jsonExpression, self.SCHEMA)
 
-        self.expressionType = ExpressionType.COURSE
-        self.courseCode = jsonExpression["code"]
+        jsonschema.validate(jsonData, self.SCHEMA)
 
-        if "requisiteType" not in jsonExpression:
+        super().__init__(jsonData)
+
+        self.courseCode = jsonData["code"]
+
+        if "requisiteType" not in jsonData:
             self.requisiteType = RequisiteType.COREQUISITE
         else:
-            self.requisiteType = RequisiteType(jsonExpression["requisiteType"])
+            self.requisiteType = RequisiteType(jsonData["requisiteType"])
 
     def isExpressionSatisfied(self, activeTerms):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
         """
 
         latestYear = max(activeTerms)
@@ -141,23 +173,38 @@ class CourseExpression():
         return False
 
     @staticmethod 
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, CourseExpression.SCHEMA)
-        return CourseExpression(jsonExpression) 
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, CourseExpression.SCHEMA)
+        return CourseExpression(jsonData) 
 
 
-class ConditionalExpression():
+class ConditionalExpression(Expression):
+    """
+    This expression refers to a condition which must be satisfied by the two nested expressions. The condition
+    associated with this expression must be a type specified by `ConditionType`
+    """
+
     SCHEMA = schema.CONDITIONAL_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, ConditionalExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, ConditionalExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.CONDITIONAL
-        self.expressionOne  = Expression.buildAndGetExpression(jsonExpression["expressionOne"])
-        self.expressionTwo  = Expression.buildAndGetExpression(jsonExpression["expressionTwo"])
-        self.condition      = ConditionType(jsonExpression["condition"])
+        super().__init__(jsonData)
+
+        self.expressionOne  = ExpressionFactory.buildAndGetExpression(jsonData["expressionOne"])
+        self.expressionTwo  = ExpressionFactory.buildAndGetExpression(jsonData["expressionTwo"])
+        self.condition      = ConditionType(jsonData["condition"])
 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         if self.condition == ConditionType.OR:
             if self.expressionOne.isExpressionSatisfied(activeTerms) \
                or self.expressionTwo.isExpressionSatisfied(activeTerms):
@@ -174,9 +221,9 @@ class ConditionalExpression():
         # TODO: Handle undefined state 
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, ConditionalExpression.SCHEMA)
-        return ConditionalExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, ConditionalExpression.SCHEMA)
+        return ConditionalExpression(jsonData)
 
 
 """
@@ -187,33 +234,48 @@ other expression.
 
 The list storage will be directly coupled to the List expression.
 
-- jsonExpression["expressions"] *can* be a reference to a list, or just a list
+- jsonData["expressions"] *can* be a reference to a list, or just a list
 
 """
-class ListExpression():
+class ListExpression(Expression):
+    """
+    This expression refers to a list of expressions with an associated condition that must be satisfied 
+    for the expression to be satisfied.
+    """
+
     SCHEMA = schema.LIST_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, ListExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, ListExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.LIST 
-        self.threshold = jsonExpression["threshold"]
-        self.type = ThresholdType(jsonExpression["type"])
+        super().__init__(jsonData)
+
+        self.threshold = jsonData["threshold"]
+        self.type = ThresholdType(jsonData["type"])
 
         # If the type of "expressions" is not reference we de-reference
-        if type(jsonExpression["expressions"]) != list:
-            reference = ReferenceExpression(jsonExpression["expressions"])
-            expressions = reference.getJsonExpression()
+        if type(jsonData["expressions"]) != list:
+            reference = ReferenceExpression(jsonData["expressions"])
+            expressions = reference.getJsonData()
         else:
-            expressions = jsonExpression["expressions"]
+            expressions = jsonData["expressions"]
 
         # Assert threshold is within range 0 to the length of list
         assert self.threshold >= 0 and self.threshold <= len(expressions)
 
         # At this point, `expressions` is assumed to be a list
-        self.expressions = [Expression.buildAndGetExpression(expression) for expression in expressions]
+        self.expressions = [ExpressionFactory.buildAndGetExpression(expression) for expression in expressions]
 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         expressionsSatisfied = len([expression.isExpressionSatisfied(activeTerms) for expression in self.expressions])
 
         if self.threshold == ThresholdType.LESS_THAN:
@@ -230,31 +292,42 @@ class ListExpression():
         # TODO: Handle undefined state
 
     @staticmethod 
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, ListExpression.SCHEMA)
-        return ListExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, ListExpression.SCHEMA)
+        return ListExpression(jsonData)
 
 
 """
 This is basically a NOT operator on the result of any nested expression. If the nested expression is satisfied,
 then the result is not satisfied. If the nested expression is not satisfied, the result is satisfied.
 """
-class RegistrationRestrictionExpression():  
+class RegistrationRestrictionExpression(Expression):  
     SCHEMA = schema.REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, RegistrationRestrictionExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, RegistrationRestrictionExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.REGISTRATION_RESTRICTION
-        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
+        super().__init__(jsonData)
+
+        self.expression = ExpressionFactory.buildAndGetExpression(jsonData["expression"])
 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         return not self.expression.isExpressionSatisfied(activeTerms)
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, RegistrationRestrictionExpression.SCHEMA)
-        return RegistrationRestrictionExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, RegistrationRestrictionExpression.SCHEMA)
+        return RegistrationRestrictionExpression(jsonData)
+
 
 """
 This is used to determine if in the context of the `activeTerms` that is provided, whether or not the associated
@@ -263,59 +336,77 @@ student is part of a range of a year standing.
 Since we don't want to keep the definition of the condition to be in this class, we use a reference that define 
 your year standing.
 """
-class YearStandingExpression():
+class YearStandingExpression(Expression):
     SCHEMA = schema.YEAR_STANDING_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, YearStandingExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, YearStandingExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.YEAR_STANDING
-        self.type = jsonExpression["type"]
-        self.threshold = ThresholdType(jsonExpression["threshold"])
+        super().__init__(jsonData)
 
-    """
-    Must calculate the number of units completed with help of `UnitsExpression`
-    """
+        self.type = jsonData["type"]
+        self.threshold = ThresholdType(jsonData["threshold"])
+
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         pass
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, YearStandingExpression.SCHEMA)
-        return YearStandingExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, YearStandingExpression.SCHEMA)
+        return YearStandingExpression(jsonData)
+
 
 """
 Determines whether in the context of `activeTerms`, if the nested expression is satisfied in terms of 
 units completed.
 """
-class UnitsExpression():
+class UnitsExpression(Expression):
     SCHEMA = schema.UNITS_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, UnitsExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, UnitsExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.UNITS
-        self.type = jsonExpression["type"]
-        self.threshold = ThresholdType(jsonExpression["threshold"])
+        super().__init__(jsonData)
+
+        self.type = jsonData["type"]
+        self.threshold = ThresholdType(jsonData["threshold"])
 
         # Assert threshold is within range 0 to the length of list
-        assert self.threshold >= 0 and self.threshold <= len(jsonExpression["expressions"])
+        assert self.threshold >= 0 and self.threshold <= len(jsonData["expressions"])
 
         # At this point, `expressions` is assumed to be a list
-        self.expressions = [Expression.buildAndGetExpression(expression) for expression in jsonExpression["expressions"]]
+        self.expressions = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonData["expressions"]]
     
     """
     Must calculate the number of units completed in a possibly unbounded number of nested expressions.
     """
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         # TODO: Implement the `ExpressionResults` class to implement this. Otherwise, the alternative
         # is to implement an `unitsSatisfied` for each expression. 
         pass 
     
     @staticmethod 
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, UnitsExpression.SCHEMA)
-        return UnitsExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, UnitsExpression.SCHEMA)
+        return UnitsExpression(jsonData)
 
 
 """
@@ -325,18 +416,29 @@ Maybe generating a reference is best.
 
 NOTE: Maybe unnecessary and just build an expression by calling Data.getAcademicWritingRequirements()?
 """
-class AwrSatisfiedExpression():
+class AwrSatisfiedExpression(Expression):
     SCHEMA = schema.AWR_SATISFIED_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, AwrSatisfiedExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, AwrSatisfiedExpression.SCHEMA)
 
-        self.expression = Expression.buildAndGetExpression(Data.getAcademicWritingRequirements())
+        super().__init__(jsonData)
+
+        self.expression = ExpressionFactory.buildAndGetExpression(Data.getAcademicWritingRequirements())
 
     """
     Evaluates the ACADEMIC_WRITING_REQUIREMENT expression and returns its result
     """ 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         awrExpression = ReferenceExpression.buildAndGetExpression({
             "group": "uvic_references",
             "identifier": "ACADEMIC_WRITING_REQUIREMENT"
@@ -345,70 +447,82 @@ class AwrSatisfiedExpression():
         return awrExpression.isExpressionSatisfied(activeTerms)
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, AwrSatisfiedExpression.SCHEMA)
-        return AwrSatisfiedExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, AwrSatisfiedExpression.SCHEMA)
+        return AwrSatisfiedExpression(jsonData)
 
-class UmbrellaExpression():
+
+class UmbrellaExpression(Expression):
     SCHEMA = schema.UMBRELLA_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, UmbrellaExpression.SCHEMA) 
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, UmbrellaExpression.SCHEMA) 
 
-        self.level = jsonExpression["level"]
-        self.subject = jsonExpression["subject"]
+        super().__init__(jsonData)
+
+        self.level = jsonData["level"]
+        self.subject = jsonData["subject"]
 
     """
     Easy to calculate, just count towards the specified level and subject!
     """ 
     def isExpressionSatisfied(self, activeTerms):
+        """
+        Determines if the expression, given the `activeTerms` variables, is satisfied
+
+        Args:
+            activeTerms: A dictionary containing the list of courses to evaluate
+        Returns:
+            (boolean): True if the expression is satisfied, false otherwise
+        """
+
         pass
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, UmbrellaExpression.SCHEMA)
-        return UmbrellaExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, UmbrellaExpression.SCHEMA)
+        return UmbrellaExpression(jsonData)
 
 
-class NoCreditWarningExpression():
+class NoCreditWarningExpression(Expression):
     SCHEMA = schema.NO_CREDIT_WARNING_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, NoCreditWarningExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, NoCreditWarningExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.NO_CREDIT_WARNING
-        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
+        super().__init__(jsonData)
+
+        self.expression = ExpressionFactory.buildAndGetExpression(jsonData["expression"])
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, NoCreditWarningExpression.SCHEMA)
-        return NoCreditWarningExpression(jsonExpression)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, NoCreditWarningExpression.SCHEMA)
+        return NoCreditWarningExpression(jsonData)
 
 
-class RecommendationWarningExpression():
+class RecommendationWarningExpression(Expression):
     SCHEMA = schema.RECOMMENDATION_WARNING_EXPRESSION_SCHEMA
 
-    def __init__(self, jsonExpression):
-        jsonschema.validate(jsonExpression, RecommendationWarningExpression.SCHEMA)
+    def __init__(self, jsonData):
+        jsonschema.validate(jsonData, RecommendationWarningExpression.SCHEMA)
 
-        self.expressionType = ExpressionType.RECOMMENDATION_WARNING
-        self.expression = Expression.buildAndGetExpression(jsonExpression["expression"])
+        super().__init__(jsonData)
+
+        self.expression = ExpressionFactory.buildAndGetExpression(jsonData["expression"])
 
     @staticmethod
-    def buildAndGetExpression(jsonExpression):
-        jsonschema.validate(jsonExpression, RecommendationWarningExpression.SCHEMA)
+    def buildAndGetExpression(jsonData):
+        jsonschema.validate(jsonData, RecommendationWarningExpression.SCHEMA)
 
-        return RecommendationWarningExpression(jsonExpression)
+        return RecommendationWarningExpression(jsonData)
 
 
-class Expression():
+class ExpressionFactory():
     """
-    This is the top-level class of an expression. The root of every expression is an `Expression`
-    object. The primary use of the class is for any user to call the `buildAndGetExpression()` 
-    function to build a full expression.
+    A factory with the mechanism necessary to create expression objects of whatever type is required. The class
+    returned from this class may be any child of the `Expression` class
     """
 
-    SCHEMA = schema.EXPRESSION_SCHEMA
     EXPRESSION_TYPE_MAP = {
         "REFERENCE": ReferenceExpression,
         "COURSE": CourseExpression,
@@ -423,120 +537,17 @@ class Expression():
         "RECOMMENDATION_WARNING": RecommendationWarningExpression
     }
 
-    def __init__(self, jsonExpression, message=None):
+    @staticmethod
+    def buildAndGetExpression(jsonData):
         """
-        Returns an `Expression` object with a fully built expression
+        Returns an expression object 
 
         Args:
-            jsonExpression: A parsed JSON expression to be validated for this class
-            message (str): A message to be associated with this expression
+            jsonData: A parsed JSON expression to be validated for this class
+        Returns:
+            expression (Expression): An expression which is a child of the `Expression` class
         """
 
-        jsonschema.validate(jsonExpression, Expression.SCHEMA)
-
-        expressionClass = Expression.EXPRESSION_TYPE_MAP[jsonExpression["expressionType"]]
-        self.expression = expressionClass.buildAndGetExpression(jsonExpression)
-        self.message = message
-
-    def isExpressionSatisfied(self, activeTerms):
-        return self.expression.isExpressionSatisfied(activeTerms)
-
-    @staticmethod
-    def buildAndGetExpression(jsonExpression, message=None):
-        jsonschema.validate(jsonExpression, Expression.SCHEMA) 
-        return Expression(jsonExpression, message)
-
-
-if __name__ == "__main__":
-    testExpression = {
-        "expressionType": "CONDITIONAL",
-        "expressionOne": {
-            "expressionType": "COURSE",
-            "code": "CSC 110",
-            "requisiteType": "P"
-        },
-        "expressionTwo": {
-            "expressionType": "COURSE",
-            "code": "CSC 111",
-            "requisiteType": "C"
-        },
-        "condition": "OR"
-    }
-
-    e = Expression.buildAndGetExpression(testExpression)
-
-
-
-
-"""
-    testRequirements = [
-        {
-            "expressionType": "CONDITIONAL",
-            "expressionOne": {
-                "expressionType": "COURSE",
-                "code": "CSC 110",
-                "requisiteType": "P"
-            },
-            "expressionTwo": {
-                "expressionType": "COURSE",
-                "code": "CSC 111",
-                "requisiteType": "C"
-            },
-            "condition": "OR" # Can be OR or AND
-        },
-        {
-            "expressionType": "LIST",
-            "threshold": 1,
-            "type": "geq", # Can be lt, leq, eq, geq, gt (less than, less than eq, equal, greater than eq, greater than)
-            "expressions": [{
-                "code": "ENGR 110",
-                "requisiteType": "P"
-            },
-            {
-                "code": "ENGR 111",
-                "requisiteType": "P"
-            },
-            {
-                "code": "ENGR 112",
-                "requisiteType": "P"
-            }]
-        },
-        {
-            "expressionType": "COURSE",
-            "code": "ENGR 112",
-            "requisiteType": "P"
-        },
-        #{
-        #    "expressionType": "CREDIT_RESTRICTION", # Cannot take if already have credit 
-        #    "expression": {
-                # Any expression type, ignores prerequisite/corequisites
-        #    }
-        #},
-        {
-            "expressionType": "NO_CREDIT_WARNING", # Cannot get credit if already have credit
-            "expression": {
-                # Any expression type, ignores prerequisites/corequisites
-            }
-        },
-        {
-            "expressionType": "RECCOMENDATION_WARNING",
-            "expression": {
-                
-            }
-        },
-        {
-            "expressionType": "REGISTRSATION_RESTRICTION", # Basically NOT. To allow for "cannot take if also registered in...".  CREDIT_RESTRICTION can be fulfilled by this
-            "expression": {
-                # Any expression type, ignores prerequisite/corequisites
-            }
-        },
-        {
-            "expressionType": "YEAR_STANDING",
-            "type": "leq", # Can be lt, leq, eq, geq, gt (less than, less than eq, equal, greater than eq, greater than)
-            "threshold": 4 # 1) First year 2) Second year 3) Third year 4) Fourth year
-        },
-        {
-            "expressionType": "AWR_SATISFIED"
-        }
-    ]
-"""
+        expressionClass = ExpressionFactory.EXPRESSION_TYPE_MAP[jsonData["expressionType"]]
+        expression = expressionClass.buildAndGetExpression(jsonData)
+        return expression

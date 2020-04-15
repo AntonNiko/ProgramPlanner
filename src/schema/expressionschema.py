@@ -3,9 +3,19 @@ EXPRESSION_SCHEMA = {
     "properties": {
         "expressionType": {
             "type": "string"
+        },
+        "message": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ]
         }
     },
-    "required": ["expressionType"]
+    "required": ["expressionType", "message"]
 }
 
 REFERENCE_EXPRESSION_SCHEMA = {
