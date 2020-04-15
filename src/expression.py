@@ -44,12 +44,38 @@ class ExpressionType(Enum):
     RECOMMENDATION_WARNING = "RECOMMENDATION_WARNING"
 
 
-class ExpressionResult():
+class ResultContainer():
     """
     This class is intended to be injected into an `Expression` method to contain information on 
-    the result of the evaluation. 
+    the result of the evaluation. Furthermore, certain attributes are used to calculate statistics,
+    such as units completed.
     """
-    pass
+    
+    def __init__(self):
+        # Indicates that the expression in which this value is being evaluated at is satisfied
+        self.satisfied = True
+
+        # A list of dictionary elements composed of messages relating to an expression, and its satisfied status
+        self.expressionStatus = []
+        self.satisfiedUnits = 0
+
+    def addExpressionStatus(self, message, isSatisfied):
+        """
+        Adds the result of an expression being evaluated. Furthermore, updates the status the `satisfied`
+        variable to reflect the status of the expression. Used to diagnose which specific expressions with 
+        messages have or have not been satisfied.
+        """
+
+        if isSatisfied == False:
+            self.satisfied = False
+
+        if message == None:
+            return
+
+        self.expressionStatus.append({
+            "message": message,
+            "isSatisfied": isSatisfied
+        })
 
 
 class Expression():
@@ -64,7 +90,11 @@ class Expression():
         jsonschema.validate(jsonData, Expression.SCHEMA)
 
         self.expressionType = ExpressionType(jsonData["expressionType"])
-        self.message = jsonData["message"]
+
+        if "message" not in jsonData:
+            self.message = None
+        else:
+            self.message = jsonData["message"]
 
 
 class ReferenceExpression(Expression):
@@ -149,7 +179,7 @@ class CourseExpression(Expression):
         else:
             self.requisiteType = RequisiteType(jsonData["requisiteType"])
 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -158,6 +188,9 @@ class CourseExpression(Expression):
         Returns:
             (boolean): True if the expression is satisfied, false otherwise
         """
+
+        if resultContainer == None:
+            result = ResultContainer()
 
         latestYear = max(activeTerms)
         latestActiveTerm = activeTerms[latestYear][max(activeTerms[latestYear])]
@@ -168,9 +201,14 @@ class CourseExpression(Expression):
                     # If the course is in the latest active term but we're evaluating as co-requisite, then
                     # not satisfied
                     if (activeTerms[year][term] == latestActiveTerm) and (self.requisiteType == RequisiteType.PREREQUISITE):
-                        return False
-                    return True
-        return False
+                        result.addExpressionStatus(self.message, False)
+                        return result
+
+                    result.addExpressionStatus(self.message, True)
+                    return result
+                    
+        result.addExpressionStatus(self.message, False)
+        return result
 
     @staticmethod 
     def buildAndGetExpression(jsonData):
@@ -195,7 +233,7 @@ class ConditionalExpression(Expression):
         self.expressionTwo  = ExpressionFactory.buildAndGetExpression(jsonData["expressionTwo"])
         self.condition      = ConditionType(jsonData["condition"])
 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -205,20 +243,28 @@ class ConditionalExpression(Expression):
             (boolean): True if the expression is satisfied, false otherwise
         """
 
+        if resultContainer == None:
+            result = ResultContainer()
+
         if self.condition == ConditionType.OR:
             if self.expressionOne.isExpressionSatisfied(activeTerms) \
                or self.expressionTwo.isExpressionSatisfied(activeTerms):
-                return True
+                result.addExpressionStatus(self.message, True)
             else:
-                return False
+                result.addExpressionStatus(self.message, False)
+
         elif self.condition == ConditionType.AND:
             if self.expressionOne.isExpressionSatisfied(activeTerms) \
                and self.expressionTwo.isExpressionSatisfied(activeTerms):
-               return True
+                result.addExpressionStatus(self.message, True)
             else:
-                return False
+                result.addExpressionStatus(self.message, False)
 
-        # TODO: Handle undefined state 
+        else:
+            # TODO: Raise an exception since this expression CANNOT be evaluated. This is an error.
+            pass
+
+        return result
 
     @staticmethod
     def buildAndGetExpression(jsonData):
@@ -226,17 +272,6 @@ class ConditionalExpression(Expression):
         return ConditionalExpression(jsonData)
 
 
-"""
-
-Aside: Having simply a list of expressions, without context, has no purpose. What exactly is the point
-of it? The context that I see is only that a list complements a List Expression, no 
-other expression.
-
-The list storage will be directly coupled to the List expression.
-
-- jsonData["expressions"] *can* be a reference to a list, or just a list
-
-"""
 class ListExpression(Expression):
     """
     This expression refers to a list of expressions with an associated condition that must be satisfied 
@@ -260,13 +295,10 @@ class ListExpression(Expression):
         else:
             expressions = jsonData["expressions"]
 
-        # Assert threshold is within range 0 to the length of list
-        assert self.threshold >= 0 and self.threshold <= len(expressions)
-
         # At this point, `expressions` is assumed to be a list
         self.expressions = [ExpressionFactory.buildAndGetExpression(expression) for expression in expressions]
 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -275,21 +307,27 @@ class ListExpression(Expression):
         Returns:
             (boolean): True if the expression is satisfied, false otherwise
         """
+        
+        if resultContainer == None:
+            result = ResultContainer()
 
         expressionsSatisfied = len([expression.isExpressionSatisfied(activeTerms) for expression in self.expressions])
 
         if self.threshold == ThresholdType.LESS_THAN:
-            return expressionsSatisfied < self.threshold
+            result.addExpressionStatus(self.message, expressionsSatisfied < self.threshold)
         elif self.threshold == ThresholdType.LESS_THAN_OR_EQUAL:
-            return expressionsSatisfied <= self.threshold
+            result.addExpressionStatus(self.message, expressionsSatisfied <= self.threshold)
         elif self.threshold == ThresholdType.EQUAL:
-            return expressionsSatisfied == self.threshold
+            result.addExpressionStatus(self.message, expressionsSatisfied == self.threshold)
         elif self.threshold == ThresholdType.GREATER_THAN_OR_EQUAL:
-            return expressionsSatisfied >= self.threshold
+            result.addExpressionStatus(self.message, expressionsSatisfied >= self.threshold)
         elif self.threshold == ThresholdType.GREATER_THAN:
-            return expressionsSatisfied > self.threshold
+            result.addExpressionStatus(self.message, expressionsSatisfied > self.threshold)
+        else:
+            # TODO: Raise an exception since this expression CANNOT be evaluated. This is an error.
+            pass            
 
-        # TODO: Handle undefined state
+        return result
 
     @staticmethod 
     def buildAndGetExpression(jsonData):
@@ -311,7 +349,7 @@ class RegistrationRestrictionExpression(Expression):
 
         self.expression = ExpressionFactory.buildAndGetExpression(jsonData["expression"])
 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -321,7 +359,11 @@ class RegistrationRestrictionExpression(Expression):
             (boolean): True if the expression is satisfied, false otherwise
         """
 
-        return not self.expression.isExpressionSatisfied(activeTerms)
+        if resultContainer == None:
+            result = ResultContainer()
+
+        result.addExpressionStatus(self.message, not self.expression.isExpressionSatisfied(activeTerms))
+        return result
 
     @staticmethod
     def buildAndGetExpression(jsonData):
@@ -347,7 +389,7 @@ class YearStandingExpression(Expression):
         self.type = jsonData["type"]
         self.threshold = ThresholdType(jsonData["threshold"])
 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -357,7 +399,8 @@ class YearStandingExpression(Expression):
             (boolean): True if the expression is satisfied, false otherwise
         """
 
-        pass
+        if resultContainer == None:
+            result = ResultContainer()
 
     @staticmethod
     def buildAndGetExpression(jsonData):
@@ -366,7 +409,7 @@ class YearStandingExpression(Expression):
 
 
 """
-Determines whether in the context of `activeTerms`, if the nested expression is satisfied in terms of 
+Determines whether in the context of `activeTerms`, the nested expression is satisfied in terms of 
 units completed.
 """
 class UnitsExpression(Expression):
@@ -386,10 +429,7 @@ class UnitsExpression(Expression):
         # At this point, `expressions` is assumed to be a list
         self.expressions = [ExpressionFactory.buildAndGetExpression(expression) for expression in jsonData["expressions"]]
     
-    """
-    Must calculate the number of units completed in a possibly unbounded number of nested expressions.
-    """
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -401,7 +441,11 @@ class UnitsExpression(Expression):
 
         # TODO: Implement the `ExpressionResults` class to implement this. Otherwise, the alternative
         # is to implement an `unitsSatisfied` for each expression. 
-        pass 
+
+        if resultContainer == None:
+            result = ResultContainer()
+
+        
     
     @staticmethod 
     def buildAndGetExpression(jsonData):
@@ -429,7 +473,7 @@ class AwrSatisfiedExpression(Expression):
     """
     Evaluates the ACADEMIC_WRITING_REQUIREMENT expression and returns its result
     """ 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -438,6 +482,9 @@ class AwrSatisfiedExpression(Expression):
         Returns:
             (boolean): True if the expression is satisfied, false otherwise
         """
+
+        if resultContainer == None:
+            result = ResultContainer()
 
         awrExpression = ReferenceExpression.buildAndGetExpression({
             "group": "uvic_references",
@@ -466,7 +513,7 @@ class UmbrellaExpression(Expression):
     """
     Easy to calculate, just count towards the specified level and subject!
     """ 
-    def isExpressionSatisfied(self, activeTerms):
+    def isExpressionSatisfied(self, activeTerms, resultContainer=None):
         """
         Determines if the expression, given the `activeTerms` variables, is satisfied
 
@@ -476,7 +523,8 @@ class UmbrellaExpression(Expression):
             (boolean): True if the expression is satisfied, false otherwise
         """
 
-        pass
+        if resultContainer == None:
+            result = ResultContainer()
 
     @staticmethod
     def buildAndGetExpression(jsonData):

@@ -15,7 +15,7 @@ EXPRESSION_SCHEMA = {
             ]
         }
     },
-    "required": ["expressionType", "message"]
+    "required": ["expressionType"]
 }
 
 REFERENCE_EXPRESSION_SCHEMA = {
