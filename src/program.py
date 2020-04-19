@@ -41,14 +41,16 @@ class UVicEngineeringProgram(UVicProgram):
 
         super().__init__()
 
-        self.name = jsonProgram["Name"]
-        self.degree = jsonProgram["Degree"]
-
+        self.__setNameAndDegree(jsonProgram)
         self.__setGeneralRequirements(jsonProgram)
         self.__setHonours(jsonProgram)
         self.__setOptions(jsonProgram)
         self.__setSpecializations(jsonProgram)
         self.__setCombined(jsonProgram)
+
+    def __setNameAndDegree(self, jsonProgram):
+        self.name = jsonProgram["Name"]
+        self.degree = jsonProgram["Degree"]
 
     def __setGeneralRequirements(self, jsonProgram):
         # General Requirements are foundational to the program

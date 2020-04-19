@@ -22,7 +22,6 @@ Represents a term in which its details are currently unknown.
      * Number of active courses
 
 """
-# TODO: Ensure there is a way to get list of active Courses
 class Term():
     def __init__(self, year, termType):
         assert type(year) == int
