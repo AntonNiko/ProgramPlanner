@@ -1,6 +1,6 @@
 from course import OfferingCourse
 from requirement import RequirementManager
-from term import OfferingTerm, Term
+from term import Term
 
 """
 This is a collection of `Term` objects, representing a container for 
@@ -20,10 +20,10 @@ class Sequence():
     def __init__(self):
         self.activeTerms = {}
 
-    """
-    Adds an empty term. 
-    """
     def addTerm(self, year, termType):
+        """
+        Adds an empty term. 
+        """
         if year not in self.activeTerms:
             self.activeTerms[year] = {}
         if termType in self.activeTerms[year]:
@@ -32,18 +32,20 @@ class Sequence():
         
         self.activeTerms[year][termType] = Term(year, termType)
         
-    """
-    Removes a term 
-    """
     def removeTerm(self, year, termType):
+        """
+        Removes a term 
+        """
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
             # Term does not exist
             return 
 
-    """ 
-    Adds a course, passing in its `Course` object reference
-    """
+        del self.activeTerms[year][termType]
+
     def addCourse(self, year, termType, course):
+        """ 
+        Adds a course, passing in its `Course` object reference
+        """
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
             # Term does not exist
             return       
@@ -53,10 +55,10 @@ class Sequence():
         if not RequirementManager.isRequirementSatisfied(self.activeTerms, course.requirement):
             return
 
-    """
-    Removes a course, probably with its `CourseCode` object
-    """
     def removeCourse(self, year, termType, course):
+        """
+        Removes a course, probably with its `CourseCode` object
+        """
         if year not in self.activeTerms or termType not in self.activeTerms[year]:
             # Term does not exist
             return 

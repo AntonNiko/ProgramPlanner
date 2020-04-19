@@ -1,5 +1,5 @@
 import re
-from schedule import Section
+from section import Section
 from utils import Institution, NumberOperations
 
 """
