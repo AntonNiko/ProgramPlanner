@@ -70,7 +70,6 @@ class OfferingCourse(Course):
         assert type(courseCode) == CourseCode
         assert type(name) == str
         assert type(credits) == float
-        #assert type(requirements) == Requirement
         assert isinstance(details, CourseDetails)
         assert all(type(section) == Section for section in sections)
 

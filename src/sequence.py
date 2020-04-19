@@ -67,7 +67,6 @@ class Sequence():
         if not RequirementManager.isRequirementSatisfied(self.activeTerms, course.requirement):
             return
 
-
     """
     Removes a course, probably with its `CourseCode` object
     """

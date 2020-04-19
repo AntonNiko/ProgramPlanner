@@ -1,3 +1,4 @@
+from data import Data
 from expression import Expression
 
 """
@@ -8,9 +9,20 @@ class RequirementManager():
     def __init__(self):
         pass
 
-    """
-    A requirement is a list of expressions. 
-    """
+    @staticmethod
+    def getAcademicWritingRequirements():
+        awrGroup = "uvic_references"
+        awrIdentifier = "ACADEMIC_WRITING_REQUIREMENT"
+
+        return Data.getData(awrGroup, awrIdentifier)
+
+    @staticmethod
+    def getMinimumCourseworkUnits():
+        minimumCourseworkGroup = "uvic_references"
+        minimumCourseworkIdentifier = "MINIMUM_COURSEWORK_UNITS"
+
+        return Data.getData(minimumCourseworkGroup, minimumCourseworkIdentifier)
+
     @staticmethod
     def isRequirementSatisfied(activeTerms, requirement):
         for expression in requirement:

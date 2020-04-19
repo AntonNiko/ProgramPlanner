@@ -3,6 +3,7 @@ sys.path.append('..')
 
 import datetime
 from expression import *
+import json
 import jsonschema
 from term import TermTypes
 import unittest 
@@ -89,10 +90,10 @@ class CourseExpressionTests(unittest.TestCase):
         }
 
         expression = CourseExpression.buildAndGetExpression(jsonExpression)
-
-        print(expression.isExpressionSatisfied(activeTerms).expressionStatus)
-        # TODO fix
-        #self.assertTrue(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertTrue(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 225", "isSatisfied": True}], result.expressionStatus)
 
     def testExpressionSatisfiedValidTermsCorequisite(self):
         termOneMock = Mock()
@@ -115,8 +116,10 @@ class CourseExpressionTests(unittest.TestCase):
         }
 
         expression = CourseExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertTrue(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertTrue(result.satisfied)
+        self.assertListEqual([], result.expressionStatus)
 
     def testExpressionSatisfiedValidTermsPrerequisiteUnsatisfied(self):
         termOneMock = Mock()
@@ -141,8 +144,10 @@ class CourseExpressionTests(unittest.TestCase):
         }
 
         expression = CourseExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertFalse(expression.isExpressionSatisfied(activeTerms))             
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertFalse(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 226", "isSatisfied": False}], result.expressionStatus)        
 
 
 class ConditionalExpressionTests(unittest.TestCase):
@@ -245,8 +250,10 @@ class ConditionalExpressionTests(unittest.TestCase):
         }
 
         expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertTrue(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertTrue(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 115 or CSC 116", "isSatisfied": True}], result.expressionStatus)  
 
     def testExpressionSatisfiedValidCoursesAndCondition(self):
         termOneMock = Mock()
@@ -280,8 +287,10 @@ class ConditionalExpressionTests(unittest.TestCase):
         }  
 
         expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertTrue(expression.isExpressionSatisfied(activeTerms))    
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertTrue(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 320 and CSC 360", "isSatisfied": True}], result.expressionStatus) 
 
     def testExpressionSatisfiedValidCourseOrConditonUnsatisfied(self):
         termOneMock = Mock()
@@ -308,15 +317,18 @@ class ConditionalExpressionTests(unittest.TestCase):
             "expressionTwo": {
                 "expressionType": "COURSE",
                 "code": "SENG 350",
-                "requisiteType": "P"
+                "requisiteType": "P",
+                "message": "SENG 350"
             },
             "condition": "OR",
             "message": "CSC 399 or SENG 350"
         }  
 
         expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertFalse(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 399 or SENG 350", "isSatisfied": False}, {"message": "SENG 350", "isSatisfied": False}], result.expressionStatus)
 
     def testExpressionSatisfiedValidCourseOrConditionUnsatisfiedPrerequisite(self):
         termOneMock = Mock()
@@ -350,8 +362,10 @@ class ConditionalExpressionTests(unittest.TestCase):
         }      
 
         expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+        
+        self.assertFalse(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 399 or SENG 350", "isSatisfied": False}], result.expressionStatus) 
 
     def testExpressionSatisfiedValidCourseAndConditionUnsatisfiedPrerequisite(self):
         termOneMock = Mock()
@@ -385,8 +399,10 @@ class ConditionalExpressionTests(unittest.TestCase):
         }                 
 
         expression = ConditionalExpression.buildAndGetExpression(jsonExpression)
-        # TODO fix
-        #self.assertFalse(expression.isExpressionSatisfied(activeTerms))
+        result = expression.isExpressionSatisfied(activeTerms)
+
+        self.assertFalse(result.satisfied)
+        self.assertCountEqual([{"message": "CSC 399 or CSC 360", "isSatisfied": False}], result.expressionStatus)
 
 
 class ListExpressionTests(unittest.TestCase):
@@ -450,7 +466,163 @@ class ListExpressionTests(unittest.TestCase):
         for e in expression.expressions:
             self.assertEqual(CourseExpression, type(e))
 
-class ExpressionTests(unittest.TestCase):
+    def testExpressionSatisfiedValidListOfCoursesGeqSatisfied(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["MECH 200"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["MECH 285", "MECH 220"] 
+        termThreeMock = Mock() 
+        termThreeMock.getActiveCoursesCodes.return_value = ["CSC 399", "SENG 350", "SENG 480B", "SENG 275"] 
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock,
+                TermTypes.SUMMER_TERM: termThreeMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "LIST",
+            "threshold": 1,
+            "type": "geq",
+            "expressions": [{
+                "expressionType": "COURSE",
+                "code": "MECH 200",
+                "requisiteType": "P",
+                "message": "MECH 200"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ECE 299",
+                "requisiteType": "P"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ELEC 299",
+                "requisiteType": "P",
+                "message": "ELEC 299"
+            }],
+            "message": "One of MECH 200, ECE 299, ELEC 299"
+        }
+
+        expression = ListExpression.buildAndGetExpression(jsonExpression)
+        result = expression.isExpressionSatisfied(activeTerms)
+
+        self.assertTrue(result.satisfied)
+        self.assertCountEqual([{"message": "One of MECH 200, ECE 299, ELEC 299", "isSatisfied": True}, {"message": "MECH 200", "isSatisfied": True}, {"message": "ELEC 299", "isSatisfied": False}], result.expressionStatus)
+        
+    def testExpressionSatisfiedValidListOfExpressionsGtSatisfied(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["MECH 200"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["ELEC 299", "MECH 220"] 
+        termThreeMock = Mock() 
+        termThreeMock.getActiveCoursesCodes.return_value = ["CSC 360", "SENG 350", "SENG 480B", "SENG 275"] 
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock,
+                TermTypes.SUMMER_TERM: termThreeMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "LIST",
+            "threshold": 1,
+            "type": "gt",
+            "expressions": [{
+                "expressionType": "CONDITIONAL",
+                "expressionOne": {
+                    "expressionType": "COURSE",
+                    "code": "CSC 399",
+                    "requisiteType": "P"
+                },
+                "expressionTwo": {
+                    "expressionType": "COURSE",
+                    "code": "CSC 360",
+                    "requisiteType": "C"
+                },
+                "condition": "OR",
+                "message": "CSC 399 or CSC 360"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ECE 299",
+                "requisiteType": "P"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ELEC 299",
+                "requisiteType": "P",
+                "message": "ELEC 299"
+            }],
+            "message": "At least two of some courses"
+        }
+
+        expression = ListExpression.buildAndGetExpression(jsonExpression)
+        result = expression.isExpressionSatisfied(activeTerms)
+
+        self.assertTrue(result.satisfied)
+        self.assertCountEqual([{"message": "At least two of some courses", "isSatisfied": True}, {"message": "CSC 399 or CSC 360", "isSatisfied": True}, {"message": "ELEC 299", "isSatisfied": True}], result.expressionStatus)
+
+    def testExpressionSatisfiedValidListOfExpressionsGeqUnsatisfied(self):
+        termOneMock = Mock()
+        termOneMock.getActiveCoursesCodes.return_value = ["MECH 200"]
+        termTwoMock = Mock()
+        termTwoMock.getActiveCoursesCodes.return_value = ["ECE 260", "MECH 220"] 
+        termThreeMock = Mock() 
+        termThreeMock.getActiveCoursesCodes.return_value = ["CSC 360", "SENG 350", "SENG 480B", "SENG 275"] 
+
+        activeTerms = {
+            2017: {
+                TermTypes.FALL_TERM: termOneMock
+            },
+            2018: {
+                TermTypes.SPRING_TERM: termTwoMock,
+                TermTypes.SUMMER_TERM: termThreeMock
+            }
+        }
+
+        jsonExpression = {
+            "expressionType": "LIST",
+            "threshold": 1,
+            "type": "gt",
+            "expressions": [
+            {
+                "expressionType": "COURSE",
+                "code": "ECE 360",
+                "requisiteType": "C"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ECE 299",
+                "requisiteType": "P"
+            },
+            {
+                "expressionType": "COURSE",
+                "code": "ELEC 299",
+                "requisiteType": "P",
+            }],
+            "message": "At least two of some courses"
+        }
+
+        expression = ListExpression.buildAndGetExpression(jsonExpression)
+        result = expression.isExpressionSatisfied(activeTerms)
+
+        self.assertFalse(result.satisfied)
+        self.assertCountEqual([{"message": "At least two of some courses", "isSatisfied": False}], result.expressionStatus)
+
+
+class ExpressionFactoryTests(unittest.TestCase):
+    """
+    The tests for this class are meant to assert that the JSON expressions map to the correct class.
+    """
     
     def testValidExpressionList(self):
         pass

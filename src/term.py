@@ -2,7 +2,6 @@ from course import Course, OfferingCourse
 import datetime
 from enum import Enum
 
-
 class TermTypes(Enum):
     SPRING_TERM   = 1
     SUMMER_TERM = 2
@@ -68,9 +67,6 @@ IT IS to determine if the offering can be added for this term
 IT IS NOT to determine if the offering added has its requirements fulfilled 
 
 """
-# TODO: Make sure that course code is accessible for expression validation
-# TODO: Try to ensure activeOffering and activeCourses are as consistent to each other as possible
-# TODO: Provide a method to be called to get list of all active courses
 class OfferingTerm(Term):
     
     def __init__(self, year, termType, startDate, endDate):

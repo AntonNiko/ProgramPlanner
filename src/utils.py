@@ -1,3 +1,4 @@
+from aenum import MultiValueEnum
 from enum import Enum 
 import math
 
@@ -25,3 +26,12 @@ class ThresholdType(Enum):
     EQUAL = "eq"
     GREATER_THAN_OR_EQUAL = "geq"
     GREATER_THAN = "gt"
+
+class Weekday(MultiValueEnum):
+    MONDAY = 0, "M"
+    TUESDAY = 1, "T"
+    WEDNESDAY = 2, "W"
+    THURSDAY = 3, "R"
+    FRIDAY = 4, "F"
+    SATURDAY = 5, "S"
+    SUNDAY = 6, "Z"

@@ -3,6 +3,7 @@ from aenum import MultiValueEnum
 from enum import Enum
 import jsonschema
 import schema
+from utils import Weekday
 
 # https://json-schema.org/understanding-json-schema/
 """
@@ -31,7 +32,7 @@ class Section():
         self.name = jsonData["name"]
         self.type = SectionType(jsonData["type"])
         self.crn  = jsonData["crn"]
-        self.meetings = [SectionMeeting(jsonElement) for jsonElement in jsonData["meetings"]]
+        self.meetings = [Meeting(jsonElement) for jsonElement in jsonData["meetings"]]
 
     """
     Takes a Section object, and determines if any of the meetings conflict
@@ -48,7 +49,7 @@ class Section():
                     return True 
         return False
 
-class SectionMeeting():
+class Meeting():
     SCHEMA = schema.SECTION_MEETING_SCHEMA
 
     def __init__(self, jsonData):
@@ -79,9 +80,9 @@ class SectionMeeting():
     at any point in time.
     """
     def doesMeetingConflict(self, meeting):
-        assert type(meeting) == SectionMeeting 
+        assert type(meeting) == Meeting 
 
-        if not SectionMeeting.doesDateConflict(self.dates, meeting.dates):
+        if not Meeting.doesDateConflict(self.dates, meeting.dates):
             # Skip if the date ranges don't overlap
             return False
 
@@ -90,12 +91,12 @@ class SectionMeeting():
         # conflicts.
         if abs(meeting.dates["end"] - self.dates["start"]) < datetime.timedelta(days=7) \
             or abs(self.dates["end"] - meeting.dates["start"]) < datetime.timedelta(days=7):
-            overlappingWeekdays = SectionMeeting.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
+            overlappingWeekdays = Meeting.getWeekdaysInDateRange(meeting.dates["start"], self.dates["end"])
             weekdaysToCompare = [day for day in overlappingWeekdays if (day in meeting.days) and (day in self.days)]
 
             if len(weekdaysToCompare) == 0:
                 return False 
-            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
+            if Meeting.doesTimeConflict(self.times, meeting.times):
                 return True
 
         # Third case when overlap is 7 days or more. Any weekdays are applicable
@@ -104,7 +105,7 @@ class SectionMeeting():
             if len(weekdaysToCompare) == 0:
                 return False
 
-            if SectionMeeting.doesTimeConflict(self.times, meeting.times):
+            if Meeting.doesTimeConflict(self.times, meeting.times):
                 return True 
 
         return False
@@ -160,12 +161,3 @@ class SectionType(Enum):
     LECTURE = "lecture"
     LAB = "lab"
     TUTORIAL = "tutorial"
-
-class Weekday(MultiValueEnum):
-    MONDAY = 0, "M"
-    TUESDAY = 1, "T"
-    WEDNESDAY = 2, "W"
-    THURSDAY = 3, "R"
-    FRIDAY = 4, "F"
-    SATURDAY = 5, "S"
-    SUNDAY = 6, "Z"

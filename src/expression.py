@@ -53,7 +53,7 @@ class ResultContainer():
     
     def __init__(self):
         # Indicates that the expression in which this value is being evaluated at is satisfied
-        self.satisfied = True
+        self.satisfied = False
 
         # A list of dictionary elements composed of messages relating to an expression, and its satisfied status
         self.expressionStatus = []
@@ -66,8 +66,7 @@ class ResultContainer():
         messages have or have not been satisfied.
         """
 
-        if isSatisfied == False:
-            self.satisfied = False
+        self.satisfied = isSatisfied
 
         if message == None:
             return
@@ -190,7 +189,7 @@ class CourseExpression(Expression):
         """
 
         if resultContainer == None:
-            result = ResultContainer()
+            resultContainer = ResultContainer()
 
         latestYear = max(activeTerms)
         latestActiveTerm = activeTerms[latestYear][max(activeTerms[latestYear])]
@@ -201,14 +200,17 @@ class CourseExpression(Expression):
                     # If the course is in the latest active term but we're evaluating as co-requisite, then
                     # not satisfied
                     if (activeTerms[year][term] == latestActiveTerm) and (self.requisiteType == RequisiteType.PREREQUISITE):
-                        result.addExpressionStatus(self.message, False)
-                        return result
+                        #resultContainer.satisfied = False
+                        resultContainer.addExpressionStatus(self.message, False)
+                        return resultContainer
 
-                    result.addExpressionStatus(self.message, True)
-                    return result
-                    
-        result.addExpressionStatus(self.message, False)
-        return result
+                    #resultContainer.satisfied = True
+                    resultContainer.addExpressionStatus(self.message, True)
+                    return resultContainer
+
+        #resultContainer.satisfied = False    
+        resultContainer.addExpressionStatus(self.message, False)
+        return resultContainer
 
     @staticmethod 
     def buildAndGetExpression(jsonData):
@@ -244,27 +246,31 @@ class ConditionalExpression(Expression):
         """
 
         if resultContainer == None:
-            result = ResultContainer()
+            resultContainer = ResultContainer()
 
         if self.condition == ConditionType.OR:
-            if self.expressionOne.isExpressionSatisfied(activeTerms) \
-               or self.expressionTwo.isExpressionSatisfied(activeTerms):
-                result.addExpressionStatus(self.message, True)
+            if self.expressionOne.isExpressionSatisfied(activeTerms, resultContainer).satisfied \
+               or self.expressionTwo.isExpressionSatisfied(activeTerms, resultContainer).satisfied:
+                #resultContainer.satisfied = True
+                resultContainer.addExpressionStatus(self.message, True)
             else:
-                result.addExpressionStatus(self.message, False)
+                #resultContainer.satisfied = False
+                resultContainer.addExpressionStatus(self.message, False)
 
         elif self.condition == ConditionType.AND:
-            if self.expressionOne.isExpressionSatisfied(activeTerms) \
-               and self.expressionTwo.isExpressionSatisfied(activeTerms):
-                result.addExpressionStatus(self.message, True)
+            if self.expressionOne.isExpressionSatisfied(activeTerms, resultContainer).satisfied \
+               and self.expressionTwo.isExpressionSatisfied(activeTerms, resultContainer).satisfied:
+                #resultContainer.satisfied = True
+                resultContainer.addExpressionStatus(self.message, True)
             else:
-                result.addExpressionStatus(self.message, False)
+                #resultContainer.satisfied = False
+                resultContainer.addExpressionStatus(self.message, False)
 
         else:
             # TODO: Raise an exception since this expression CANNOT be evaluated. This is an error.
             pass
 
-        return result
+        return resultContainer
 
     @staticmethod
     def buildAndGetExpression(jsonData):
@@ -288,7 +294,7 @@ class ListExpression(Expression):
         self.threshold = jsonData["threshold"]
         self.type = ThresholdType(jsonData["type"])
 
-        # If the type of "expressions" is not reference we de-reference
+        # If the type of "expressions" is not reference, de-reference
         if type(jsonData["expressions"]) != list:
             reference = ReferenceExpression(jsonData["expressions"])
             expressions = reference.getJsonData()
@@ -309,25 +315,25 @@ class ListExpression(Expression):
         """
         
         if resultContainer == None:
-            result = ResultContainer()
+            resultContainer = ResultContainer()
 
-        expressionsSatisfied = len([expression.isExpressionSatisfied(activeTerms) for expression in self.expressions])
+        expressionsSatisfied = len([True for expression in self.expressions if expression.isExpressionSatisfied(activeTerms, resultContainer).satisfied])
 
-        if self.threshold == ThresholdType.LESS_THAN:
-            result.addExpressionStatus(self.message, expressionsSatisfied < self.threshold)
-        elif self.threshold == ThresholdType.LESS_THAN_OR_EQUAL:
-            result.addExpressionStatus(self.message, expressionsSatisfied <= self.threshold)
-        elif self.threshold == ThresholdType.EQUAL:
-            result.addExpressionStatus(self.message, expressionsSatisfied == self.threshold)
-        elif self.threshold == ThresholdType.GREATER_THAN_OR_EQUAL:
-            result.addExpressionStatus(self.message, expressionsSatisfied >= self.threshold)
-        elif self.threshold == ThresholdType.GREATER_THAN:
-            result.addExpressionStatus(self.message, expressionsSatisfied > self.threshold)
+        if self.type == ThresholdType.LESS_THAN:
+            resultContainer.addExpressionStatus(self.message, expressionsSatisfied < self.threshold)
+        elif self.type == ThresholdType.LESS_THAN_OR_EQUAL:
+            resultContainer.addExpressionStatus(self.message, expressionsSatisfied <= self.threshold)
+        elif self.type == ThresholdType.EQUAL:
+            resultContainer.addExpressionStatus(self.message, expressionsSatisfied == self.threshold)
+        elif self.type == ThresholdType.GREATER_THAN_OR_EQUAL:
+            resultContainer.addExpressionStatus(self.message, expressionsSatisfied >= self.threshold)
+        elif self.type == ThresholdType.GREATER_THAN:
+            resultContainer.addExpressionStatus(self.message, expressionsSatisfied > self.threshold)
         else:
             # TODO: Raise an exception since this expression CANNOT be evaluated. This is an error.
             pass            
 
-        return result
+        return resultContainer
 
     @staticmethod 
     def buildAndGetExpression(jsonData):
