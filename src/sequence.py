@@ -2,21 +2,16 @@ from course import OfferingCourse
 from requirement import RequirementManager
 from term import Term
 
-"""
-This is a collection of `Term` objects, representing a container for 
-a user to organize terms into a sequence. One sequence exists per institution.
-
-- A tool to visualize completed courses, and planned courses
-- The same sequence can be used towards multiple program requirements
-"""
-
-"""
-SEQUENCE:
-- The user chooses which year to start its sequence, i.e Year and Term Type
-- We can add a course or offering if year and term type don't already exist
-"""
 
 class Sequence():
+    """
+    Represents a container for a user to organize terms into a sequence. Contains a list of
+    `Term` objects which represent the progression of courses towards a program.
+
+    Zero or more programs may be associated to a sequence. The purpose of this is to evaluate 
+    if the requirements of the program are satisfied.
+    """
+
     def __init__(self):
         self.activeTerms = {}
 
