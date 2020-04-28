@@ -1,4 +1,4 @@
-from submodels.utils_models import *
+from .utils_models import CourseCode
 from djongo import models
 
 class Expression(models.Model):

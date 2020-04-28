@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from models import Course
+from plan.models import CourseCode
 
 class AccountHandler():
     """
@@ -67,7 +67,7 @@ class DataHandler():
         number_min = request.GET.get('number_min', None)
         number_max = request.GET.get('number_max', None)
 
-        return Course.objects.all()
+        #return Course.objects.all()
 
 
     @staticmethod

@@ -1,7 +1,7 @@
 from djongo import models
-from submodels.expression_models import *
-from submodels.section_models import *
-from submodels.utils_models import *
+from .expression_models import Expression
+from .section_models import Section
+from .utils_models import CourseCode
 
 class UVicCourseDetails(models.Model):
     hours_lectures = models.DecimalField(max_digits=4, decimal_places=2)

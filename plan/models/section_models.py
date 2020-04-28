@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from djongo import models
-from submodels.utils_models import *
+from .utils_models import DateRange, TimeRange
 
 class MeetingDay(models.Model):
     day = models.CharField(

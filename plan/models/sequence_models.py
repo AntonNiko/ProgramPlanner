@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from djongo import models
-from submodels.course_models import *
+from .course_models import Course
 
 class Term(models.Model):
     year = models.PositiveSmallIntegerField()
