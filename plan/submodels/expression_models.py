@@ -1,4 +1,4 @@
-from .utils_models import *
+from submodels.utils_models import *
 from djongo import models
 
 class Expression(models.Model):

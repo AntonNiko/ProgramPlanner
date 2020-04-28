@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from djongo import models
-from .utils_models import *
+from submodels.utils_models import *
 
 class MeetingDay(models.Model):
     day = models.CharField(
