@@ -1,10 +1,10 @@
 from djongo import models
-from .fields import MongoDecimalField
+from plan.fields import MongoDecimalField
 from .expression_models import Expression
 from .section_models import Section
 from .utils_models import CourseCode
 
-class UVicCourseDetails(models.Model):
+class UVicCourseDetails(models.Model): 
     hours_lectures = MongoDecimalField(max_digits=4, decimal_places=2)
     hours_labs = MongoDecimalField(max_digits=4, decimal_places=2)
     hours_tutorials = MongoDecimalField(max_digits=4, decimal_places=2)
