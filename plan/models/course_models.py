@@ -9,6 +9,14 @@ class UVicCourseDetails(models.Model):
     hours_labs = MongoDecimalField(max_digits=4, decimal_places=2)
     hours_tutorials = MongoDecimalField(max_digits=4, decimal_places=2)
 
+    def to_dict(self):
+        result = {
+            'hours_lectures': float(self.hours_lectures),
+            'hours_labs': float(self.hours_labs),
+            'hours_tutorials': float(self.hours_tutorials)
+        }
+        return result
+
 class Course(models.Model):
     course_code = models.EmbeddedField(
         model_container = CourseCode
@@ -21,6 +29,16 @@ class Course(models.Model):
     requirement = models.ArrayField(
         model_container = Expression
     )
+
+    def to_dict(self):
+        result = {
+            'course_code': self.course_code.to_dict(),
+            'name': self.name,
+            'credits': self.credits,
+            'course_details': self.course_details.to_dict(),
+            'requirement': self.requirement
+        }
+        return result
 
 class OfferingCourse(Course):
     sections = models.ArrayField(

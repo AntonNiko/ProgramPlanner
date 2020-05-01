@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.template import loader
 from django.shortcuts import render
-from handlers import AccountHandler, DataHandler
+from .handlers import AccountHandler, DataHandler
 
 # Create your views here.
 def view_index(request):
@@ -36,16 +36,16 @@ def data_course_get(request):
     # TODO: Better validation
 
     data = DataHandler.get_course_data(request)
-    return JsonResponse(data)
+    return JsonResponse(data, safe=False)
 
 def data_program_get(request):
     return HttpResponse("This will get the Program data.")
 
 def plan_course_add(request):
-    return HttpResponse("This will add the provided course to the schedule.")
+    return HttpResponse("This will add the provided course to the section.")
 
 def plan_course_remove(request):
-    return HttpResponse("This will remove the provided course from the schedule.")
+    return HttpResponse("This will remove the provided course from the section.")
 
 def plan_program(request):
     return HttpResponse("This will return the current program(s) selected.")

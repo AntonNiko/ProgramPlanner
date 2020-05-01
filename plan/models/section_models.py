@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from djongo import models
 from .utils_models import DateRange, TimeRange
@@ -6,15 +7,21 @@ class MeetingDay(models.Model):
     day = models.CharField(
         max_length = 2,
         choices = [
-            ('M', 'Monday'),
-            ('T', 'Tuesday'),
-            ('W', 'Wednesday'),
-            ('R', 'Thursday'),
-            ('F', 'Friday'),
-            ('S', 'Saturday'),
-            ('Z', 'Sunday')
+            ('M', 'monday'),
+            ('T', 'tuesday'),
+            ('W', 'wednesday'),
+            ('R', 'thursday'),
+            ('F', 'friday'),
+            ('S', 'saturday'),
+            ('Z', 'sunday')
         ]
     ) 
+
+    def to_dict(self):
+        result = {
+            'day': self.day 
+        }
+        return result
 
 class Meeting(models.Model):
     days = models.ArrayField(
@@ -28,14 +35,23 @@ class Meeting(models.Model):
         model_container = TimeRange
     )
 
+    def to_dict(self):
+        result = {
+            'days': [day.to_dict() for day in self.days],
+            'location': self.location,
+            'date_range': self.date_range,
+            'time_range': self.time_range
+        }
+        return result
+
 class Section(models.Model):
     name = models.CharField(max_length=4)
     section_type = models.CharField(
         max_length=20,
         choices=[
-            ('lecture', 'Lecture'),
-            ('lab', 'Lab'),
-            ('tutorial', 'Tutorial')
+            ('lecture', 'lecture'),
+            ('lab', 'lab'),
+            ('tutorial', 'tutorial')
         ]
     )
     crn = models.IntegerField()
@@ -43,8 +59,20 @@ class Section(models.Model):
         model_container = Meeting
     )
 
+    def to_dict(self):
+        result = {
+            'name': self.name,
+            'section_type': self.section_type,
+            'crn': self.crn, 
+            'meetings': [meeting.to_dict() for meeting in self.meetings]
+        }
+
 class Schedule(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE, blank = True, null = True)
     sections = models.ArrayField(
         model_container = Section
     )
+
+    def to_dict(self):
+        result = {
+            'sections': [section.to_dict() for section in self.sections]
+        }
