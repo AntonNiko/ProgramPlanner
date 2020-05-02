@@ -1,9 +1,30 @@
 from .utils_models import CourseCode
 from djongo import models
 
+
+
+class ExpressionResultContainer():
+
+    def __init__(self):
+        self.satisifed = False
+        self.expression_status = []
+        
+    def add_expression_status(self, message, satisfied):
+        self.satisfied = satisfied
+
+        if message == None:
+            return 
+
+        self.expression_status.append({
+            'message': message,
+            'satisfied': satisfied
+        })
+
+
 class Expression(models.Model):
-    class Meta:
-        abstract = True
+    pass
+    #class Meta:
+    #    abstract = True
 
 
 class CourseExpression(Expression):
@@ -24,6 +45,11 @@ class CourseExpression(Expression):
         requisite_type = json_data['requisite_type']
         return CourseExpression(course_code=course_code, requisite_type=requisite_type)
 
+    def evaluate_expression(self, sequence, result_container=None):
+        if result_container == None:
+            result_container = ExpressionResultContainer()
+
+        
 
 class ConditionalExpression(Expression):
     expression_one = models.EmbeddedField(
@@ -46,6 +72,12 @@ class ConditionalExpression(Expression):
         expression_two = ExpressionFactory.build_and_get_expression(json_data['expression_two'])
         condition = json_data['condition']
         return ConditionalExpression(expression_one, expression_two, condition)
+
+    def evaluate_expression(self, sequence, result_container=None):
+        
+        if result_container == None:
+            result_container = ExpressionResultContainer()
+
 
 
 class ListExpression(Expression):
@@ -71,6 +103,11 @@ class ListExpression(Expression):
         expressions = [ExpressionFactory.build_and_get_expression(json_expression) for json_expression in json_data['expressions']]
         return ListExpression(threshold=threshold, threshold_type=threshold_type, expressions=expressions)
 
+    def evaluate_expression(self, sequence, result_container=None):
+        
+        if result_container == None:
+            result_container = ExpressionResultContainer()
+
 
 class RegistrationRestrictionExpression(Expression):
     expression = models.ArrayField(
@@ -81,6 +118,11 @@ class RegistrationRestrictionExpression(Expression):
     def build_and_get_expression(json_data):
         expression = ExpressionFactory.build_and_get_expression(json_data)
         return RegistrationRestrictionExpression(expression=expression)
+
+    def evaluate_expression(self, sequence, result_container=None):
+        
+        if result_container == None:
+            result_container = ExpressionResultContainer()
 
 
 class YearStandingExpression(Expression):
@@ -101,6 +143,11 @@ class YearStandingExpression(Expression):
         threshold_value = json_data['threshold_value']
         threshold_type = json_data['threshold_type']
         return YearStandingExpression(threshold_value=threshold_value, threshold_type=threshold_type)
+
+    def evaluate_expression(self, sequence, result_container=None):
+        
+        if result_container == None:
+            result_container = ExpressionResultContainer()
 
 
 class UnitsExpression(Expression):
@@ -125,6 +172,10 @@ class UnitsExpression(Expression):
         threshold_type = json_data['threshold_type']
         expressions = [ExpressionFactory.build_and_get_expression(json_expression) for json_expression in json_data['expressions']]
         return UnitsExpression(threshold_value=threshold_value, threshold_type=threshold_type, expressions=expressions)
+
+    def evaluate_expression(self, sequence, result_container=None):
+        if result_container == None:
+            result_container = ExpressionResultContainer()
 
 
 class ExpressionFactory():

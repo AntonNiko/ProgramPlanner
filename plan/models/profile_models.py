@@ -6,10 +6,9 @@ from .sequence_models import Sequence
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     sequence = models.EmbeddedField(
-        model_container = Sequence,
-        blank = True
+        model_container = Sequence
     )
-    schedule = models.EmbeddedField(
-        model_container = Schedule,
-        blank = True
+    schedules = models.ArrayField(
+        model_container = Schedule
     )
+    # TODO: Add array of programs.

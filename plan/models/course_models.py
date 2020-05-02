@@ -30,13 +30,16 @@ class Course(models.Model):
         model_container = Expression
     )
 
+    def evaluate_requirement(self, sequence):
+        pass
+
     def to_dict(self):
         result = {
             'course_code': self.course_code.to_dict(),
             'name': self.name,
             'credits': self.credits,
             'course_details': self.course_details.to_dict(),
-            'requirement': self.requirement
+            'requirement': [expression.to_dict() for expression in self.requirement]
         }
         return result
 

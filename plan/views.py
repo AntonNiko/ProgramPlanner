@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.template import loader
 from django.shortcuts import render
-from .handlers import AccountHandler, DataHandler
+from .handlers import AccountHandler, DataHandler, PlanHandler
 
 # Create your views here.
 def view_index(request):
@@ -42,10 +42,13 @@ def data_program_get(request):
     return HttpResponse("This will get the Program data.")
 
 def plan_course_add(request):
-    return HttpResponse("This will add the provided course to the section.")
+    PlanHandler.add_course_to_sequence(request)
+
+    return HttpResponse("This has perhaps added a course to the sequence.")
 
 def plan_course_remove(request):
-    return HttpResponse("This will remove the provided course from the section.")
+    PlanHandler.remove_course_from_sequence(request)
+    return HttpResponse("This will remove the provided course from the sequence.")
 
 def plan_program(request):
     return HttpResponse("This will return the current program(s) selected.")
@@ -57,13 +60,19 @@ def plan_program_remove(request):
     return HttpResponse("This will remove the specified program from the selection list.")
 
 def plan_sequence(request):
-    return HttpResponse("This will get the current sequence.")
+
+    sequence = PlanHandler.get_sequence(request)
+    return JsonResponse(sequence, safe=False)
 
 def plan_term_add(request):
-    return HttpResponse("This will add a term to the sequence")
+
+    PlanHandler.add_term(request)
+    return HttpResponse("Perhaps added a term")
 
 def plan_term_remove(request):
-    return HttpResponse("This will remove a term from the sequence.")
+
+    PlanHandler.remove_term(request)
+    return HttpResponse("Perhaps a term has been removed.")
 
 def schedule(request):
     return HttpResponse("Gets the active schedule(s).")

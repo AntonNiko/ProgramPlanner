@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from plan.models import Profile, Term
+from plan.models import Course, Profile, Sequence, Term
 
 
 class AccountHandler():
@@ -39,6 +39,7 @@ class AccountHandler():
 
         logout(request)
 
+
 class DataHandler():
 
     @staticmethod
@@ -63,16 +64,17 @@ class DataHandler():
         subject = request.GET.get('subject', None)
         number = request.GET.get('number', None)
 
+        print(request.session.items())
+
         if subject == None and number == None:
-          result = [course.to_dict() for course in Course.objects.all()]
+            result = [course.to_dict() for course in Course.objects.all()]
         elif subject != None and number == None:
-          result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject})]
+            result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject})]
         elif subject != None and number != None:
-          print("yes")
-          result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject}).filter(course_code__exact={'number': number})]
+            result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject}).filter(course_code__exact={'number': number})]
         else:
-          # TODO: Better error handling
-          result = []
+            # TODO: Better error handling
+            result = []
         return result
 
 
@@ -96,18 +98,88 @@ class PlanHandler():
     """
 
     @staticmethod
-    def add_term(request):
+    def add_course_to_sequence(request):
         """
-        Adds a term for the user, depending on whether they're logged in or not.
-        """
+        Adds a course to the user's sequence. To correctly add a course, the following parameters
+        must be specified:
+          - subject: Course subject (e.g 'CSC')
+          - number: Course number (e.g '480B')
+          - year: Year to add course to
+          - term_type: term_type to add course to
+        """ 
 
+        subject = request.GET.get('subject')
+        number = request.GET.get('number')
         year = int(request.GET.get('year'))
-        term_type = request.GET.get('term_type')
+        term_type = int(request.GET.get('term_type'))
 
-        if request.user.is_authenticated():
-          sequence = Profile.objects.get(user=request.user).sequence
-          sequence.append(Term(year=year, term_type=term_type))
-          sequence.save()
+        # Fetch course to add.
+        course = Course.objects.filter(course_code={'subject': subject}).filter(course_code={'number': number})[0]
+
+        # Fetch targeted sequence and term
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence = profile.sequence
+        else:
+            sequence = request.session.get('sequence')
+
+        for term in sequence.terms:
+          if term.year == year and term.term_type == term_type:
+            break
+        else:
+          # The term has not been found.
+          return
+
+        # Evaluate if requirements are fulfilled for that course
+        #expression_result = course.evaluate_requirement(sequence) 
+
+        # Add course to term
+        term.courses.append(course)
+
+        # Clean-up
+        PlanHandler.__clean_up(request, profile)
+
+
+    @staticmethod
+    def remove_course_from_sequence(request):
+        """
+        Removes a course from the user's sequence. The following parameters
+        must be specified:
+          - subject: Course subject (e.g 'CSC')
+          - number: Course number (e.g '480B')
+          - year: Year to remove course from
+          - term_type: term_type to remove course from
+        """ 
+
+        subject = request.GET.get('subject')
+        number = request.GET.get('number')
+        year = int(request.GET.get('year'))
+        term_type = int(request.GET.get('term_type'))           
+
+        # Fetch targeted sequence and term
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence = profile.sequence
+        else:
+            sequence = request.session.get('sequence')
+
+        for term in sequence.terms:
+            if term.year == year and term.term_type == term_type:
+                break
+        else:
+            # The term has not been found.
+            return
+
+        for course in term.courses:
+            if course.course_code.subject == subject and course.course_code.number == number:
+                term.courses.remove(course)
+                break
+        else:
+            # The course has not been found.
+            return
+          
+        # Clean-up
+        PlanHandler.__clean_up(request, profile)
 
 
     @staticmethod
@@ -117,13 +189,82 @@ class PlanHandler():
         session data
         """
 
-        if request.user.is_authenticated():
-          result = Profile.objects.get(user=request.user).sequence
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            result = profile.sequence
+            if result != None:
+                result = result.to_dict()
         else:
-          result = request.session.get('sequence', {})
+            result = request.session.get('sequence')
 
         return result
 
 
+    @staticmethod
+    def add_term(request):
+        """
+        Adds a term for the user, depending on whether they're logged in or not.
+        """
+
+        year = int(request.GET.get('year'))
+        term_type = int(request.GET.get('term_type'))
+
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence = profile.sequence
+        else:
+            sequence = request.session.get('sequence')
+
+        # TODO: Improve validation
+        assert sequence != None
+
+        # Check that no Term with same year and term_type already exist
+        for term in sequence.terms:
+          if term.year == year and term.term_type == term_type:
+            return
+
+        sequence.terms.append(Term(year=year, term_type=term_type, courses=[]))
+
+        # Clean-up
+        PlanHandler.__clean_up(request, profile)
 
 
+    @staticmethod
+    def remove_term(request):
+        """
+        Removes a term for the user, depending on whether they're logged in or not.
+        """
+
+        year = int(request.GET.get('year'))
+        term_type = int(request.GET.get('term_type'))
+
+        # Fetching sequence
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence = profile.sequence
+        else:
+            sequence = request.session.get('sequence')
+
+        # TODO: Improve validation
+        assert sequence != None
+
+        for term in sequence.terms:
+            if term.year == year and term.term_type == term_type:
+                sequence.terms.remove(term)
+                break 
+
+        # Clean-up
+        PlanHandler.__clean_up(request, profile) 
+
+
+    @staticmethod
+    def __clean_up(request, profile):
+        """
+        Ensures that either the profile is saved or session modified flag is set.
+        """     
+
+        if request.user.is_authenticated:
+            profile.save()
+        else:
+            request.session.modified = True  
+              

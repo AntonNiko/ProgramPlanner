@@ -13,15 +13,17 @@ class Term(models.Model):
         ]
     )
     courses = models.ArrayField(
-        model_container = Course
+        model_container = Course,
+        blank = False
     )
 
     def to_dict(self):
         result = {
             'year': self.year,
             'term_type': self.term_type,
-            'courses': self.courses.to_dict()
+            'courses': [course.to_dict() for course in self.courses]
         }
+        return result
 
 class Sequence(models.Model):
     terms = models.ArrayField(

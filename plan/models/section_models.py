@@ -66,6 +66,7 @@ class Section(models.Model):
             'crn': self.crn, 
             'meetings': [meeting.to_dict() for meeting in self.meetings]
         }
+        return result
 
 class Schedule(models.Model):
     sections = models.ArrayField(
@@ -76,3 +77,4 @@ class Schedule(models.Model):
         result = {
             'sections': [section.to_dict() for section in self.sections]
         }
+        return result
