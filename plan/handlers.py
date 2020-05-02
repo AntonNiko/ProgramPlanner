@@ -131,7 +131,11 @@ class PlanHandler():
           return
 
         # Evaluate if requirements are fulfilled for that course
-        #expression_result = course.evaluate_requirement(sequence) 
+        # TODO: return evaluation_container as statistic
+        evaluation_status, evaluation_container = course.evaluate_requirement(sequence) 
+        if evaluation_status == False:
+            print("Not satisfied!!")
+            return
 
         # Add course to term
         term.courses.append(course)

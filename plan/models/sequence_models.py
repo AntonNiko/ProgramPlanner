@@ -25,6 +25,13 @@ class Term(models.Model):
         }
         return result
 
+    def __gt__(self, other):
+        return True if (self.year, self.term_type) > (other.year, other.term_type) else False
+
+    def __ge__(self, other):
+        return True if (self.year, self.term_type) >= (other.year, other.term_type) else False
+
+
 class Sequence(models.Model):
     terms = models.ArrayField(
         model_container = Term

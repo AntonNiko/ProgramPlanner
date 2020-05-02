@@ -1,6 +1,6 @@
 from djongo import models
+from plan.expressions import *
 from plan.fields import MongoDecimalField
-from .expression_models import Expression
 from .section_models import Section
 from .utils_models import CourseCode
 
@@ -26,12 +26,26 @@ class Course(models.Model):
     course_details = models.EmbeddedField(
         model_container = UVicCourseDetails
     )
-    requirement = models.ArrayField(
-        model_container = Expression
-    )
+    requirement = models.DictField(default={'expressions':[]}, blank=False)
 
     def evaluate_requirement(self, sequence):
-        pass
+        """
+        Evaluates if the requirement is satisfied given a sequence.
+        """
+
+        expressions = [ExpressionFactory.build_and_get_expression(json_data) for json_data in self.requirement['expressions']]
+        
+        evaluation_result_container = []
+        evaluation_result_status = True
+
+        for expression in expressions:
+            result = expression.evaluate_expression(sequence)
+            evaluation_result_container.append(result)
+            if not result.satisfied:
+                evaluation_result_status = False
+                break
+
+        return evaluation_result_status, evaluation_result_container
 
     def to_dict(self):
         result = {
@@ -39,7 +53,7 @@ class Course(models.Model):
             'name': self.name,
             'credits': self.credits,
             'course_details': self.course_details.to_dict(),
-            'requirement': [expression.to_dict() for expression in self.requirement]
+            'requirement': self.requirement
         }
         return result
 
