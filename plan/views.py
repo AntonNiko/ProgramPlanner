@@ -3,6 +3,8 @@ from django.template import loader
 from django.shortcuts import render
 from .handlers import AccountHandler, DataHandler, PlanHandler
 
+JSON_RESPONSE_BASE = {'method': None, 'response_data': None}
+
 # Create your views here.
 def view_index(request):
     template = loader.get_template('index.html')
@@ -16,69 +18,102 @@ def view_account(request):
     template = loader.get_template('account.html')
     return HttpResponse(template.render({}, request))
 
-def account_authentication_login(request):
-    assert request.method == 'POST'
+def account_authentication(request):
     # TODO: Better validation
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'account_authentication'
 
-    AccountHandler.login(request)
+    action = request.GET.get('action')
+    if action == 'login':
+        assert request.method == 'POST'
+        response_json['response_data'] = AccountHandler.login(request)
+    elif action == 'logout':
+        assert request.method == 'GET'
+        response_json['response_data'] = AccountHandler.logout(request)
 
-    return HttpResponse("This will handle the login request.")
+    return JsonResponse(response_json)
 
-def account_authentication_logout(request):
-    assert request.method == 'POST'
+def data_course(request):
     # TODO: Better validation
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'data_course'
 
-    AccountHandler.logout(request)
-    return HttpResponse("This will handle the logout request.")
-
-def data_course_get(request):
     assert request.method == 'GET'
-    # TODO: Better validation
 
-    data = DataHandler.get_course_data(request)
-    return JsonResponse(data, safe=False)
+    response_json['response_data'] = DataHandler.get_course_data(request)
+    
+    return JsonResponse(response_json)
 
-def data_program_get(request):
-    return HttpResponse("This will get the Program data.")
+def data_program(request):
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'data_program'
 
-def plan_course_add(request):
-    PlanHandler.add_course_to_sequence(request)
+    action = request.GET.get('action')
+    if action == 'get':
+        assert request.method == 'GET'
+        response_json['response_data'] = DataHandler.get_program_data(request)
 
-    return HttpResponse("This has perhaps added a course to the sequence.")
+    return JsonResponse(response_json)
 
-def plan_course_remove(request):
-    PlanHandler.remove_course_from_sequence(request)
-    return HttpResponse("This will remove the provided course from the sequence.")
+def plan_course(request):
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'plan_course'
+
+    action = request.GET.get('action')
+    if action == 'add':
+        assert request.method == 'GET'
+        response_json['response_data'] = PlanHandler.add_course_to_sequence(request)
+    elif action == 'remove':
+        assert request.method == 'GET'
+        response_json['response_data'] = PlanHandler.remove_course_from_sequence(request)
+    else:
+        response_json['response_data'] = 'unsupported parameters'
+
+    return JsonResponse(response_json)
 
 def plan_program(request):
-    return HttpResponse("This will return the current program(s) selected.")
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'plan_program'
 
-def plan_program_add(request):
-    return HttpResponse("This will add the specificed program to the selection list.")
+    action = request.GET.get('action')
+    if action == 'add':
+        response_json['response_data'] = PlanHandler.add_program(request)
+    elif action == 'get':
+        pass
+    elif action == 'remove':
+        pass 
 
-def plan_program_remove(request):
-    return HttpResponse("This will remove the specified program from the selection list.")
+    return JsonResponse(response_json)
 
 def plan_sequence(request):
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'plan_sequence'
 
-    sequence = PlanHandler.get_sequence(request)
-    return JsonResponse(sequence, safe=False)
+    response_json['response_data'] = PlanHandler.get_sequence(request)
+    return JsonResponse(response_json)
 
-def plan_term_add(request):
+def plan_term(request):
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'plan_term'
 
-    PlanHandler.add_term(request)
-    return HttpResponse("Perhaps added a term")
-
-def plan_term_remove(request):
-
-    PlanHandler.remove_term(request)
-    return HttpResponse("Perhaps a term has been removed.")
+    action = request.GET.get('action')
+    if action == 'add':
+        assert request.method == 'GET'
+        PlanHandler.add_term(request)
+    elif action == 'remove':
+        assert request.method == 'POST'
+        PlanHandler.remove_term(request)
+    
+    return JsonResponse(response_json)
 
 def schedule(request):
-    return HttpResponse("Gets the active schedule(s).")
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'schedule'
 
-def schedule_section_add(request):
-    return HttpResponse("This will add a section to the schedule for a specific term.")
+    return JsonResponse(response_json)
 
-def schedule_section_remove(request):
-    return HttpResponse("This will remove a section from the schedule for a specific term.")
+def schedule_section(request):
+    response_json = JSON_RESPONSE_BASE.copy()
+    response_json['method'] = 'schedule_section'
+
+    return JsonResponse(response_json)

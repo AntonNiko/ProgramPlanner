@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from plan.models import Course, Profile, Sequence, Term
+from plan.models import Course, Profile, Program, Sequence, Term
 
 
 class AccountHandler():
@@ -64,8 +64,6 @@ class DataHandler():
         subject = request.GET.get('subject', None)
         number = request.GET.get('number', None)
 
-        print(request.session.items())
-
         if subject == None and number == None:
             result = [course.to_dict() for course in Course.objects.all()]
         elif subject != None and number == None:
@@ -88,6 +86,18 @@ class DataHandler():
         Returns:
           - response: A JSON-serializable object with result.
         """
+
+        institution = request.GET.get('institution', None)
+        name = request.GET.get('name', None)
+
+        assert institution != None
+
+        if name == None:
+            result = [program.to_dict() for program in Program.objects.filter(institution=institution)]
+        else:
+            result = Program.objects.filter(institution=institution).filter(name=name)[0]
+
+        return result
 
 
 class PlanHandler():
@@ -134,14 +144,15 @@ class PlanHandler():
         # TODO: return evaluation_container as statistic
         evaluation_status, evaluation_container = course.evaluate_requirement(sequence) 
         if evaluation_status == False:
-            print("Not satisfied!!")
-            return
+            return evaluation_container
 
         # Add course to term
         term.courses.append(course)
 
         # Clean-up
         PlanHandler.__clean_up(request, profile)
+
+        return evaluation_container
 
 
     @staticmethod
@@ -186,6 +197,31 @@ class PlanHandler():
         PlanHandler.__clean_up(request, profile)
 
 
+    @staticmethod
+    def add_program(request):
+        """
+        Adds a program to the list of selected programs that the user's sequence is intended
+        to satisfy
+        """
+        response = {'success': False}
+
+        institution = request.GET.get('institution')
+        name = request.GET.get('name')
+
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence_programs = profile.programs
+        else:
+            sequence_programs = request.session.get('programs')
+
+        program = Program.objects.filter(institution=institution).filter(name=name)[0]
+        sequence_programs.append(program)
+        response['success'] = True
+
+        PlanHandler.__clean_up(request, profile)
+
+        return response
+        
     @staticmethod
     def get_sequence(request):
         """

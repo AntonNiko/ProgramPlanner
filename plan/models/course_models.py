@@ -40,7 +40,7 @@ class Course(models.Model):
 
         for expression in expressions:
             result = expression.evaluate_expression(sequence)
-            evaluation_result_container.append(result)
+            evaluation_result_container.append(result.expression_status)
             if not result.satisfied:
                 evaluation_result_status = False
                 break
