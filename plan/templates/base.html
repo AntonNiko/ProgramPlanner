@@ -41,15 +41,15 @@
             </div>
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item {% block program-nav-item-active %}{% endblock %}">
                 <a class="nav-link" href="/">
                 <i class="fas fa-fw fa-graduation-cap"></i>
                 <span>Program</span></a>
             </li>
         
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="/">
+            <li class="nav-item {% block schedule-nav-item-active %}{% endblock %}">
+                <a class="nav-link" href="/schedule">
                 <i class="fas fa-fw fa-chalkboard-teacher"></i>
                 <span>Schedule</span></a>
             </li>

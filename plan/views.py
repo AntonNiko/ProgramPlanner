@@ -5,8 +5,8 @@ from .handlers import AccountHandler, DataHandler, PlanHandler
 
 JSON_RESPONSE_BASE = {'method': None, 'response_data': None}
 
-def view_index(request):
-    template = loader.get_template('base_index.html')
+def view_program(request):
+    template = loader.get_template('base_program.html')
     return HttpResponse(template.render({}, request))
 
 def view_schedule(request):    
