@@ -5,20 +5,19 @@ from .handlers import AccountHandler, DataHandler, PlanHandler
 
 JSON_RESPONSE_BASE = {'method': None, 'response_data': None}
 
-# Create your views here.
 def view_index(request):
-    template = loader.get_template('index.html')
+    template = loader.get_template('base_index.html')
     return HttpResponse(template.render({}, request))
 
 def view_schedule(request):    
-    template = loader.get_template('schedule.html')
+    template = loader.get_template('base_schedule.html')
     return HttpResponse(template.render({}, request))
 
 def view_account(request):
-    template = loader.get_template('account.html')
+    template = loader.get_template('base_account.html')
     return HttpResponse(template.render({}, request))
 
-def account_authentication(request):
+def api_account_authentication(request):
     # TODO: Better validation
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'account_authentication'
@@ -33,7 +32,7 @@ def account_authentication(request):
 
     return JsonResponse(response_json)
 
-def data_course(request):
+def api_data_course(request):
     # TODO: Better validation
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'data_course'
@@ -44,7 +43,7 @@ def data_course(request):
     
     return JsonResponse(response_json)
 
-def data_program(request):
+def api_data_program(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'data_program'
 
@@ -55,7 +54,7 @@ def data_program(request):
 
     return JsonResponse(response_json)
 
-def plan_course(request):
+def api_plan_course(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'plan_course'
 
@@ -71,7 +70,7 @@ def plan_course(request):
 
     return JsonResponse(response_json)
 
-def plan_program(request):
+def api_plan_program(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'plan_program'
 
@@ -80,19 +79,21 @@ def plan_program(request):
         response_json['response_data'] = PlanHandler.add_program(request)
     elif action == 'get':
         pass
+    elif action == 'evaluate':
+        pass
     elif action == 'remove':
         pass 
 
     return JsonResponse(response_json)
 
-def plan_sequence(request):
+def api_plan_sequence(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'plan_sequence'
 
     response_json['response_data'] = PlanHandler.get_sequence(request)
     return JsonResponse(response_json)
 
-def plan_term(request):
+def api_plan_term(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'plan_term'
 
@@ -106,14 +107,29 @@ def plan_term(request):
     
     return JsonResponse(response_json)
 
-def schedule(request):
+def api_schedule(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'schedule'
 
+    action = request.GET.get('action')
+    # TODO: Complete
+    if action == 'add':
+        pass
+    elif action == 'remove':
+        pass
+
     return JsonResponse(response_json)
 
-def schedule_section(request):
+def api_schedule_section(request):
     response_json = JSON_RESPONSE_BASE.copy()
     response_json['method'] = 'schedule_section'
+
+    action = request.GET.get('action')
+    # TODO: Complete 
+    if action == 'add':
+        pass
+    elif action == 'remove':
+        pass
+
 
     return JsonResponse(response_json)
