@@ -29,7 +29,7 @@ COURSE_EXPRESSION_SCHEMA = {
         },
         "requisite_type": {
             "type": "string",
-            "enum": ["P","C"]
+            "enum": ["P", "C"]
         }
     },
     "required": ["subject", "number"]
@@ -50,7 +50,7 @@ CONDITIONAL_EXPRESSION_SCHEMA = {
         }
     },
     "required": ["expression_one", "expression_two", "condition"]
-} 
+}
 
 LIST_EXPRESSION_SCHEMA = {
     "type": "object",
@@ -70,7 +70,7 @@ LIST_EXPRESSION_SCHEMA = {
                         "type": "object"
                     }
                 }
-            ]    
+            ]
         }
     },
     "required": ["threshold_value", "threshold_type", "expressions"]
@@ -86,7 +86,7 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
     "required": ["expression"]
 }
 
-#YEAR_STANDING_EXPRESSION_SCHEMA = {
+# YEAR_STANDING_EXPRESSION_SCHEMA = {
 #    "type": "object",
 #    "properties": {
 #        "type": {
@@ -98,11 +98,11 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
 #        }
 #    },
 #    "required": ["type", "threshold"]
-#}
+# }
 
 # Makes sense to have list of expressions, since the semantics of this expression define that 
 # Any expression that is satisfied, "counts" towards this unit
-#UNITS_EXPRESSION_SCHEMA = {
+# UNITS_EXPRESSION_SCHEMA = {
 #    "type": "object",
 #    "properties": {
 #        "type": {
@@ -120,13 +120,13 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
 #        }                  
 #    },
 #    "required": ["type", "threshold", "expressions"]
-#}
+# }
 
-#AWR_SATISFIED_EXPRESSION_SCHEMA = {
+# AWR_SATISFIED_EXPRESSION_SCHEMA = {
 #    "type": "object",
-#}
+# }
 
-#UMBRELLA_EXPRESSION_SCHEMA = {
+# UMBRELLA_EXPRESSION_SCHEMA = {
 #    "type": "object",
 #    "properties": {
 #        "level": {
@@ -157,9 +157,9 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
 #        }
 #    },
 #    "required": ["level", "subject"]
-#}
+# }
 
-#NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {
+# NO_CREDIT_WARNING_EXPRESSION_SCHEMA = {
 #    "type": "object",
 #    "properties": {
 #        "expression": {
@@ -167,9 +167,9 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
 #        }
 #    },
 #    "required": ["expression"]
-#}
+# }
 
-#RECOMMENDATION_WARNING_EXPRESSION_SCHEMA = {
+# RECOMMENDATION_WARNING_EXPRESSION_SCHEMA = {
 #    "type": "object",
 #    "properties": {
 #        "expression": {
@@ -177,4 +177,4 @@ REGISTRATION_RESTRICTION_EXPRESSION_SCHEMA = {
 #        }
 #    },
 #    "required": ["expression"]
-#}
+# }

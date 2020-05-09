@@ -1,5 +1,6 @@
 from djongo import models
 
+
 class CourseCode(models.Model):
     subject = models.CharField(max_length=4)
     number = models.CharField(max_length=8)
@@ -33,4 +34,4 @@ class TimeRange(models.Model):
             'start_time': self.start_time,
             'end_time': self.end_time
         }
-        return 
+        return

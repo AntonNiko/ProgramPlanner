@@ -4,7 +4,8 @@ from plan.fields import MongoDecimalField
 from .section_models import Section
 from .utils_models import CourseCode
 
-class UVicCourseDetails(models.Model): 
+
+class UVicCourseDetails(models.Model):
     hours_lectures = MongoDecimalField(max_digits=4, decimal_places=2)
     hours_labs = MongoDecimalField(max_digits=4, decimal_places=2)
     hours_tutorials = MongoDecimalField(max_digits=4, decimal_places=2)
@@ -17,24 +18,26 @@ class UVicCourseDetails(models.Model):
         }
         return result
 
+
 class Course(models.Model):
     course_code = models.EmbeddedField(
-        model_container = CourseCode
+        model_container=CourseCode
     )
     name = models.CharField(max_length=200)
     credits = MongoDecimalField(max_digits=3, decimal_places=1)
     course_details = models.EmbeddedField(
-        model_container = UVicCourseDetails
+        model_container=UVicCourseDetails
     )
-    requirement = models.DictField(default={'expressions':[]}, blank=False)
+    requirement = models.DictField(default={'expressions': []}, blank=False)
 
     def evaluate_requirement(self, sequence):
         """
         Evaluates if the requirement is satisfied given a sequence.
         """
 
-        expressions = [ExpressionFactory.build_and_get_expression(json_data) for json_data in self.requirement['expressions']]
-        
+        expressions = [ExpressionFactory.build_and_get_expression(json_data) for json_data in
+                       self.requirement['expressions']]
+
         evaluation_result_container = []
         evaluation_result_status = True
 
@@ -57,7 +60,8 @@ class Course(models.Model):
         }
         return result
 
+
 class OfferingCourse(Course):
     sections = models.ArrayField(
-        model_container = Section
+        model_container=Section
     )

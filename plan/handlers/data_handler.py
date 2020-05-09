@@ -1,6 +1,7 @@
 from plan.models import Course, Program
 
-class DataHandler():
+
+class DataHandler:
 
     @staticmethod
     def get_course_data(request):
@@ -24,17 +25,18 @@ class DataHandler():
         subject = request.GET.get('subject', None)
         number = request.GET.get('number', None)
 
-        if subject == None and number == None:
+        if subject is None and number is None:
             result = [course.to_dict() for course in Course.objects.all()]
-        elif subject != None and number == None:
+        elif subject is not None and number is None:
             result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject})]
-        elif subject != None and number != None:
-            result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject}).filter(course_code__exact={'number': number})]
+        elif subject is not None and number is not None:
+            result = [course.to_dict() for course in
+                      Course.objects.filter(course_code__exact={'subject': subject}).filter(
+                          course_code__exact={'number': number})]
         else:
             # TODO: Better error handling
             result = []
         return result
-
 
     @staticmethod
     def get_program_data(request):
@@ -50,9 +52,9 @@ class DataHandler():
         institution = request.GET.get('institution', None)
         name = request.GET.get('name', None)
 
-        assert institution != None
+        assert institution is not None
 
-        if name == None:
+        if name is None:
             result = [program.to_dict() for program in Program.objects.filter(institution=institution)]
         else:
             result = Program.objects.filter(institution=institution).filter(name=name)[0]

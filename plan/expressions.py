@@ -7,9 +7,11 @@ class ConditionType(Enum):
     AND = "AND"
     OR = "OR"
 
+
 class RequisiteType(Enum):
     PREREQUISITE = "P"
-    COREQUISITE  = "C"    
+    COREQUISITE = "C"
+
 
 class ThresholdType(Enum):
     LESS_THAN = "lt"
@@ -19,17 +21,17 @@ class ThresholdType(Enum):
     GREATER_THAN = "gt"
 
 
-class ExpressionResultContainer():
+class ExpressionResultContainer:
 
     def __init__(self):
-        self.satisified = False
-        self.expression_status = [] 
+        self.satisfied = False
+        self.expression_status = []
 
     def add_expression_status(self, message, satisfied):
         # The satisfied flag at this level represents the current expression and all its children.
         self.satisfied = satisfied
 
-        if message == None:
+        if message is None:
             return
 
         self.expression_status.append({
@@ -57,7 +59,7 @@ class ExpressionType(Enum):
     RECOMMENDATION_WARNING = "RECOMMENDATION_WARNING"
 
 
-class Expression():
+class Expression:
     """
     This is the parent class of all possible expression types. Ensures by validating the JSON 
     data that the subclass is indeed a valid expression.
@@ -101,10 +103,10 @@ class CourseExpression(Expression):
         else:
             self.requisite_type = RequisiteType(json_data["requisite_type"])
 
-    @staticmethod 
+    @staticmethod
     def build_and_get_expression(json_data):
         jsonschema.validate(json_data, CourseExpression.SCHEMA)
-        return CourseExpression(json_data) 
+        return CourseExpression(json_data)
 
     def evaluate_expression(self, sequence, result_container=None):
         """
@@ -115,7 +117,7 @@ class CourseExpression(Expression):
         Returns:
             (boolean): True if the expression is satisfied, false otherwise
         """
-        if result_container == None:
+        if result_container is None:
             result_container = ExpressionResultContainer()
 
         latest_term = max(sequence.terms)
@@ -125,13 +127,14 @@ class CourseExpression(Expression):
         for term in sorted_terms:
             for course in term.courses:
                 if (course.course_code.subject == self.subject) and (course.course_code.number == self.number):
-                    if (self.requisite_type == RequisiteType.PREREQUISITE) and (term.year == latest_term.year and term.term_type == latest_term.term_type):
+                    if (self.requisite_type == RequisiteType.PREREQUISITE) and (
+                            term.year == latest_term.year and term.term_type == latest_term.term_type):
                         result_container.add_expression_status(self.message, False)
                         return result_container
 
                     result_container.add_expression_status(self.message, True)
                     return result_container
-   
+
         result_container.add_expression_status(self.message, False)
         return result_container
 
@@ -153,20 +156,20 @@ class ConditionalExpression(Expression):
         jsonschema.validate(json_data, ConditionalExpression.SCHEMA)
         return ConditionalExpression(json_data)
 
-    def evaluate_expression(self, sequence, result_container=None):   
-        if result_container == None:
+    def evaluate_expression(self, sequence, result_container=None):
+        if result_container is None:
             result_container = ExpressionResultContainer()
 
         if self.condition == ConditionType.OR:
             if self.expression_one.evaluate_expression(sequence, result_container).satisfied \
-               or self.expression_two.evaluate_expression(sequence, result_container).satisfied:
+                    or self.expression_two.evaluate_expression(sequence, result_container).satisfied:
                 result_container.add_expression_status(self.message, True)
             else:
                 result_container.add_expression_status(self.message, False)
 
         elif self.condition == ConditionType.AND:
             if self.expression_one.evaluate_expression(sequence, result_container).satisfied \
-               and self.expression_two.evaluate_expression(sequence, result_container).satisfied:
+                    and self.expression_two.evaluate_expression(sequence, result_container).satisfied:
                 result_container.add_expression_status(self.message, True)
             else:
                 result_container.add_expression_status(self.message, False)
@@ -188,7 +191,8 @@ class ListExpression(Expression):
 
         self.threshold_value = json_data['threshold_value']
         self.threshold_type = ThresholdType(json_data['threshold_type'])
-        self.expressions = [ExpressionFactory.build_and_get_expression(expression) for expression in json_data['expressions']]
+        self.expressions = [ExpressionFactory.build_and_get_expression(expression) for expression in
+                            json_data['expressions']]
 
     @staticmethod
     def build_and_get_expression(json_data):
@@ -196,10 +200,11 @@ class ListExpression(Expression):
         return ListExpression(json_data)
 
     def evaluate_expression(self, sequence, result_container=None):
-        if result_container == None:
+        if result_container is None:
             result_container = ExpressionResultContainer()
 
-        satisfied_expressions = len([True for expression in self.expressions if expression.evaluate_expressions(sequence, result_container).satisfied])
+        satisfied_expressions = len([True for expression in self.expressions if
+                                     expression.evaluate_expressions(sequence, result_container).satisfied])
 
         if self.threshold_type == ThresholdType.LESS_THAN:
             result_container.add_expression_status(self.message, satisfied_expressions < self.threshold_value)
@@ -213,7 +218,7 @@ class ListExpression(Expression):
             result_container.add_expression_status(self.message, satisfied_expressions > self.threshold_value)
         else:
             # TODO: Raise an exception since this expression CANNOT be evaluated. This is an error.
-            pass    
+            pass
 
         return result_container
 
@@ -234,11 +239,13 @@ class RegistrationRestrictionExpression(Expression):
         return RegistrationRestrictionExpression(json_data)
 
     def evaluate_expression(self, sequence, result_container=None):
-        if result_container == None:
+        if result_container is None:
             result_container = ExpressionResultContainer()
 
-        result_container.add_expression_status(self.message, not self.expression.evaluate_expression(sequence, result_container))
+        result_container.add_expression_status(self.message,
+                                               not self.expression.evaluate_expression(sequence, result_container))
         return result_container
+
 
 class ExpressionFactory():
     """

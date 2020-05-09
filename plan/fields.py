@@ -1,6 +1,7 @@
 from bson.decimal128 import Decimal128
 from djongo.models import DecimalField
 
+
 class MongoDecimalField(DecimalField):
     def to_python(self, value):
         if isinstance(value, Decimal128):
