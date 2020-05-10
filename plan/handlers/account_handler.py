@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 
-class AccountHandler():
+
+class AccountHandler:
     """
     Handles requests relating to user accounts, and performs actions to fulfill
     the specified requests.
     """
-    
+
     @staticmethod
     def login(request):
         """

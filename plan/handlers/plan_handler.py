@@ -1,6 +1,6 @@
 from plan.models import Course, Profile, Program, Term
 
-class PlanHandler():
+class PlanHandler:
     """
     This handles requests and manages user-specific information regarding their program plan.
 

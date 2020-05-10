@@ -1,24 +1,28 @@
 from django.http import JsonResponse, HttpResponse
 from django.template import loader
-from django.shortcuts import render
-from .handlers import AccountHandler, DataHandler, PlanHandler
+from .handlers import AccountHandler, DataHandler, PageHandler, PlanHandler
 
 JSON_RESPONSE_BASE = {'method': None, 'response_data': None}
 
 
+def view_home(request):
+    http_response = PageHandler.get_home_view(request)
+    return http_response
+
+
 def view_program(request):
-    template = loader.get_template('base_program.html')
-    return HttpResponse(template.render({}, request))
+    http_response = PageHandler.get_program_view(request)
+    return http_response
 
 
 def view_schedule(request):
-    template = loader.get_template('base_schedule.html')
-    return HttpResponse(template.render({}, request))
+    http_response = PageHandler.get_schedule_view(request)
+    return http_response
 
 
 def view_account(request):
-    template = loader.get_template('base_account.html')
-    return HttpResponse(template.render({}, request))
+    http_response = PageHandler.get_account_view(request)
+    return http_response
 
 
 def api_account_authentication(request):

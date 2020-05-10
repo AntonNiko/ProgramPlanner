@@ -1,6 +1,6 @@
 
 
-class ScheduleHandler():
+class ScheduleHandler:
     
     @staticmethod
     def add_term(request):
