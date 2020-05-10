@@ -1,0 +1,3 @@
+
+class ScheduleCoordinator:
+    pass

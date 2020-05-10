@@ -3,18 +3,19 @@ from django.contrib.auth.models import User
 from djongo import models
 from .course_models import Course
 
+
 class Term(models.Model):
     year = models.PositiveSmallIntegerField()
     term_type = models.PositiveSmallIntegerField(
-        choices = [
+        choices=[
             (1, 'spring'),
             (2, 'summer'),
             (3, 'fall')
         ]
     )
     courses = models.ArrayField(
-        model_container = Course,
-        blank = False
+        model_container=Course,
+        blank=False
     )
 
     def to_dict(self):
@@ -33,12 +34,15 @@ class Term(models.Model):
 
 
 class Sequence(models.Model):
+    name = models.CharField(max_length=100, blank=False)
     terms = models.ArrayField(
-        model_container = Term
+        model_container=Term,
+        blank=False
     )
 
     def to_dict(self):
         result = {
+            'name': self.name,
             'terms': [term.to_dict() for term in self.terms]
         }
         return result
