@@ -2,6 +2,7 @@ from plan.models import Course, Program
 
 
 class DataHandler:
+    RESPONSE_BASE = {'success': False, 'message': '', 'data': None}
 
     @staticmethod
     def get_course_data(request):
@@ -21,22 +22,31 @@ class DataHandler:
         Returns:
           - response: A JSON-serializable object with result.
         """
+        response = DataHandler.RESPONSE_BASE.copy()
 
+        # Parameter parsing
         subject = request.GET.get('subject', None)
         number = request.GET.get('number', None)
 
         if subject is None and number is None:
-            result = [course.to_dict() for course in Course.objects.all()]
+            response['data'] = [course.to_dict() for course in Course.objects.all()]
+            response['success'] = True
+
         elif subject is not None and number is None:
-            result = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject})]
+            response['data'] = [course.to_dict() for course in Course.objects.filter(course_code__exact={'subject': subject})]
+            response['success'] = True
+
         elif subject is not None and number is not None:
-            result = [course.to_dict() for course in
+            response['data'] = [course.to_dict() for course in
                       Course.objects.filter(course_code__exact={'subject': subject}).filter(
                           course_code__exact={'number': number})]
+            response['success'] = True
+
+        # Invalid request parameters
         else:
-            # TODO: Better error handling
-            result = []
-        return result
+            response['message'] = 'Invalid request parameter values'
+
+        return response
 
     @staticmethod
     def get_program_data(request):
@@ -48,15 +58,18 @@ class DataHandler:
         Returns:
           - response: A JSON-serializable object with result.
         """
+        response = DataHandler.RESPONSE_BASE.copy()
 
+        # Parameter parsing
         institution = request.GET.get('institution', None)
         name = request.GET.get('name', None)
-
         assert institution is not None
 
         if name is None:
-            result = [program.to_dict() for program in Program.objects.filter(institution=institution)]
+            response['data'] = [program.to_dict() for program in Program.objects.filter(institution=institution)]
+            response['success'] = True
         else:
-            result = Program.objects.filter(institution=institution).filter(name=name)[0]
+            response['data'] = Program.objects.filter(institution=institution).filter(name=name)[0]
+            response['success'] = True
 
-        return result
+        return response

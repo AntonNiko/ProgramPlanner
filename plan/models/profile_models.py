@@ -25,3 +25,4 @@ class Profile(models.Model):
     programs = models.ArrayField(
         model_container=Program
     )
+    # TODO: Add user preferences for sequence and schedule coordination
