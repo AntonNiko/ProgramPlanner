@@ -3,7 +3,8 @@ from .course_models import Course
 from .schedule_models import Section
 
 
-class CourseOffering(Course):
+class CourseOffering(models.Model):
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
     term_type = models.PositiveSmallIntegerField(
         choices=[

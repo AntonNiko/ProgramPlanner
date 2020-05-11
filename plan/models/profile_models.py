@@ -24,8 +24,9 @@ class Profile(models.Model):
         model_container=Schedule,
         blank=False
     )
-    programs = models.ArrayField(
-        model_container=Program,
+    programs = models.ArrayReferenceField(
+        to=Program,
+        on_delete=models.CASCADE,
         blank=False
     )
     # TODO: Add user preferences for sequence and schedule coordination

@@ -1,5 +1,3 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 from djongo import models
 from .course_models import Course
 
@@ -13,8 +11,9 @@ class Term(models.Model):
             (3, 'fall')
         ]
     )
-    courses = models.ArrayField(
-        model_container=Course,
+    courses = models.ArrayReferenceField(
+        to=Course,
+        on_delete=models.CASCADE,
         blank=False
     )
 

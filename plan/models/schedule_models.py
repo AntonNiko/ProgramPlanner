@@ -80,8 +80,9 @@ class Schedule(models.Model):
         ]
     )
     name = models.CharField(max_length=100)
-    sections = models.ArrayField(
-        model_container=Section,
+    sections = models.ArrayReferenceField(
+        to=Section,
+        on_delete=models.CASCADE,
         blank=False
     )
 

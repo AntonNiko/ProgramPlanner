@@ -1,7 +1,6 @@
 from djongo import models
 from plan.expressions import *
 from plan.fields import MongoDecimalField
-from .schedule_models import Section
 from .utils_models import CourseCode
 
 
@@ -21,12 +20,14 @@ class UVicCourseDetails(models.Model):
 
 class Course(models.Model):
     course_code = models.EmbeddedField(
-        model_container=CourseCode
+        model_container=CourseCode,
+        blank=False
     )
     name = models.CharField(max_length=200)
     credits = MongoDecimalField(max_digits=3, decimal_places=1)
     course_details = models.EmbeddedField(
-        model_container=UVicCourseDetails
+        model_container=UVicCourseDetails,
+        blank=False
     )
     requirement = models.DictField(default={'expressions': []}, blank=False)
 
@@ -59,9 +60,3 @@ class Course(models.Model):
             'requirement': self.requirement
         }
         return result
-
-
-class OfferingCourse(Course):
-    sections = models.ArrayField(
-        model_container=Section
-    )
