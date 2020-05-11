@@ -1,7 +1,7 @@
 from djongo import models
 from plan.expressions import *
 from plan.fields import MongoDecimalField
-from .section_models import Section
+from .schedule_models import Section
 from .utils_models import CourseCode
 
 

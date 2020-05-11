@@ -1,12 +1,11 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 from djongo import models
 from .utils_models import DateRange, TimeRange
 
+
 class MeetingDay(models.Model):
     day = models.CharField(
-        max_length = 2,
-        choices = [
+        max_length=2,
+        choices=[
             ('M', 'monday'),
             ('T', 'tuesday'),
             ('W', 'wednesday'),
@@ -15,34 +14,36 @@ class MeetingDay(models.Model):
             ('S', 'saturday'),
             ('Z', 'sunday')
         ]
-    ) 
+    )
 
     def to_dict(self):
         result = {
-            'day': self.day 
+            'day': self.day
         }
         return result
 
+
 class Meeting(models.Model):
     days = models.ArrayField(
-        model_container = MeetingDay
+        model_container=MeetingDay
     )
     location = models.CharField(max_length=30)
     date_range = models.EmbeddedField(
-        model_container = DateRange
+        model_container=DateRange
     )
     time_range = models.EmbeddedField(
-        model_container = TimeRange
+        model_container=TimeRange
     )
 
     def to_dict(self):
         result = {
-            'days': [day.to_dict() for day in self.days],
+            'days': [day.to_dict()['day'] for day in self.days],
             'location': self.location,
             'date_range': self.date_range,
             'time_range': self.time_range
         }
         return result
+
 
 class Section(models.Model):
     name = models.CharField(max_length=4)
@@ -56,21 +57,32 @@ class Section(models.Model):
     )
     crn = models.IntegerField()
     meetings = models.ArrayField(
-        model_container = Meeting
+        model_container=Meeting
     )
 
     def to_dict(self):
         result = {
             'name': self.name,
             'section_type': self.section_type,
-            'crn': self.crn, 
+            'crn': self.crn,
             'meetings': [meeting.to_dict() for meeting in self.meetings]
         }
         return result
 
+
 class Schedule(models.Model):
+    year = models.PositiveSmallIntegerField()
+    term_type = models.PositiveSmallIntegerField(
+        choices=[
+            (1, 'spring'),
+            (2, 'summer'),
+            (3, 'fall')
+        ]
+    )
+    name = models.CharField(max_length=100)
     sections = models.ArrayField(
-        model_container = Section
+        model_container=Section,
+        blank=False
     )
 
     def to_dict(self):

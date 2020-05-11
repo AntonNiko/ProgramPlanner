@@ -57,6 +57,10 @@ def api_data_course(request):
     return JsonResponse(response_json)
 
 
+def api_data_offering(request):
+    pass
+
+
 def api_data_program(request):
     response_json = API_RESPONSE_BASE.copy()
     response_json['method'] = 'data_program'
@@ -143,6 +147,8 @@ def api_schedule(request):
     action = request.GET.get('action')
     if action == 'add':
         response_json['response'] = ScheduleHandler.add_schedule(request)
+    elif action == 'get':
+        response_json['response'] = ScheduleHandler.get_schedule(request)
     elif action == 'remove':
         response_json['response'] = ScheduleHandler.remove_schedule(request)
     else:
