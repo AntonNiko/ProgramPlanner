@@ -243,7 +243,7 @@ class SequenceHandler:
                 response['message'] = 'A term with the same year and term type already exists.'
                 return response
 
-        sequence.terms.append(Term(year=year, term_type=term_type, courses=[]))
+        sequence.terms.append(Term(year=year, term_type=term_type))
         response['success'] = True
 
         # Clean-up

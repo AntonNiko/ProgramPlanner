@@ -13,8 +13,7 @@ class Term(models.Model):
     )
     courses = models.ArrayReferenceField(
         to=Course,
-        on_delete=models.CASCADE,
-        blank=False
+        on_delete=models.CASCADE
     )
 
     def to_dict(self):
