@@ -64,7 +64,7 @@ class SequenceHandler:
                 return response
 
         # Add course to term
-        term.courses.append(course)
+        term.courses.add(course)
         response['success'] = True
 
         # Clean-up
@@ -110,12 +110,13 @@ class SequenceHandler:
             return response
 
         # Find course to remove
-        for course in term.courses:
-            if course.course_code.subject == subject and course.course_code.number == number:
-                term.courses.remove(course)
-                response['success'] = True
-                break
-        else:
+        try:
+            course = term.courses.objects.filter(course_code__exact={'subject': subject}).filter(
+                course_code__exact={'number': number})[0]
+            term.courses.remove(course)
+            response['success'] = True
+
+        except IndexError:
             # The course has not been found.
             response['message'] = 'The selected course does not exist in the selected term.'
             return response
@@ -145,12 +146,24 @@ class SequenceHandler:
             sequence_programs = request.session.get('programs')
 
         program = Program.objects.filter(institution=institution).filter(name=name)[0]
-        sequence_programs.append(program)
+        sequence_programs.add(program)
         response['success'] = True
 
         # Clean-up
         SequenceHandler.__clean_up(request, profile)
         return response
+
+    @staticmethod
+    def evaluate_program(request):
+        pass
+
+    @staticmethod
+    def get_program(request):
+        pass
+
+    @staticmethod
+    def remove_program(request):
+        pass
 
     @staticmethod
     def add_active_sequence(request):

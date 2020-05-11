@@ -99,11 +99,11 @@ def api_plan_program(request):
     if action == 'add':
         response_json['response'] = SequenceHandler.add_program(request)
     elif action == 'get':
-        pass
+        response_json['response'] = SequenceHandler.get_program(request)
     elif action == 'evaluate':
-        pass
+        response_json['response'] = SequenceHandler.evaluate_program(request)
     elif action == 'remove':
-        pass
+        response_json['response'] = SequenceHandler.remove_program(request)
     else:
         response_json['response'] = 'Unsupported action'
 
