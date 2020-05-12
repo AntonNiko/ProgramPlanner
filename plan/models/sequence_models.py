@@ -20,7 +20,7 @@ class Term(models.Model):
         result = {
             'year': self.year,
             'term_type': self.term_type,
-            'courses': [course.to_dict() for course in self.courses]
+            'courses': [course.to_dict() for course in self.courses.all()]
         }
         return result
 

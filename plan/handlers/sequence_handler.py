@@ -155,14 +155,17 @@ class SequenceHandler:
 
     @staticmethod
     def evaluate_program(request):
+        # TODO complete
         pass
 
     @staticmethod
     def get_program(request):
+        # TODO complete
         pass
 
     @staticmethod
     def remove_program(request):
+        # TODO complete
         pass
 
     @staticmethod
@@ -262,6 +265,11 @@ class SequenceHandler:
         # Clean-up
         SequenceHandler.__clean_up(request, profile)
         return response
+
+    @staticmethod
+    def get_term(request):
+        # TODO: To complete
+        pass
 
     @staticmethod
     def remove_term(request):

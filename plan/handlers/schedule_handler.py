@@ -1,3 +1,5 @@
+from typing import Dict, Union
+
 from plan.models import Profile, Section, Schedule
 
 
@@ -42,12 +44,27 @@ class ScheduleHandler:
 
     @staticmethod
     def get_schedule(request):
-        response = ScheduleHandler.RESPONSE_BASE.copy()
+        """
+        Returns a response with the requested schedule data for a specific user profile or
+        user session.
+
+        Three options are accepted for the GET parameters, resulting in 3 different responses:
+          - `name` is defined, but neither the `year` or `term_type`.
+          - `year` and `term_type` are defined, but `name` is undefined.
+          - Neither of those
+
+        :param request:
+        :return:
+        """
+
+        # Type-hinting to avoid PyCharm from complaining
+        response: Dict[str, Union[bool, str, list]] = ScheduleHandler.RESPONSE_BASE.copy()
+        response['data'] = []
 
         # Parameter parsing
         name = request.GET.get('name')
-        year = int(request.GET.get('year'))
-        term_type = int(request.GET.get('term_type'))
+        year = int(request.GET.get('year')) if request.GET.get('year') is not None else None
+        term_type = int(request.GET.get('term_type')) if request.GET.get('term_type') is not None else None
 
         if request.user.is_authenticated:
             profile = Profile.objects.get(user=request.user)
@@ -55,13 +72,16 @@ class ScheduleHandler:
         else:
             schedules = request.session.get('saved_schedules')
 
-        for schedule in schedules:
-            if schedule.name == name or (schedule.year == year and schedule.term_type == term_type):
-                response['data'] = schedule.to_dict()
-                response['success'] = True
-                break
+        if name is not None:
+            response['data'] = [schedule.to_dict() for schedule in schedules.filter(name__exact=name)]
+            response['success'] = True
+        elif year is not None and term_type is not None:
+            response['data'] = [schedule.to_dict() for schedule in schedules.filter(year__exact=year).filter(term_type__exact=term_type)]
+            response['success'] = True
+
+        # Invalid request parameters
         else:
-            response['message'] = 'No schedules with the specified parameters exist.'
+            response['message'] = 'Invalid request parameter values'
 
         return response
 
@@ -122,7 +142,7 @@ class ScheduleHandler:
             return response
 
         # Ensure that the section is not already present
-        for section in schedule.sections:
+        for section in schedule.sections.all():
             if section.crn == section_to_add.crn:
                 response['message'] = 'A section with the same CRN already exists for the specified schedule.'
                 return response
@@ -133,7 +153,7 @@ class ScheduleHandler:
             pass
 
         # Add section to schedule
-        schedule.sections.append(section_to_add)
+        schedule.sections.add(section_to_add)
         response['success'] = True
 
         # Clean-up
@@ -165,7 +185,7 @@ class ScheduleHandler:
             return response
 
         # Ensure that the section is not already present
-        for section in schedule.sections:
+        for section in schedule.sections.all():
             if section.crn == crn:
                 schedule.sections.remove(section)
                 response['success'] = True

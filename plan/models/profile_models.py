@@ -20,9 +20,9 @@ class Profile(models.Model):
         model_container=Schedule,
         blank=True
     )
-    saved_schedules = models.ArrayField(
-        model_container=Schedule,
-        blank=False
+    saved_schedules = models.ArrayReferenceField(
+        to=Schedule,
+        on_delete=models.CASCADE
     )
     programs = models.ArrayReferenceField(
         to=Program,

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from djongo import models
 from .utils_models import DateRange, TimeRange
 
@@ -71,6 +72,7 @@ class Section(models.Model):
 
 
 class Schedule(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
     term_type = models.PositiveSmallIntegerField(
         choices=[
@@ -88,6 +90,9 @@ class Schedule(models.Model):
 
     def to_dict(self):
         result = {
-            'sections': [section.to_dict() for section in self.sections]
+            'year': self.year,
+            'term_type': self.term_type,
+            'name': self.name,
+            'sections': [section.to_dict() for section in self.sections.all()]
         }
         return result
