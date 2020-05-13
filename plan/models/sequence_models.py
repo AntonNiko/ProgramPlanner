@@ -1,8 +1,10 @@
+from django.contrib.auth.models import User
 from djongo import models
 from .course_models import Course
 
 
 class Term(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
     term_type = models.PositiveSmallIntegerField(
         choices=[
@@ -32,15 +34,16 @@ class Term(models.Model):
 
 
 class Sequence(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=False)
-    terms = models.ArrayField(
-        model_container=Term,
-        blank=False
+    terms = models.ArrayReferenceField(
+        to=Term,
+        on_delete=models.CASCADE
     )
 
     def to_dict(self):
         result = {
             'name': self.name,
-            'terms': [term.to_dict() for term in self.terms]
+            'terms': [term.to_dict() for term in self.terms.all()]
         }
         return result

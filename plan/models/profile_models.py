@@ -11,11 +11,12 @@ class Profile(models.Model):
         model_container=Sequence,
         blank=True
     )
-    # saved_sequences to be implemented later, only use active_sequence atm.
-    saved_sequences = models.ArrayField(
-        model_container=Sequence,
-        blank=False
+    # saved_sequences to be used later
+    saved_sequences = models.ArrayReferenceField(
+        to=Sequence,
+        on_delete=models.CASCADE
     )
+    # active_schedule to be used later
     active_schedule = models.EmbeddedField(
         model_container=Schedule,
         blank=True

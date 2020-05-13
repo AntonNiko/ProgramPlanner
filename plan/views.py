@@ -58,6 +58,7 @@ def api_data_course(request):
 
 
 def api_data_offering(request):
+    # TODO: Complete API_DATA_OFFERING route view and handling
     pass
 
 
@@ -115,6 +116,7 @@ def api_plan_sequence(request):
     response_json['method'] = 'plan_sequence'
 
     action = request.GET.get('action')
+    # TODO: Add 'remove' method for api_plan_sequence
     if action == 'add':
         response_json['response'] = SequenceHandler.add_active_sequence(request)
     elif action == 'get':
@@ -130,6 +132,7 @@ def api_plan_term(request):
     response_json['method'] = 'plan_term'
 
     action = request.GET.get('action')
+    # TODO: Add 'get' method for api_plan_term
     if action == 'add':
         response_json['response'] = SequenceHandler.add_term(request)
     elif action == 'remove':

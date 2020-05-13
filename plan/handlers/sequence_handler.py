@@ -1,5 +1,6 @@
 from plan.models import Course, Profile, Program, Sequence, Term
 
+
 # TODO: Refactor class to properly handle anonymous, session-based requests.
 # TODO: Refactor class to properly catch any relevant errors or exceptions
 
@@ -47,12 +48,15 @@ class SequenceHandler:
             sequence = request.session.get('active_sequence')
 
         # Find term to which to add course to.
-        for term in sequence.terms:
-            if term.year == year and term.term_type == term_type:
-                break
-        else:
-            # The term has not been found.
+        try:
+            term = sequence.get(year=year, term_type=term_type)
+        except Term.DoesNotExist:
             response['message'] = 'The selected term does not exist.'
+            return response
+
+        # Ensure that the course is not already present
+        if len(term.courses.filter(course_code={'subject': subject}).filter(course_code={'number': number})) > 0:
+            response['message'] = 'The same course already exists for the specified term.'
             return response
 
         # Evaluate if requirements are fulfilled for that course
@@ -100,24 +104,20 @@ class SequenceHandler:
         else:
             sequence = request.session.get('active_sequence')
 
-        # Find term to which to remove course from.
-        for term in sequence.terms:
-            if term.year == year and term.term_type == term_type:
-                break
-        else:
-            # The term has not been found.
-            response['message'] = 'The selected term does not exist.'
-            return response
-
-        # Find course to remove
+        # Find term & course and remove it
         try:
-            course = term.courses.objects.filter(course_code__exact={'subject': subject}).filter(
+            term = sequence.terms.get(year=year, term_type=term_type)
+            course = term.courses.filter(course_code__exact={'subject': subject}).filter(
                 course_code__exact={'number': number})[0]
             term.courses.remove(course)
             response['success'] = True
 
+        except Term.DoesNotExist:
+            response['message'] = 'The selected term does not exist.'
+            return response
+
         except IndexError:
-            # The course has not been found.
+            # TODO: Find a better way to catch this error
             response['message'] = 'The selected course does not exist in the selected term.'
             return response
 
@@ -145,7 +145,14 @@ class SequenceHandler:
         else:
             sequence_programs = request.session.get('programs')
 
+        # Find program to add
         program = Program.objects.filter(institution=institution).filter(name=name)[0]
+
+        # Ensure that the same program currently does not exist
+        if len(sequence_programs.filter(institution=institution).filter(name=name)) > 0:
+            response['message'] = 'The selected term does not exist.'
+            return response
+
         sequence_programs.add(program)
         response['success'] = True
 
@@ -155,18 +162,27 @@ class SequenceHandler:
 
     @staticmethod
     def evaluate_program(request):
-        # TODO complete
-        pass
+        # TODO complete evaluate_program method
+        response = SequenceHandler.RESPONSE_BASE.copy()
+        response['message'] = 'This method is currently not implemented.'
+
+        return response
 
     @staticmethod
     def get_program(request):
-        # TODO complete
-        pass
+        # TODO complete get_program method
+        response = SequenceHandler.RESPONSE_BASE.copy()
+        response['message'] = 'This method is currently not implemented.'
+
+        return response
 
     @staticmethod
     def remove_program(request):
-        # TODO complete
-        pass
+        # TODO complete remove_program method
+        response = SequenceHandler.RESPONSE_BASE.copy()
+        response['message'] = 'This method is currently not implemented.'
+
+        return response
 
     @staticmethod
     def add_active_sequence(request):
@@ -189,16 +205,16 @@ class SequenceHandler:
             if result is not None:
                 response['message'] = 'Could not add sequence, one already exists.'
                 return response
-            profile.active_sequence = Sequence(name=sequence_name, terms=[])
+            profile.active_sequence = Sequence(user=request.user, name=sequence_name)
             response['success'] = True
 
-        else:
-            result = request.session.get('active_sequence')
-            if result is not None:
-                response['message'] = 'Could not add sequence, one already exists.'
-                return response
-            request.session['active_sequence'] = Sequence(name=sequence_name, terms=[])
-            response['success'] = True
+        #else:
+        #    result = request.session.get('active_sequence')
+        #    if result is not None:
+        #        response['message'] = 'Could not add sequence, one already exists.'
+        #        return response
+        #    request.session['active_sequence'] = Sequence(name=sequence_name, terms=[])
+        #    response['success'] = True
 
         # Clean-up
         SequenceHandler.__clean_up(request, profile)
@@ -254,12 +270,11 @@ class SequenceHandler:
         assert sequence is not None
 
         # Check that no Term with same year and term_type already exist
-        for term in sequence.terms:
-            if term.year == year and term.term_type == term_type:
-                response['message'] = 'A term with the same year and term type already exists.'
-                return response
+        if len(sequence.terms.filter(year=year).filter(term_type=term_type)) > 0:
+            response['message'] = 'A term with the same year and term type already exists.'
+            return response
 
-        sequence.terms.append(Term(year=year, term_type=term_type))
+        sequence.terms.add(Term(user=request.user, year=year, term_type=term_type))
         response['success'] = True
 
         # Clean-up
@@ -268,8 +283,38 @@ class SequenceHandler:
 
     @staticmethod
     def get_term(request):
-        # TODO: To complete
-        pass
+        response = SequenceHandler.RESPONSE_BASE.copy()
+
+        # Parameter parsing
+        year = int(request.GET.get('year'))
+        term_type = int(request.GET.get('term_type'))
+
+        if request.user.is_authenticated:
+            profile = Profile.objects.get(user=request.user)
+            sequence = profile.active_sequence
+        else:
+            sequence = request.session.get('active_sequence')
+
+        # TODO: Improve validation
+        assert sequence is not None
+
+        if year is None and term_type is None:
+            response['data'] = [term.to_dict() for term in sequence.terms.all()]
+            response['success'] = True
+
+        elif year is not None and term_type is None:
+            response['data'] = [term.to_dict() for term in sequence.terms.filter(year=year)]
+            response['success'] = True
+
+        elif year is not None and term_type is not None:
+            response['data'] = [term.to_dict() for term in sequence.terms.filter(year=year).filter(term_type=term_type)]
+            response['success'] = True
+
+        # Invalid request parameters
+        else:
+            response['message'] = 'Invalid request parameter values'
+
+        return response
 
     @staticmethod
     def remove_term(request):
@@ -294,12 +339,11 @@ class SequenceHandler:
         # TODO: Improve validation
         assert sequence is not None
 
-        for term in sequence.terms:
-            if term.year == year and term.term_type == term_type:
-                sequence.terms.remove(term)
-                response['success'] = True
-                break
-        else:
+        try:
+            term = sequence.terms.get(year=year, term_type=term_type)
+            sequence.terms.remove(term)
+            response['success'] = True
+        except Term.DoesNotExist:
             response['message'] = 'No terms with the selected year and term type exist.'
             return response
 

@@ -1,5 +1,4 @@
 from typing import Dict, Union
-
 from plan.models import Profile, Section, Schedule
 
 
@@ -30,12 +29,11 @@ class ScheduleHandler:
         assert schedules is not None
 
         # Ensure that no schedules with the same name exist
-        for schedule in schedules:
-            if schedule.name == name:
-                response['message'] = 'A schedule with the same name already exists.'
-                return response
+        if len(schedules.filter(name=name)) > 0:
+            response['message'] = 'A schedule with the same name already exists.'
+            return response
 
-        schedules.append(Schedule(year=year, term_type=term_type, name=name))
+        schedules.add(Schedule(user=request.user, year=year, term_type=term_type, name=name))
         response['success'] = True
 
         # Clean-up
@@ -59,7 +57,6 @@ class ScheduleHandler:
 
         # Type-hinting to avoid PyCharm from complaining
         response: Dict[str, Union[bool, str, list]] = ScheduleHandler.RESPONSE_BASE.copy()
-        response['data'] = []
 
         # Parameter parsing
         name = request.GET.get('name')
@@ -78,7 +75,9 @@ class ScheduleHandler:
         elif year is not None and term_type is not None:
             response['data'] = [schedule.to_dict() for schedule in schedules.filter(year__exact=year).filter(term_type__exact=term_type)]
             response['success'] = True
-
+        elif year is None and term_type is None:
+            response['data'] = [schedule.to_dict() for schedule in schedules.all()]
+            response['success'] = True
         # Invalid request parameters
         else:
             response['message'] = 'Invalid request parameter values'
@@ -99,12 +98,11 @@ class ScheduleHandler:
         else:
             schedules = request.session.get('saved_schedules')
 
-        for schedule in schedules:
-            if schedule.name == name:
-                schedules.remove(schedule)
-                response['success'] = True
-                break
-        else:
+        try:
+            schedule = schedules.get(name=name)
+            schedules.remove(schedule)
+            response['success'] = True
+        except Schedule.DoesNotExist:
             response['message'] = 'No schedules with the specified name exist.'
             return response
 
@@ -127,25 +125,23 @@ class ScheduleHandler:
         # Fetch section to add.
         section_to_add = Section.objects.get(crn=crn)
 
+        # Fetch user's schedules
         if request.user.is_authenticated:
             profile = Profile.objects.get(user=request.user)
             schedules = profile.saved_schedules
         else:
             schedules = request.session.get('saved_schedules')
 
-        # Fetch the schedule for the specified name
-        for schedule in schedules:
-            if schedule.name == schedule_name:
-                break
-        else:
+        try:
+            schedule = schedules.get(name=schedule_name)
+        except Schedule.DoesNotExist:
             response['message'] = 'No schedules with the specified name exist.'
             return response
 
         # Ensure that the section is not already present
-        for section in schedule.sections.all():
-            if section.crn == section_to_add.crn:
-                response['message'] = 'A section with the same CRN already exists for the specified schedule.'
-                return response
+        if len(schedule.sections.filter(crn=crn)) > 0:
+            response['message'] = 'A section with the same CRN already exists for the specified schedule.'
+            return response
 
         # Evaluate if the section conflicts with currently added sections
         if not ignore_conflicts:
@@ -176,21 +172,18 @@ class ScheduleHandler:
         else:
             schedules = request.session.get('saved_schedules')
 
-        # Fetch the schedule for the specified name
-        for schedule in schedules:
-            if schedule.name == schedule_name:
-                break
-        else:
+        # Remove the section from specified schedule
+        try:
+            schedule = schedules.get(name=schedule_name)
+            section = schedule.sections.get(crn=crn)
+            schedule.sections.remove(section)
+            response['success'] = True
+
+        except Schedule.DoesNotExist:
             response['message'] = 'No schedules with the specified name exist.'
             return response
 
-        # Ensure that the section is not already present
-        for section in schedule.sections.all():
-            if section.crn == crn:
-                schedule.sections.remove(section)
-                response['success'] = True
-                break
-        else:
+        except Section.DoesNotExist:
             response['message'] = 'No sections with the specified CRN exist in the specified schedule.'
             return response
 
