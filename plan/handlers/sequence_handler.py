@@ -49,7 +49,7 @@ class SequenceHandler:
 
         # Find term to which to add course to.
         try:
-            term = sequence.get(year=year, term_type=term_type)
+            term = sequence.terms.get(year=year, term_type=term_type)
         except Term.DoesNotExist:
             response['message'] = 'The selected term does not exist.'
             return response
@@ -274,7 +274,9 @@ class SequenceHandler:
             response['message'] = 'A term with the same year and term type already exists.'
             return response
 
-        sequence.terms.add(Term(user=request.user, year=year, term_type=term_type))
+        term_to_add = Term(user=request.user, year=year, term_type=term_type)
+        term_to_add.save()
+        sequence.terms.add(term_to_add)
         response['success'] = True
 
         # Clean-up

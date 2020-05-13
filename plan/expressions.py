@@ -120,18 +120,20 @@ class CourseExpression(Expression):
         if result_container is None:
             result_container = ExpressionResultContainer()
 
-        latest_term = max(sequence.terms)
-        sorted_terms = sequence.terms.copy()
+        latest_term = max(list(sequence.terms.all()))
+        sorted_terms = list(sequence.terms.all())
         sorted_terms.sort()
 
         for term in sorted_terms:
-            for course in term.courses:
-                if (course.course_code.subject == self.subject) and (course.course_code.number == self.number):
-                    if (self.requisite_type == RequisiteType.PREREQUISITE) and (
-                            term.year == latest_term.year and term.term_type == latest_term.term_type):
-                        result_container.add_expression_status(self.message, False)
-                        return result_container
+            if term.courses.filter(course_code__exact={'subject': self.subject}). \
+                    filter(course_code__exact={'number': self.number}).count() == 1:
 
+                if (self.requisite_type == RequisiteType.PREREQUISITE) and (
+                        term.year == latest_term.year and term.term_type == latest_term.term_type):
+                    result_container.add_expression_status(self.message, False)
+                    return result_container
+
+                else:
                     result_container.add_expression_status(self.message, True)
                     return result_container
 

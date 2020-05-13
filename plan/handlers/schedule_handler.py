@@ -33,7 +33,9 @@ class ScheduleHandler:
             response['message'] = 'A schedule with the same name already exists.'
             return response
 
-        schedules.add(Schedule(user=request.user, year=year, term_type=term_type, name=name))
+        schedule_to_add = Schedule(user=request.user, year=year, term_type=term_type, name=name)
+        schedule_to_add.save()
+        schedules.add(schedule_to_add)
         response['success'] = True
 
         # Clean-up
