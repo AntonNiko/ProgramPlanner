@@ -1,1 +1,110 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block container-fluid %}
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Home</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Dashboard</h6>
+        </div>
+        <div class="card-body">
+            <!-- Welcome logo -->
+            <div class="text-center">
+                <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width:15rem;" src="{% static "img/undraw_posting_photo.svg" %}" alt="Welcome logo">
+            </div>
+
+            <!-- Welcome page hint text -->
+            <p class="text-center">This is the home page where you can find your saved schedules and degree plans.</p>
+
+            <!-- Schedules section header title -->
+            <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Schedules</h1>
+
+            <!-- Active schedules list -->
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                            <h6 class="text-left font-weight-bold text-gray-800">My Test Schedule</h6>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-2 my-2">
+                            <span class="d-block">
+                                <span>Year:</span>
+                                <span class="font-weight-bold">2020</span>
+                            </span>
+                            <span class="d-block">
+                                <span>Term:</span>
+                                <span class="font-weight-bold">Fall</span>
+                            </span>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md my-2">
+                            <div class="float-right">
+                                <button class="btn btn-primary my-1" type="button">Open</button>
+                                <button class="btn btn-danger my-1" type="button">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                            <h6 class="text-left font-weight-bold text-gray-800">MECH Fall 2020 Schedule 1</h6>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-2 my-2">
+                            <span class="d-block">
+                                <span>Year:</span>
+                                <span class="font-weight-bold">2020</span>
+                            </span>
+                            <span class="d-block">
+                                <span>Term:</span>
+                                <span class="font-weight-bold">Fall</span>
+                            </span>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md my-2">
+                            <div class="float-right">
+                                <button class="btn btn-primary my-1" type="button">Open</button>
+                                <button class="btn btn-danger my-1" type="button">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">Test 3</li>
+            </ul>
+
+            <!-- Start new Schedule button -->
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg my-4">New Schedule</button>
+            </div>
+
+            <!-- Sequences section header title -->
+            <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Degree Plans</h1>
+
+            <!-- Active sequences list -->
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                            <h6 class="text-left font-weight-bold text-gray-800">My Test Sequence</h6>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md my-2">
+                            <div class="float-right">
+                                <button class="btn btn-primary my-1" type="button">Open</button>
+                                <button class="btn btn-danger my-1" type="button">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">Test 2</li>
+                <li class="list-group-item">Test 3</li>
+            </ul>
+
+            <!-- Start new Degree Plan button -->
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg my-4">New Degree Plan</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

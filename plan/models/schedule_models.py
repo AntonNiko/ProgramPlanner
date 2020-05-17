@@ -1,5 +1,7 @@
+import datetime
 from django.contrib.auth.models import User
 from djongo import models
+from plan.utils import DateUtils, Weekday
 from .utils_models import DateRange, TimeRange
 
 
@@ -36,6 +38,39 @@ class Meeting(models.Model):
         model_container=TimeRange
     )
 
+    def does_meeting_conflict(self, meeting_to_compare):
+
+        if not DateUtils.do_dates_overlap(self.date_range, meeting_to_compare.date_range):
+            # Skip if the date ranges don't overlap
+            return False
+
+        # If the start and end dates overlap for 6 days or less, then
+        # we must only check the specific days they overlap for time
+        # conflicts.
+        if abs(meeting_to_compare.date_range.end_date - self.date_range.start_date) < datetime.timedelta(days=7) \
+            or abs(self.date_range.end_date - meeting_to_compare.date_range.start_date) < datetime.timedelta(days=7):
+
+            overlapping_weekdays = DateUtils.get_weekdays_in_date_range(meeting_to_compare.date_range.start_date, self.date_range.end_date)
+            # TODO: Double-check compatibility  with MeetingDay ArrayField
+            weekdays_to_compare = [day for day in overlapping_weekdays if (day in meeting_to_compare.days) and (day in self.days)]
+
+            if len(weekdays_to_compare) == 0:
+                return False
+            if DateUtils.do_times_overlap(self.time_range, meeting_to_compare.time_range):
+                return True
+
+        # Third case when overlap is 7 days or more. Any weekdays are applicable
+        else:
+            weekdays_to_compare = [day for day in list(Weekday) if (day in meeting_to_compare.days) and (day in self.days)]
+            if len(weekdays_to_compare) == 0:
+                return False
+
+            # TODO: Double-check compatibility with MeetingDay
+            if DateUtils.do_times_overlap(self.time_range, meeting_to_compare.time_range):
+                return True
+
+        return False
+
     def to_dict(self):
         result = {
             'days': [day.to_dict()['day'] for day in self.days],
@@ -60,6 +95,14 @@ class Section(models.Model):
     meetings = models.ArrayField(
         model_container=Meeting
     )
+
+    def does_section_conflict(self, section_to_compare):
+        for meeting_to_compare in section_to_compare:
+            for meeting in self.meetings:
+                if meeting.does_meeting_conflict(meeting_to_compare):
+                    return True
+
+        return False
 
     def to_dict(self):
         result = {
@@ -87,6 +130,16 @@ class Schedule(models.Model):
         on_delete=models.CASCADE,
         blank=False
     )
+
+    def does_section_conflict(self, section_to_compare):
+        result = {'conflicts': False, 'data': []}
+        for section in self.sections.all():
+            conflict_exists = section.does_section_conflict(section_to_compare)
+            if conflict_exists:
+                result['conflicts'] = True
+                result['data'].append(section.crn)
+
+        return result
 
     def to_dict(self):
         result = {

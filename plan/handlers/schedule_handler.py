@@ -147,8 +147,10 @@ class ScheduleHandler:
 
         # Evaluate if the section conflicts with currently added sections
         if not ignore_conflicts:
-            # TODO: Finish conflict check
-            pass
+            conflict_results = schedule.does_section_conflict(section_to_add)
+            if conflict_results['conflicts']:
+                response['data'] = conflict_results['data']
+                return response
 
         # Add section to schedule
         schedule.sections.add(section_to_add)

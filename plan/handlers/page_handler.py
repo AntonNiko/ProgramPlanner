@@ -25,5 +25,5 @@ class PageHandler:
     @staticmethod
     def get_account_view(request):
         template = loader.get_template('base_account.html')
-        http_response = HttpResponse(template.redner({}, request))
+        http_response = HttpResponse(template.render({}, request))
         return http_response
