@@ -1,0 +1,43 @@
+{
+  "name": "programplanner",
+  "version": "1.0.0",
+  "description": "Program Planner project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonNiko/ProgramPlanner.git"
+  },
+  "author": "Anton Nikitenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AntonNiko/ProgramPlanner/issues"
+  },
+  "homepage": "https://github.com/AntonNiko/ProgramPlanner#readme",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "5.10.2",
+    "@fullcalendar/core": "^4.4.0",
+    "@fullcalendar/daygrid": "^4.4.0",
+    "@fullcalendar/timegrid": "^4.4.0",
+    "bootstrap": "4.3.1",
+    "chart.js": "2.8.0",
+    "datatables.net-bs4": "1.10.19",
+    "jquery": "^3.5.1",
+    "jquery.easing": "^1.4.1"
+  },
+  "devDependencies": {
+    "browser-sync": "2.26.7",
+    "del": "5.1.0",
+    "gulp": "4.0.2",
+    "gulp-autoprefixer": "7.0.0",
+    "gulp-clean-css": "4.2.0",
+    "gulp-header": "2.0.9",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "1.4.0",
+    "gulp-sass": "4.0.2",
+    "gulp-uglify": "3.0.2",
+    "merge-stream": "2.0.0"
+  }
+}
