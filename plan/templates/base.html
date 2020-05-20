@@ -17,6 +17,11 @@
     <!-- Custom styles for this template-->
     <link href="{% static "css/sb-admin-2.min.css" %}" rel="stylesheet">
 
+    <!-- Full Calendar styles -->
+    <link href="{% static "@fullcalendar/core/main.css" %}" rel="stylesheet">
+    <link href="{% static "@fullcalendar/daygrid/main.css" %}" rel="stylesheet">
+    <link href="{% static "@fullcalendar/timegrid/main.css" %}" rel="stylesheet">
+
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -56,7 +61,11 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
-        
+
+            <!-- Extra block for any additional sidebar options as required -->
+            {% block extra-sidebar %}
+            {% endblock %}
+
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
@@ -158,6 +167,8 @@
 
     </div>
 
+  {% block extra-html %}
+  {% endblock %}
 
   <!-- Bootstrap core JavaScript-->
   <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
@@ -175,6 +186,16 @@
   <!-- Page level custom scripts -->
   <script src="{% static "js/demo/chart-area-demo.js" %}"></script>
   <script src="{% static "js/demo/chart-pie-demo.js" %}"></script>
+
+  <!-- Full Calendar JavaScript -->
+  <script src="{% static "@fullcalendar/core/main.js" %}"></script>
+  <script src="{% static "@fullcalendar/daygrid/main.js" %}"></script>
+  <script src="{% static "@fullcalendar/timegrid/main.js" %}"></script>
+  <script src="{% static "@fullcalendar/resource-common/main.js" %}"></script>
+  <script src="{% static "@fullcalendar/resource-timegrid/main.js" %}"></script>
+
+  {% block js-scripts %}
+  {% endblock %}
 
 </body>
 </html>

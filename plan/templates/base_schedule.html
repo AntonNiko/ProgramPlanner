@@ -1,3 +1,82 @@
 {% extends "base.html" %}
 
 {% block schedule-nav-item-active %}active{% endblock %}
+
+{% block extra-sidebar %}
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapse-saved-schedules" aria-expanded="false" aria-controls="collapse-saved-schedules">
+            <i class="fas fa-fw fa-save"></i>
+            <span>Saved Schedules</span>
+        </a>
+        <div id="collapse-saved-schedules" class="collapse">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header"></h6>
+                <a class="collapse-item" href="#">My Test Schedule</a>
+                <a class="collapse-item" href="#">Cards</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+{% endblock %}
+
+{% block container-fluid %}
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h3 class="mb-0 text-gray-800">Schedule</h3>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">My Test Schedule</h6>
+        </div>
+
+        <div class="card-body">
+            <div id="time-grid"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra-html %}
+    <footer class="footer" style="position: fixed; left: 0; bottom: 0; width: 100%; line-height: 60px; z-index: 1500;">
+         <div class="modal-dialog" role="document" style="position: absolute; bottom: 10px; right: 10px;">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h6 class="text-gray-800">I Want To...</h6>
+                    <button type="button" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-danger">Remove</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
+
+{% block js-scripts %}
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          var calendarEl = document.getElementById('time-grid');
+
+          var calendar = new FullCalendar.Calendar(calendarEl, {
+              plugins: [ 'timeGrid' ],
+              defaultView: 'timeGridWeek',
+              allDaySlot: false,
+              firstDay: 1,
+              defaultDate: '2020-05-04'
+          });
+
+          calendar.render();
+
+
+          calendar.addEvent({
+              title: 'Test Event',
+              startRecur: '2020-05-04',
+              endRecur: '2020-07-31',
+              startTime: '10:00',
+              endTime: '11:20',
+              daysOfWeek: [1, 4],
+              eventTextColor: 'red'
+          });
+      });
+  </script>
+{% endblock %}
