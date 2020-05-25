@@ -1,3 +1,168 @@
 {% extends "base.html" %}
 
+<!-- Active Navbar Item highlighted -->
 {% block program-nav-item-active %}active{% endblock %}
+
+<!-- Extra sidebar content -->
+{% block extra-sidebar %}
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapse-saved-programs" aria-expanded="false" aria-controls="collapse-saved-programs">
+            <i class="fas fa-fw fa-save"></i>
+            <span>Saved Programs</span>
+        </a>
+        <div id="collapse-saved-programs" class="collapse">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header"></h6>
+                <a class="collapse-item" href="#">My Test Schedule</a>
+                <a class="collapse-item" href="#">Cards</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+{% endblock %}
+
+{% block container-fluid %}
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h3 class="mb-0 text-gray-800">Program</h3>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary justify-content-start d-inline-flex">My Test Program</h6>
+            <div class="alert alert-danger justify-content-end d-inline-flex" role="alert">
+                <span>Requirements</span>
+                <i class="fas fa-fw fa-times"></i>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- EXAMPLE: https://dribbble.com/shots/6107620-4-Year-Course-Planner/attachments -->
+            <div id="program-grid">
+                <div class="program-semester" style="width: 200px; display: inline-block;">
+                    <div>
+                        <h5 class="font-weight-bold text-gray-800">2020</h5>
+                        <h6 class="text-gray-800">Fall</h6>
+                    </div>
+                    <ul class="justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
+                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                            <div class="card-body py-0">
+                                <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
+                                    <div class="my-0">
+                                        <span class="text-gray-800 font-weight-bold d-inline-flex">CSC 115</span>
+                                        <span class="text-gray-600 d-inline-flex">&nbsp;|&nbsp;</span>
+                                        <span class="text-gray-600 d-inline-flex">3-2-0</span>
+                                    </div>
+                                    <span class="text-gray-800 mt-1">Fundamentals of Programming II</span>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <span class="text-gray-600">1.5 cr</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                            <div class="card-body py-0">
+                                <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
+                                    <div class="my-0">
+                                        <span class="text-gray-800 font-weight-bold d-inline-flex">ECON 180</span>
+                                        <span class="text-gray-600 d-inline-flex">&nbsp;|&nbsp;</span>
+                                        <span class="text-gray-600 d-inline-flex">3-0</span>
+                                    </div>
+                                    <span class="text-gray-800 mt-1">Introduction to Principles of Microeconomics and Financial Project Evaluation</span>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <span class="text-gray-600">1.5 cr</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="card mb-2" style="">
+                            <div class="">
+                                ADD COURSE
+                            </div>
+                            <div class="">
+
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="program-semester" style="width: 200px; display: inline-block;">
+                    <div>
+                        <h5 class="font-weight-bold text-gray-800">2021</h5>
+                        <h6 class="text-gray-800">Spring</h6>
+                    </div>
+                    <ul class="justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
+                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                            <div class="card-body py-0">
+                                <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
+                                    <div class="my-0">
+                                        <span class="text-gray-800 font-weight-bold d-inline-flex">CSC 115</span>
+                                        <span class="text-gray-600 d-inline-flex">&nbsp;|&nbsp;</span>
+                                        <span class="text-gray-600 d-inline-flex">3-2-0</span>
+                                    </div>
+                                    <span class="text-gray-800 mt-1">Fundamentals of Programming II</span>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <span class="text-gray-600">1.5 cr</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                            <div class="card-body py-0">
+                                <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
+                                    <div class="my-0">
+                                        <span class="text-gray-800 font-weight-bold d-inline-flex">ECON 180</span>
+                                        <span class="text-gray-600 d-inline-flex">&nbsp;|&nbsp;</span>
+                                        <span class="text-gray-600 d-inline-flex">3-0</span>
+                                    </div>
+                                    <span class="text-gray-800 mt-1">Introduction to Principles of Microeconomics and Financial Project Evaluation</span>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <span class="text-gray-600">1.5 cr</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="card mb-2" style="">
+                            <div class="">
+                                ADD COURSE
+                            </div>
+                            <div class="">
+
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="program-semester" style="width: 200px; display: inline-block;">
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary btn-lg">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js-scripts %}
+    <script>
+
+    const Classes = {
+        draggable: 'StackedListItem--isDraggable',
+        capacity: 'draggable-container-parent--capacity',
+    }
+
+    const containers = document.querySelectorAll('#program-grid .program-semester');
+
+    const sortable = new Sortable(containers, {
+        draggable: `.${Classes.draggable}`,
+        mirror: {
+            constrainDimensions: true,
+        },
+        plugins: [Plugins.ResizeMirror],
+    });
+
+    </script>
+{% endblock %}

@@ -194,6 +194,15 @@
   <script src="{% static "@fullcalendar/resource-common/main.js" %}"></script>
   <script src="{% static "@fullcalendar/resource-timegrid/main.js" %}"></script>
 
+  <!-- Shopify Draggable library -->
+  <script type="module" src="{% static "@shopify/draggable/lib/draggable.bundle.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/draggable.bundle.legacy.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/draggable.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/sortable.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/droppable.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/swappable.js" %}"></script>
+  <script type="module" src="{% static "@shopify/draggable/lib/plugins.js" %}"></script>
+
   {% block js-scripts %}
   {% endblock %}
 
