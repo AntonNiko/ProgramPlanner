@@ -41,17 +41,38 @@
 {% endblock %}
 
 {% block extra-html %}
-    <footer class="footer" style="position: fixed; left: 0; bottom: 0; width: 100%; line-height: 60px; z-index: 1500;">
+    <footer class="footer" style="position: fixed; left: 0; bottom: 0; width: 100%; line-height: 60px; z-index: 1000;">
          <div class="modal-dialog" role="document" style="position: absolute; bottom: 10px; right: 10px;">
             <div class="modal-content">
                 <div class="modal-body">
                     <h6 class="text-gray-800">I Want To...</h6>
-                    <button type="button" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_add">Add</button>
                     <button type="button" class="btn btn-danger">Remove</button>
                 </div>
             </div>
         </div>
     </footer>
+
+    <div class="modal fade" id="modal_add" tabindex="-1" role="dialog" style="z-index: 1500;">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Modal body text goes here.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
 
 {% block js-scripts %}

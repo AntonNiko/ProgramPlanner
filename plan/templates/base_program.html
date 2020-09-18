@@ -41,13 +41,13 @@
         <div class="card-body">
             <!-- EXAMPLE: https://dribbble.com/shots/6107620-4-Year-Course-Planner/attachments -->
             <div id="program-grid">
-                <div class="program-semester" style="width: 200px; display: inline-block;">
+                <div class="" style="width: 200px; display: inline-block;">
                     <div>
                         <h5 class="font-weight-bold text-gray-800">2020</h5>
                         <h6 class="text-gray-800">Fall</h6>
                     </div>
-                    <ul class="justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
-                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                    <ul class="program-semester justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
+                        <li class="program-course card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
                             <div class="card-body py-0">
                                 <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
                                     <div class="my-0">
@@ -62,7 +62,7 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                        <li class="program-course card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
                             <div class="card-body py-0">
                                 <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
                                     <div class="my-0">
@@ -87,13 +87,13 @@
                         </li>
                     </ul>
                 </div>
-                <div class="program-semester" style="width: 200px; display: inline-block;">
+                <div class="" style="width: 200px; display: inline-block;">
                     <div>
                         <h5 class="font-weight-bold text-gray-800">2021</h5>
                         <h6 class="text-gray-800">Spring</h6>
                     </div>
-                    <ul class="justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
-                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                    <ul class="program-semester justify-content-start rounded border-secondary" style="padding: 9px; list-style-type: none; background-color: #efefef;">
+                        <li class="program-course card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
                             <div class="card-body py-0">
                                 <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
                                     <div class="my-0">
@@ -108,7 +108,7 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
+                        <li class="program-course card mb-2 py-1 border-secondary border-left-success" style="border-left: .50rem solid #1cc88a!important;">
                             <div class="card-body py-0">
                                 <div class="d-flex justify-content-start flex-column" style="font-size:12px;">
                                     <div class="my-0">
@@ -133,7 +133,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="program-semester" style="width: 200px; display: inline-block;">
+                <div class="" style="width: 200px; display: inline-block;">
                     <div class="text-center">
                         <button type="button" class="btn btn-primary btn-lg">
                             <i class="fas fa-fw fa-plus"></i>
@@ -154,15 +154,16 @@
         capacity: 'draggable-container-parent--capacity',
     }
 
-    const containers = document.querySelectorAll('#program-grid .program-semester');
+    const containers = document.querySelectorAll('.program-semester');
 
-    const sortable = new Sortable(containers, {
-        draggable: `.${Classes.draggable}`,
-        mirror: {
-            constrainDimensions: true,
-        },
-        plugins: [Plugins.ResizeMirror],
+    const sortable = new Sortable.default(containers, {
+        draggable: '.program-course',
     });
+
+    sortable.on('sortable:start', () => console.log('sortable:start'));
+    sortable.on('sortable:sort', () => console.log('sortable:sort'));
+    sortable.on('sortable:sorted', () => console.log('sortable:sorted'));
+    sortable.on('sortable:stop', () => console.log('sortable:stop'));
 
     </script>
 {% endblock %}

@@ -31,7 +31,11 @@ def api_account_authentication(request):
     response_json['method'] = 'account_authentication'
 
     action = request.GET.get('action')
-    if action == 'login':
+    if action == 'create':
+        response_json['response'] = AccountHandler.create(request)
+    elif action == 'delete':
+        response_json['response'] = AccountHandler.delete(request)
+    elif action == 'login':
         assert request.method == 'POST'
         response_json['response'] = AccountHandler.login(request)
     elif action == 'logout':

@@ -1,11 +1,51 @@
 from django.contrib.auth import authenticate, login, logout
-
+from django.contrib.auth.models import User
 
 class AccountHandler:
     """
     Handles requests relating to user accounts, and performs actions to fulfill
     the specified requests.
     """
+
+    @staticmethod
+    def create(request):
+        """
+
+        :param request:
+        :return:
+        """
+
+        username = request.POST.get('username', None)
+        password = request.POST.get('password', None)
+
+        assert username is not None
+        assert password is not None
+
+        # TODO: Determine what failure conditions to handle
+        user = User.objects.create(username=username, password=password)
+
+        return True
+
+    @staticmethod
+    def delete(request):
+        """
+
+        :param request:
+        :return:
+        """
+
+        username = request.POST.get('username', None)
+
+        assert username is not None
+
+        # TODO: Validate the terms and ensure proper data returned for action
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return False
+
+        user.delete()
+        return True
 
     @staticmethod
     def login(request):
@@ -21,7 +61,7 @@ class AccountHandler:
         """
 
         username = request.POST.get('username', None)
-        password = request.POST('password', None)
+        password = request.POST.get('password', None)
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
