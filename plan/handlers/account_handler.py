@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from plan.models import Profile
 
 
 class AccountHandler:
@@ -27,8 +26,6 @@ class AccountHandler:
 
         # TODO: Determine what failure conditions to handle
         user = User.objects.create(username=username, email=email, password=password)
-        profile = Profile(user=user)
-        profile.save()
 
         return True
 

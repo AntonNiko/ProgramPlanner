@@ -1,4 +1,4 @@
-from plan.models import Course, Profile, Program, Sequence, Term
+from plan.models import Course, Program, Sequence, Term
 
 
 # TODO: Refactor class to properly handle anonymous, session-based requests.
@@ -42,8 +42,7 @@ class SequenceHandler:
 
         # Fetch sequence
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence = profile.active_sequence
+            sequence = Sequence.objects.filter(user=request.user)
         else:
             sequence = request.session.get('active_sequence')
 
@@ -72,7 +71,7 @@ class SequenceHandler:
         response['success'] = True
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -99,8 +98,7 @@ class SequenceHandler:
 
         # Fetch targeted sequence and term
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence = profile.active_sequence
+            sequence = Sequence.objects.filter(user=request.user)
         else:
             sequence = request.session.get('active_sequence')
 
@@ -122,7 +120,7 @@ class SequenceHandler:
             return response
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -140,8 +138,9 @@ class SequenceHandler:
         assert name is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence_programs = profile.programs
+            pass
+            #profile = Profile.objects.get(user=request.user)
+            #sequence_programs = profile.programs
         else:
             sequence_programs = request.session.get('programs')
 
@@ -157,7 +156,7 @@ class SequenceHandler:
         response['success'] = True
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -200,7 +199,8 @@ class SequenceHandler:
         assert sequence_name is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
+            #profile = Profile.objects.get(user=request.user)
+            profile = None
             result = profile.active_sequence
             if result is not None:
                 response['message'] = 'Could not add sequence, one already exists.'
@@ -217,7 +217,7 @@ class SequenceHandler:
         #    response['success'] = True
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -230,8 +230,10 @@ class SequenceHandler:
 
         if request.user.is_authenticated:
             # TODO: Handle the error case of a profile not being available
-            profile = Profile.objects.get(user=request.user)
-            result = profile.active_sequence
+            #profile = Profile.objects.get(user=request.user)
+            profile = None
+            #result = profile.active_sequence
+            result = None
 
             if result is not None:
                 result = result.to_dict()
@@ -261,8 +263,9 @@ class SequenceHandler:
         assert term_type is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence = profile.active_sequence
+            #profile = Profile.objects.get(user=request.user)
+            #sequence = profile.active_sequence
+            sequence = None
         else:
             sequence = request.session.get('active_sequence')
 
@@ -280,7 +283,7 @@ class SequenceHandler:
         response['success'] = True
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -292,8 +295,9 @@ class SequenceHandler:
         term_type = int(request.GET.get('term_type'))
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence = profile.active_sequence
+            #profile = Profile.objects.get(user=request.user)
+            #sequence = profile.active_sequence
+            sequence = None
         else:
             sequence = request.session.get('active_sequence')
 
@@ -333,8 +337,9 @@ class SequenceHandler:
 
         # Fetching sequence
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            sequence = profile.active_sequence
+            #profile = Profile.objects.get(user=request.user)
+            #sequence = profile.active_sequence
+            sequence = None
         else:
             sequence = request.session.get('active_sequence')
 
@@ -350,7 +355,7 @@ class SequenceHandler:
             return response
 
         # Clean-up
-        SequenceHandler.__clean_up(request, profile)
+        SequenceHandler.__clean_up(request, None)
         return response
 
     @staticmethod

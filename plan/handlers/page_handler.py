@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
-from plan.models import Profile
-
+from plan.models import Schedule
 
 class PageHandler:
 
@@ -11,7 +10,7 @@ class PageHandler:
 
         context = {}
         if request.user.is_authenticated:
-            context["schedules"] = Profile.objects.get(user=request.user).saved_schedules
+            context["schedules"] = Schedule.objects.filter(user=request.user)
 
         http_response = HttpResponse(template.render(context, request))
         return http_response

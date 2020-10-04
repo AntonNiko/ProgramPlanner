@@ -1,16 +1,10 @@
-from djongo import models
+from django.db import models
 
 
 class Program(models.Model):
-    institution = models.CharField(
-        max_length=50,
-        choices=[
-            ('university_of_victoria', 'university_of_victoria')
-        ]
-    )
     name = models.CharField(max_length=50)
-    requirements = models.DictField(default={'expressions': {}}, blank=False)
 
+    #TODO: Refactor
     def to_dict(self):
         result = {
             'institution': self.institution,

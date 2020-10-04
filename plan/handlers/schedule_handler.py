@@ -1,5 +1,5 @@
 from typing import Dict, Union
-from plan.models import Profile, Section, Schedule
+from plan.models import Section, Schedule
 
 
 class ScheduleHandler:
@@ -20,8 +20,7 @@ class ScheduleHandler:
         assert term_type is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            schedules = profile.saved_schedules
+            schedules = Schedule.objects.filter(user=request.user)
         else:
             schedules = request.session.get('saved_schedules')
 
@@ -39,7 +38,7 @@ class ScheduleHandler:
         response['success'] = True
 
         # Clean-up
-        ScheduleHandler.__clean_up(request, profile)
+        ScheduleHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -66,8 +65,7 @@ class ScheduleHandler:
         term_type = int(request.GET.get('term_type')) if request.GET.get('term_type') is not None else None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            schedules = profile.saved_schedules
+            schedules = Schedule.objects.filter(user=request.user)
         else:
             schedules = request.session.get('saved_schedules')
 
@@ -95,8 +93,7 @@ class ScheduleHandler:
         assert name is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            schedules = profile.saved_schedules
+            schedules = Schedule.objects.filter(user=request.user)
         else:
             schedules = request.session.get('saved_schedules')
 
@@ -109,7 +106,7 @@ class ScheduleHandler:
             return response
 
         # Clean-up
-        ScheduleHandler.__clean_up(request, profile)
+        ScheduleHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -129,8 +126,7 @@ class ScheduleHandler:
 
         # Fetch user's schedules
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
-            schedules = profile.saved_schedules
+            schedules = Schedule.objects.filter(user=request.user)
         else:
             schedules = request.session.get('saved_schedules')
 
@@ -157,7 +153,7 @@ class ScheduleHandler:
         response['success'] = True
 
         # Clean-up
-        ScheduleHandler.__clean_up(request, profile)
+        ScheduleHandler.__clean_up(request, None)
         return response
 
     @staticmethod
@@ -171,7 +167,7 @@ class ScheduleHandler:
         assert crn is not None
 
         if request.user.is_authenticated:
-            profile = Profile.objects.get(user=request.user)
+            schedules = Schedule.objects.filter(user=request.user)
             schedules = profile.saved_schedules
         else:
             schedules = request.session.get('saved_schedules')
@@ -192,7 +188,7 @@ class ScheduleHandler:
             return response
 
         # Clean-up
-        ScheduleHandler.__clean_up(request, profile)
+        ScheduleHandler.__clean_up(request, None)
         return response
 
     @staticmethod
