@@ -39,7 +39,15 @@
                                     </span>
                                     <span class="d-block">
                                         <span>Term:</span>
-                                        <span class="font-weight-bold">{{ schedule.semester }}</span>
+                                        <span class="font-weight-bold">
+                                        {% if schedule.term == 1 %}
+                                            Spring
+                                        {% elif schedule.term == 2 %}
+                                            Summer
+                                        {% elif schedule.term == 3 %}
+                                            Fall
+                                        {% endif %}
+                                        </span>
                                     </span>
                                 </div>
                                 <div class="col-xs-12 col-sm-12 col-md my-2">

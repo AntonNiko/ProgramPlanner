@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.template import loader
 from plan.models import Schedule
 
+
 class PageHandler:
 
     @staticmethod
@@ -12,6 +13,7 @@ class PageHandler:
         if request.user.is_authenticated:
             context["schedules"] = Schedule.objects.filter(user=request.user)
 
+        print(type(context["schedules"][0].term))
         http_response = HttpResponse(template.render(context, request))
         return http_response
 

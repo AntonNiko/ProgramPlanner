@@ -25,7 +25,7 @@ class AccountHandler:
         assert password is not None
 
         # TODO: Determine what failure conditions to handle
-        user = User.objects.create(username=username, email=email, password=password)
+        user = User.objects.create_user(username=username, email=email, password=password)
 
         return True
 

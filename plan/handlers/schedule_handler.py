@@ -14,10 +14,10 @@ class ScheduleHandler:
 
         # Parameter parsing
         year = int(request.POST.get('year'))
-        term_type = int(request.POST.get('term'))
+        term = int(request.POST.get('term'))
         name = request.POST.get('name')
         assert year is not None
-        assert term_type is not None
+        assert term is not None
 
         if request.user.is_authenticated:
             schedules = Schedule.objects.filter(user=request.user)
@@ -32,9 +32,7 @@ class ScheduleHandler:
             response['message'] = 'A schedule with the same name already exists.'
             return response
 
-        schedule_to_add = Schedule(user=request.user, year=year, term_type=term_type, name=name)
-        schedule_to_add.save()
-        schedules.add(schedule_to_add)
+        schedule = Schedule.objects.create(user=request.user, year=year, term=term, name=name)
         response['success'] = True
 
         # Clean-up
