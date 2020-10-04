@@ -2,6 +2,7 @@ import datetime
 from django.contrib.auth.models import User
 from djongo import models
 from plan.utils import DateUtils, Weekday
+from .course_models import Course
 from .utils_models import DateRange, TimeRange
 
 
@@ -112,6 +113,22 @@ class Section(models.Model):
             'meetings': [meeting.to_dict() for meeting in self.meetings]
         }
         return result
+
+
+class CourseOffering(models.Model):
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE)
+    year = models.PositiveSmallIntegerField()
+    term_type = models.PositiveSmallIntegerField(
+        choices=[
+            (1, 'spring'),
+            (2, 'summer'),
+            (3, 'fall')
+        ]
+    )
+    sections = models.ArrayReferenceField(
+        to=Section,
+        on_delete=models.CASCADE
+    )
 
 
 class Schedule(models.Model):

@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .handlers import AccountHandler, DataHandler, PageHandler, SequenceHandler, ScheduleHandler
 
@@ -17,6 +17,11 @@ def view_program(request):
 
 def view_schedule(request):
     http_response = PageHandler.get_schedule_view(request)
+    return http_response
+
+
+def view_schedule_add(request):
+    http_response = PageHandler.get_schedule_add_view(request)
     return http_response
 
 
@@ -45,6 +50,32 @@ def api_account_authentication(request):
         response_json['response'] = 'Unsupported action'
 
     return JsonResponse(response_json)
+
+
+def account_login(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'account_login'
+    response_json['response'] = AccountHandler.login(request)
+
+    print(response_json)
+
+    return HttpResponseRedirect("/")
+
+
+def account_logout(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'account_logout'
+    response_json['response'] = AccountHandler.logout(request)
+
+    return HttpResponseRedirect("/")
+
+
+def account_register(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'account_register'
+    response_json['response'] = AccountHandler.register(request)
+
+    return HttpResponseRedirect("/")
 
 
 def api_data_course(request):
@@ -147,20 +178,27 @@ def api_plan_term(request):
     return JsonResponse(response_json)
 
 
-def api_schedule(request):
+def api_schedule_add(request):
     response_json = API_RESPONSE_BASE.copy()
-    response_json['method'] = 'schedule'
+    response_json['method'] = 'schedule_add'
 
-    action = request.GET.get('action')
-    if action == 'add':
-        response_json['response'] = ScheduleHandler.add_schedule(request)
-    elif action == 'get':
-        response_json['response'] = ScheduleHandler.get_schedule(request)
-    elif action == 'remove':
-        response_json['response'] = ScheduleHandler.remove_schedule(request)
-    else:
-        response_json['response'] = 'Unsupported action'
+    response_json['response'] = ScheduleHandler.add_schedule(request)
+    return JsonResponse(response_json)
 
+
+def api_schedule_get(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'schedule_get'
+
+    response_json['response'] = ScheduleHandler.get_schedule(request)
+    return JsonResponse(response_json)
+
+
+def api_schedule_remove(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'schedule_remove'
+
+    response_json['response'] = ScheduleHandler.remove_schedule(request)
     return JsonResponse(response_json)
 
 
@@ -177,3 +215,9 @@ def api_schedule_section(request):
         response_json['response'] = 'Unsupported action'
 
     return JsonResponse(response_json)
+
+
+def error_404(request, exception):
+    template = loader.get_template('404.html')
+    http_response = HttpResponse(template.render({}, request))
+    return http_response

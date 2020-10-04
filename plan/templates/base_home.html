@@ -24,7 +24,39 @@
             <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Schedules</h1>
 
             <!-- Active schedules list -->
-            <ul class="list-group">
+            {% if schedules %}
+                <ul class="list-group">
+                    {% for schedule in schedules %}
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                                    <h6 class="text-left font-weight-bold text-gray-800">{{ schedule.name }}</h6>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-2 my-2">
+                                    <span class="d-block">
+                                        <span>Year:</span>
+                                        <span class="font-weight-bold">{{ schedule.year }}</span>
+                                    </span>
+                                    <span class="d-block">
+                                        <span>Term:</span>
+                                        <span class="font-weight-bold">{{ schedule.semester }}</span>
+                                    </span>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md my-2">
+                                    <div class="float-right">
+                                        <button class="btn btn-primary my-1" type="button">Open</button>
+                                        <button class="btn btn-danger my-1" type="button">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center">Looks like you haven't created any schedules yet... click below to start one!</p>
+            {% endif %}
+
+            <!--<ul class="list-group">
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-xs-12 col-sm-12 col-md-4 my-2">
@@ -72,18 +104,41 @@
                     </div>
                 </li>
                 <li class="list-group-item">Test 3</li>
-            </ul>
+            </ul>-->
 
             <!-- Start new Schedule button -->
             <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg my-4">New Schedule</button>
+                <a href="/schedule/add" class="btn btn-success btn-lg my-4">New Schedule</a>
             </div>
 
             <!-- Sequences section header title -->
             <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Degree Plans</h1>
 
             <!-- Active sequences list -->
-            <ul class="list-group">
+            {% if sequences %}
+                <ul class="list-group">
+                    {% for sequence in sequences %}
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                                    <h6 class="text-left font-weight-bold text-gray-800">{{ sequence.name }}</h6>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md my-2">
+                                    <div class="float-right">
+                                        <button class="btn btn-primary my-1" type="button">Open</button>
+                                        <button class="btn btn-danger my-1" type="button">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+                <p class="text-center">Looks like you haven't created any sequences yet... click below to start one!</p>
+            {% endif %}
+
+            <!--<ul class="list-group">
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-xs-12 col-sm-12 col-md-4 my-2">
@@ -99,11 +154,11 @@
                 </li>
                 <li class="list-group-item">Test 2</li>
                 <li class="list-group-item">Test 3</li>
-            </ul>
+            </ul>-->
 
             <!-- Start new Degree Plan button -->
             <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg my-4">New Degree Plan</button>
+                <a href="/sequence/add" class="btn btn-success btn-lg my-4">New Degree Plan</a>
             </div>
         </div>
     </div>

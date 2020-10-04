@@ -1,5 +1,4 @@
 from .course_models import *
-from .offering_models import *
 from .profile_models import *
 from .program_models import *
 from .schedule_models import *

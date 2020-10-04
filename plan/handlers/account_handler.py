@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from plan.models import Profile
+
 
 class AccountHandler:
     """
@@ -8,7 +10,7 @@ class AccountHandler:
     """
 
     @staticmethod
-    def create(request):
+    def register(request):
         """
 
         :param request:
@@ -16,13 +18,17 @@ class AccountHandler:
         """
 
         username = request.POST.get('username', None)
+        email = request.POST.get('email', None)
         password = request.POST.get('password', None)
 
         assert username is not None
+        assert email is not None
         assert password is not None
 
         # TODO: Determine what failure conditions to handle
-        user = User.objects.create(username=username, password=password)
+        user = User.objects.create(username=username, email=email, password=password)
+        profile = Profile(user=user)
+        profile.save()
 
         return True
 
@@ -75,5 +81,5 @@ class AccountHandler:
         """
         Logs the user out.
         """
-
         logout(request)
+        return True

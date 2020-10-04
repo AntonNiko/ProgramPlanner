@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
+from plan.models import Profile
 
 
 class PageHandler:
@@ -7,7 +8,12 @@ class PageHandler:
     @staticmethod
     def get_home_view(request):
         template = loader.get_template('base_home.html')
-        http_response = HttpResponse(template.render({}, request))
+
+        context = {}
+        if request.user.is_authenticated:
+            context["schedules"] = Profile.objects.get(user=request.user).saved_schedules
+
+        http_response = HttpResponse(template.render(context, request))
         return http_response
 
     @staticmethod
@@ -19,6 +25,12 @@ class PageHandler:
     @staticmethod
     def get_schedule_view(request):
         template = loader.get_template('base_schedule.html')
+        http_response = HttpResponse(template.render({}, request))
+        return http_response
+
+    @staticmethod
+    def get_schedule_add_view(request):
+        template = loader.get_template('base_schedule_add.html')
         http_response = HttpResponse(template.render({}, request))
         return http_response
 

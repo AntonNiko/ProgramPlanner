@@ -13,9 +13,9 @@ class ScheduleHandler:
         response = ScheduleHandler.RESPONSE_BASE.copy()
 
         # Parameter parsing
-        year = int(request.GET.get('year'))
-        term_type = int(request.GET.get('term_type'))
-        name = request.GET.get('name')
+        year = int(request.POST.get('year'))
+        term_type = int(request.POST.get('term'))
+        name = request.POST.get('name')
         assert year is not None
         assert term_type is not None
 
