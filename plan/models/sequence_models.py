@@ -1,3 +1,6 @@
+#  Copyright (c) 2020. by Anton Nikitenko
+#  All rights reserved.
+
 from django.contrib.auth.models import User
 from django.db import models
 from .course_models import Course

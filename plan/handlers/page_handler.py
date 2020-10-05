@@ -1,3 +1,6 @@
+#  Copyright (c) 2020. by Anton Nikitenko
+#  All rights reserved.
+
 from django.http import HttpResponse
 from django.template import loader
 from plan.models import Schedule
