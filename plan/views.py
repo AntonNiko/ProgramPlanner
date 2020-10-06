@@ -57,8 +57,6 @@ def account_login(request):
     response_json['method'] = 'account_login'
     response_json['response'] = AccountHandler.login(request)
 
-    print(response_json)
-
     return HttpResponseRedirect("/")
 
 
@@ -183,7 +181,7 @@ def api_schedule_add(request):
     response_json['method'] = 'schedule_add'
 
     response_json['response'] = ScheduleHandler.add_schedule(request)
-    return JsonResponse(response_json)
+    return HttpResponseRedirect("/")
 
 
 def api_schedule_get(request):
@@ -199,7 +197,7 @@ def api_schedule_remove(request):
     response_json['method'] = 'schedule_remove'
 
     response_json['response'] = ScheduleHandler.remove_schedule(request)
-    return JsonResponse(response_json)
+    return HttpResponseRedirect("/")
 
 
 def api_schedule_section(request):

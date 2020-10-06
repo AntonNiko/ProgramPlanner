@@ -27,11 +27,8 @@ class ScheduleHandler:
         else:
             schedules = request.session.get('saved_schedules')
 
-        # TODO: Improve validation
-        assert schedules is not None
-
         # Ensure that no schedules with the same name exist
-        if len(schedules.filter(name=name)) > 0:
+        if schedules is not None and len(schedules.filter(name=name)) > 0:
             response['message'] = 'A schedule with the same name already exists.'
             return response
 
@@ -90,8 +87,8 @@ class ScheduleHandler:
         response = ScheduleHandler.RESPONSE_BASE.copy()
 
         # Parameter parsing
-        name = request.GET.get('name')
-        assert name is not None
+        schedule_id = request.POST.get('schedule-id')
+        assert schedule_id is not None
 
         if request.user.is_authenticated:
             schedules = Schedule.objects.filter(user=request.user)
@@ -99,8 +96,8 @@ class ScheduleHandler:
             schedules = request.session.get('saved_schedules')
 
         try:
-            schedule = schedules.get(name=name)
-            schedules.remove(schedule)
+            schedule = schedules.get(id__exact=schedule_id)
+            schedule.delete()
             response['success'] = True
         except Schedule.DoesNotExist:
             response['message'] = 'No schedules with the specified name exist.'
@@ -198,7 +195,7 @@ class ScheduleHandler:
         Ensures that either the profile is saved or session modified flag is set.
         """
 
-        if request.user.is_authenticated:
-            profile.save()
-        else:
-            request.session.modified = True
+        #if request.user.is_authenticated:
+        #    profile.save()
+        #else:
+        #    request.session.modified = True

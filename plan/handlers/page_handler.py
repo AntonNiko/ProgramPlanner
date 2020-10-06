@@ -16,7 +16,6 @@ class PageHandler:
         if request.user.is_authenticated:
             context["schedules"] = Schedule.objects.filter(user=request.user)
 
-        print(type(context["schedules"][0].term))
         http_response = HttpResponse(template.render(context, request))
         return http_response
 
@@ -29,7 +28,15 @@ class PageHandler:
     @staticmethod
     def get_schedule_view(request):
         template = loader.get_template('base_schedule.html')
-        http_response = HttpResponse(template.render({}, request))
+
+        schedule_id = request.GET.get("id")
+        context = {}
+        if request.user.is_authenticated:
+            if schedule_id is not None and schedule_id != "":
+                schedule = Schedule.objects.filter(user=request.user).get(id__exact=int(schedule_id))
+                context["schedule"] = schedule
+
+        http_response = HttpResponse(template.render(context, request))
         return http_response
 
     @staticmethod
