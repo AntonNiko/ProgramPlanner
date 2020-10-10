@@ -31,6 +31,6 @@ let schedule_to_calendar = {
 
 function get_schedule_sections(id) {
     $.get("/api/section/get", { id: id}).done(function(data){
-       console.log("Done!");
+       
     });
 }

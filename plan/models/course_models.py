@@ -19,6 +19,9 @@ class Course(models.Model):
     offered_summer = models.BooleanField(blank=True, null=True)
     offered_fall = models.BooleanField(blank=True, null=True)
 
+    def __str__(self):
+        return self.subject + " " + self.number
+
    #  TODO: Refactor
    #  def evaluate_requirement(self, sequence):
    #     """
@@ -65,6 +68,9 @@ class CourseOffering(models.Model):
         ]
     )
 
+    def __str__(self):
+        return str(self.course) + " - " + str(self.year) + " " + str(self.term_type)
+
 
 class Section(models.Model):
     course_offering = models.ForeignKey(to=CourseOffering, on_delete=models.CASCADE)
@@ -78,6 +84,8 @@ class Section(models.Model):
         ]
     )
     crn = models.IntegerField()
+
+    # TODO: Add location field
 
     # meetings = models.ArrayField(
     #     model_container=Meeting
@@ -100,6 +108,9 @@ class Section(models.Model):
     #     }
     #     return result
 
+    def __str__(self):
+        return str(self.course_offering) + " - " + str(self.crn) + " - " + str(self.name)
+
 
 class Meeting(models.Model):
     section = models.ForeignKey(to=Section, on_delete=models.CASCADE)
@@ -109,6 +120,7 @@ class Meeting(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
 
+    # TODO: Ensure that when creating course, default value is False
     meet_M = models.BooleanField(blank=True, null=True)
     meet_T = models.BooleanField(blank=True, null=True)
     meet_W = models.BooleanField(blank=True, null=True)
@@ -116,6 +128,9 @@ class Meeting(models.Model):
     meet_F = models.BooleanField(blank=True, null=True)
     meet_S = models.BooleanField(blank=True, null=True)
     meet_Z = models.BooleanField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.section)
 
     #
     # def does_meeting_conflict(self, meeting_to_compare):

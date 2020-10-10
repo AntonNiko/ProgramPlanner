@@ -20,6 +20,9 @@ class Schedule(models.Model):
     )
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return str(self.user) + " - " + self.name
+
     # def does_section_conflict(self, section_to_compare):
     #     result = {'conflicts': False, 'data': []}
     #     for section in self.sections.all():
@@ -43,3 +46,6 @@ class Schedule(models.Model):
 class ScheduleSection(models.Model):
     schedule = models.ForeignKey(to=Schedule, on_delete=models.CASCADE)
     section = models.ForeignKey(to=Section, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.schedule) + " - " + str(self.section)
