@@ -13,8 +13,11 @@
         <div id="collapse-saved-schedules" class="collapse">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header"></h6>
-                <a class="collapse-item" href="#">My Test Schedule</a>
-                <a class="collapse-item" href="#">Cards</a>
+                {% if schedules %}
+                    {% for schedule in schedules %}
+                        <a class="collapse-item" href="/schedule?id={{ schedule.id }}">{{ schedule.name }}</a>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </li>
@@ -29,15 +32,26 @@
         <h3 class="mb-0 text-gray-800">Schedule</h3>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">My Test Schedule</h6>
-        </div>
+    {% if requested_schedule and requested_schedule != "Not found" %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">{{ requested_schedule.name }}</h6>
+            </div>
 
-        <div class="card-body">
-            <div id="time-grid"></div>
+            <div class="card-body">
+                <div id="time-grid" data-year="{{ requested_schedule.year }}" data-term="{{ requested_schedule.term }}" data-id="{{ requested_schedule.id }}"></div>
+            </div>
         </div>
-    </div>
+    {% elif requested_schedule and requested_schedule == "Not found" %}
+        <div class="text-center">
+            <div class="error mx-auto" data-text="404">404</div>
+            <p class="lead text-gray-800 mb-5">Schedule Not Found</p>
+            <p class="text-gray-500 mb-0">It looks like you found a non-existent schedule...</p>
+            <a href="/">← Back to Home</a>
+        </div>
+    {% else %}
+        <p class="mb-4">Please select a schedule from the sidebar, or create a new schedule.</p>
+    {% endif %}
 {% endblock %}
 
 {% block extra-html %}
@@ -78,28 +92,38 @@
 {% block js-scripts %}
   <script>
       document.addEventListener('DOMContentLoaded', function() {
-          var calendarEl = document.getElementById('time-grid');
+          let calendarEl = document.getElementById('time-grid');
 
-          var calendar = new FullCalendar.Calendar(calendarEl, {
-              plugins: [ 'timeGrid' ],
-              defaultView: 'timeGridWeek',
-              allDaySlot: false,
-              firstDay: 1,
-              defaultDate: '2020-05-04'
-          });
+          // If calendar to be displayed, first render calendar and the start date properly
+          if (calendarEl != null) {
+              let schedule_year = document.getElementById('time-grid').getAttribute('data-year');
+              let schedule_term = document.getElementById('time-grid').getAttribute('data-term');
+              let schedule_id = document.getElementById('time-grid').getAttribute('data-id');
 
-          calendar.render();
+              let calendar = new FullCalendar.Calendar(calendarEl, {
+                  plugins: ['timeGrid'],
+                  defaultView: 'timeGridWeek',
+                  allDaySlot: false,
+                  firstDay: 1,
+                  defaultDate: schedule_to_calendar[schedule_year][schedule_term]
+              });
 
+              calendar.render();
 
-          calendar.addEvent({
-              title: 'Test Event',
-              startRecur: '2020-05-04',
-              endRecur: '2020-07-31',
-              startTime: '10:00',
-              endTime: '11:20',
-              daysOfWeek: [1, 4],
-              eventTextColor: 'red'
-          });
+              /* Must fetch all sections and meetings associated with the schedule for that term */
+              get_schedule_sections(schedule_id);
+
+              calendar.addEvent({
+                  title: 'Test Event',
+                  startRecur: '2020-09-09',
+                  endRecur: '2020-12-31',
+                  startTime: '10:00',
+                  endTime: '11:20',
+                  daysOfWeek: [1, 4],
+                  eventTextColor: 'red'
+              });
+          }
+
       });
   </script>
 {% endblock %}

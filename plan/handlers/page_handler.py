@@ -1,6 +1,7 @@
 #  Copyright (c) 2020. by Anton Nikitenko
 #  All rights reserved.
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.template import loader
 from plan.models import Schedule
@@ -32,9 +33,14 @@ class PageHandler:
         schedule_id = request.GET.get("id")
         context = {}
         if request.user.is_authenticated:
-            if schedule_id is not None and schedule_id != "":
-                schedule = Schedule.objects.filter(user=request.user).get(id__exact=int(schedule_id))
-                context["schedule"] = schedule
+            schedules = Schedule.objects.filter(user=request.user)
+            context["schedules"] = schedules
+
+            if schedule_id is not None:
+                try:
+                    context["requested_schedule"] = schedules.get(id=schedule_id)
+                except ObjectDoesNotExist:
+                    context["requested_schedule"] = "Not found"
 
         http_response = HttpResponse(template.render(context, request))
         return http_response

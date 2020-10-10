@@ -200,19 +200,27 @@ def api_schedule_remove(request):
     return HttpResponseRedirect("/")
 
 
-def api_schedule_section(request):
+def api_section_get(request):
     response_json = API_RESPONSE_BASE.copy()
-    response_json['method'] = 'schedule_section'
+    response_json['method'] = 'section_get'
 
-    action = request.GET.get('action')
-    if action == 'add':
-        response_json['response'] = ScheduleHandler.add_section(request)
-    elif action == 'remove':
-        response_json['response'] = ScheduleHandler.remove_section(request)
-    else:
-        response_json['response'] = 'Unsupported action'
-
+    response_json['response'] = ScheduleHandler.get_section(request)
     return JsonResponse(response_json)
+
+
+# def api_schedule_section(request):
+#     response_json = API_RESPONSE_BASE.copy()
+#     response_json['method'] = 'schedule_section'
+#
+#     action = request.GET.get('action')
+#     if action == 'add':
+#         response_json['response'] = ScheduleHandler.add_section(request)
+#     elif action == 'remove':
+#         response_json['response'] = ScheduleHandler.remove_section(request)
+#     else:
+#         response_json['response'] = 'Unsupported action'
+#
+#     return JsonResponse(response_json)
 
 
 def error_404(request, exception):

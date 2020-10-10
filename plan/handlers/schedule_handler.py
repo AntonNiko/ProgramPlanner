@@ -2,7 +2,7 @@
 #  All rights reserved.
 
 from typing import Dict, Union
-from plan.models import Section, Schedule
+from plan.models import ScheduleSection, Section, Schedule
 
 
 class ScheduleHandler:
@@ -184,6 +184,39 @@ class ScheduleHandler:
         except Section.DoesNotExist:
             response['message'] = 'No sections with the specified CRN exist in the specified schedule.'
             return response
+
+        # Clean-up
+        ScheduleHandler.__clean_up(request, None)
+        return response
+
+    @staticmethod
+    def get_section(request):
+        """
+        Returns the sections associated with the specific user and semester
+        :param request:
+        :return:
+        """
+
+        response = ScheduleHandler.RESPONSE_BASE.copy()
+
+        if not request.user.is_authenticated:
+            response['success'] = False
+            return response
+
+        schedule_id = int(request.GET.get('id'))
+        assert schedule_id is not None
+
+        # At this point, only gets all sections associated with user
+        # TODO: Add more parameter specific queries
+
+        # Fetch the schedule associated with the request
+        schedule = Schedule.objects.filter(user=request.user).get(id=schedule_id)
+
+        # Fetch all sections associated with the schedule
+        sections = ScheduleSection.objects.filter(schedule=schedule).values('section')
+
+        response['data'] = list(sections)
+        response['success'] = True
 
         # Clean-up
         ScheduleHandler.__clean_up(request, None)
