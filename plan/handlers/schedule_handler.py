@@ -2,7 +2,7 @@
 #  All rights reserved.
 
 from typing import Dict, Union
-from plan.models import ScheduleSection, Section, Schedule
+from plan.models import ScheduleSection, Section, Schedule, Meeting
 
 
 class ScheduleHandler:
@@ -213,12 +213,41 @@ class ScheduleHandler:
         schedule = Schedule.objects.filter(user=request.user).get(id=schedule_id)
 
         # Fetch all sections associated with the schedule
-        sections = ScheduleSection.objects.filter(schedule=schedule).values('section')
+        sections_references = ScheduleSection.objects.filter(schedule=schedule).values('section')
+        sections = []
+        for section_reference in sections_references:
+            sections.append(Section.objects.get(crn=section_reference["section"]))
 
-        response['data'] = list(sections)
+        response['data'] = [section.to_dict() for section in sections]
         response['success'] = True
 
         # Clean-up
+        ScheduleHandler.__clean_up(request, None)
+        return response
+
+    @staticmethod
+    def get_meeting(request):
+        """
+        At this point, this method only returns all the meetings associated with a CRN
+
+        :param request:
+        :return:
+        """
+
+        response = ScheduleHandler.RESPONSE_BASE.copy()
+
+        crn = int(request.GET.get('crn'))
+        assert crn is not None
+
+        # Fetch the section with the corresponding CRN
+        section = Section.objects.get(crn=crn)
+
+        # Query all meetings with foreign key
+        meetings = Meeting.objects.filter(section=section)
+
+        response['data'] = [meeting.to_dict() for meeting in meetings]
+        response['success'] = True
+
         ScheduleHandler.__clean_up(request, None)
         return response
 

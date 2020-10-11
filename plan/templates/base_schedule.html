@@ -40,6 +40,19 @@
 
             <div class="card-body">
                 <div id="time-grid" data-year="{{ requested_schedule.year }}" data-term="{{ requested_schedule.term }}" data-id="{{ requested_schedule.id }}"></div>
+
+                <button class="btn btn-success my-4">Add Course / Section</button>
+                <button class="btn btn-danger my-4">Remove Course / Section</button>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+            </div>
+
+            <div class="card-body">
+
             </div>
         </div>
     {% elif requested_schedule and requested_schedule == "Not found" %}
@@ -55,42 +68,42 @@
 {% endblock %}
 
 {% block extra-html %}
-    <footer class="footer" style="position: fixed; left: 0; bottom: 0; width: 100%; line-height: 60px; z-index: 1000;">
-         <div class="modal-dialog" role="document" style="position: absolute; bottom: 10px; right: 10px;">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h6 class="text-gray-800">I Want To...</h6>
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_add">Add</button>
-                    <button type="button" class="btn btn-danger">Remove</button>
-                </div>
-            </div>
-        </div>
-    </footer>
 
-    <div class="modal fade" id="modal_add" tabindex="-1" role="dialog" style="z-index: 1500;">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Modal body text goes here.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Save changes</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
 {% endblock %}
 
 {% block js-scripts %}
   <script>
+      let calendar;
+
+      function getSectionMeetingsSuccessCallbackHandler(data) {
+          let meetings = data['response']['data'];
+          let meeting;
+          for (meeting of meetings) {
+              calendar.addEvent({
+                  title: meeting['section'],
+                  startRecur: meeting['start_date'],
+                  endRecur: meeting['end_date'],
+                  startTime: meeting['start_time'],
+                  endTime: meeting['end_time'],
+                  daysOfWeek: convert_meeting_days_to_numbers_array(meeting),
+                  eventTextColor: 'red'
+              });
+          }
+
+          /* Here, we begin adding each meeting to the  */
+      }
+
+      function getScheduleSectionsSuccessCallbackHandler(data) {
+
+          let sections = data['response']['data'];
+          console.log(sections);
+          let section;
+          for (section of sections) {
+              get_section_meetings(section["crn"], getSectionMeetingsSuccessCallbackHandler);
+          }
+      }
+
       document.addEventListener('DOMContentLoaded', function() {
           let calendarEl = document.getElementById('time-grid');
 
@@ -100,28 +113,24 @@
               let schedule_term = document.getElementById('time-grid').getAttribute('data-term');
               let schedule_id = document.getElementById('time-grid').getAttribute('data-id');
 
-              let calendar = new FullCalendar.Calendar(calendarEl, {
+              calendar = new FullCalendar.Calendar(calendarEl, {
                   plugins: ['timeGrid'],
+                  themeSystem: 'bootstrap',
                   defaultView: 'timeGridWeek',
                   allDaySlot: false,
+                  slotMinTime: "07:00:00",
+                  height: 800,
                   firstDay: 1,
                   defaultDate: schedule_to_calendar[schedule_year][schedule_term]
               });
 
               calendar.render();
 
-              /* Must fetch all sections and meetings associated with the schedule for that term */
-              get_schedule_sections(schedule_id);
+              /* Must fetch all sections and meetings associated with the schedule for that term, and
+               * and add to the schedule.
+               */
+              get_schedule_sections(schedule_id, getScheduleSectionsSuccessCallbackHandler);
 
-              calendar.addEvent({
-                  title: 'Test Event',
-                  startRecur: '2020-09-09',
-                  endRecur: '2020-12-31',
-                  startTime: '10:00',
-                  endTime: '11:20',
-                  daysOfWeek: [1, 4],
-                  eventTextColor: 'red'
-              });
           }
 
       });

@@ -73,6 +73,7 @@ class CourseOffering(models.Model):
 
 
 class Section(models.Model):
+    crn = models.IntegerField(primary_key=True)
     course_offering = models.ForeignKey(to=CourseOffering, on_delete=models.CASCADE)
     name = models.CharField(max_length=4)
     section_type = models.CharField(
@@ -83,13 +84,18 @@ class Section(models.Model):
             ('tutorial', 'tutorial')
         ]
     )
-    crn = models.IntegerField()
+
+    def to_dict(self):
+        result = {
+            'crn': self.crn,
+            'course_offering': self.course_offering.id,
+            'name': self.name,
+            'section_type': self.section_type
+        }
+
+        return result
 
     # TODO: Add location field
-
-    # meetings = models.ArrayField(
-    #     model_container=Meeting
-    # )
 
     # def does_section_conflict(self, section_to_compare):
     #     for meeting_to_compare in section_to_compare:
@@ -98,15 +104,6 @@ class Section(models.Model):
     #                 return True
     #
     #     return False
-    #
-    # def to_dict(self):
-    #     result = {
-    #         'name': self.name,
-    #         'section_type': self.section_type,
-    #         'crn': self.crn,
-    #         'meetings': [meeting.to_dict() for meeting in self.meetings]
-    #     }
-    #     return result
 
     def __str__(self):
         return str(self.course_offering) + " - " + str(self.crn) + " - " + str(self.name)
@@ -121,16 +118,44 @@ class Meeting(models.Model):
     end_time = models.TimeField()
 
     # TODO: Ensure that when creating course, default value is False
-    meet_M = models.BooleanField(blank=True, null=True)
-    meet_T = models.BooleanField(blank=True, null=True)
-    meet_W = models.BooleanField(blank=True, null=True)
-    meet_R = models.BooleanField(blank=True, null=True)
-    meet_F = models.BooleanField(blank=True, null=True)
-    meet_S = models.BooleanField(blank=True, null=True)
-    meet_Z = models.BooleanField(blank=True, null=True)
+    meet_M = models.BooleanField(blank=False, null=False, default=False)
+    meet_T = models.BooleanField(blank=False, null=False, default=False)
+    meet_W = models.BooleanField(blank=False, null=False, default=False)
+    meet_R = models.BooleanField(blank=False, null=False, default=False)
+    meet_F = models.BooleanField(blank=False, null=False, default=False)
+    meet_S = models.BooleanField(blank=False, null=False, default=False)
+    meet_Z = models.BooleanField(blank=False, null=False, default=False)
 
     def __str__(self):
         return str(self.section)
+
+    def to_dict(self):
+        result = {
+            'section': self.section.crn,
+            'start_date': str(self.start_date),
+            'end_date': str(self.end_date),
+            'start_time': str(self.start_time),
+            'end_time': str(self.end_time),
+            'meet_M': self.meet_M,
+            'meet_T': self.meet_T,
+            'meet_W': self.meet_W,
+            'meet_R': self.meet_R,
+            'meet_F': self.meet_F,
+            'meet_S': self.meet_S,
+            'meet_Z': self.meet_Z
+        }
+
+        return result
+
+    # def to_dict(self):
+    #     result = {
+    #         'days': [day.to_dict()['day'] for day in self.days],
+    #         'location': self.location,
+    #         'date_range': self.date_range,
+    #         'time_range': self.time_range
+    #     }
+    #     return result
+
 
     #
     # def does_meeting_conflict(self, meeting_to_compare):
@@ -166,11 +191,3 @@ class Meeting(models.Model):
     #
     #     return False
     #
-    # def to_dict(self):
-    #     result = {
-    #         'days': [day.to_dict()['day'] for day in self.days],
-    #         'location': self.location,
-    #         'date_range': self.date_range,
-    #         'time_range': self.time_range
-    #     }
-    #     return result

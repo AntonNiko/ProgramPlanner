@@ -21,5 +21,6 @@ urlpatterns = [
     path('api/schedule/get', views.api_schedule_get, name='api_schedule_get'),
     path('api/schedule/remove', views.api_schedule_remove, name='api_schedule_remove'),
     #path('api/schedule/section', views.api_schedule_section, name='api_schedule_section'),
-    path('api/section/get', views.api_section_get, name='api_section_get')
+    path('api/section/get', views.api_section_get, name='api_section_get'),
+    path('api/meeting/get', views.api_meeting_get, name='api_meeting_get')
 ]

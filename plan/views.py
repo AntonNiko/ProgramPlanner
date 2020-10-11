@@ -208,6 +208,14 @@ def api_section_get(request):
     return JsonResponse(response_json)
 
 
+def api_meeting_get(request):
+    response_json = API_RESPONSE_BASE.copy()
+    response_json['method'] = 'meeting_get'
+
+    response_json['response'] = ScheduleHandler.get_meeting(request)
+    return JsonResponse(response_json)
+
+
 # def api_schedule_section(request):
 #     response_json = API_RESPONSE_BASE.copy()
 #     response_json['method'] = 'schedule_section'
