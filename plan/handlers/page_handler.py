@@ -12,12 +12,7 @@ class PageHandler:
     @staticmethod
     def get_home_view(request):
         template = loader.get_template('base_home.html')
-
-        context = {}
-        if request.user.is_authenticated:
-            context["schedules"] = Schedule.objects.filter(user=request.user)
-
-        http_response = HttpResponse(template.render(context, request))
+        http_response = HttpResponse(template.render({}, request))
         return http_response
 
     @staticmethod

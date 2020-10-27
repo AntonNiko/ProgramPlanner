@@ -5,7 +5,6 @@
 
 let selectedDeleteScheduleName = null;
 
-
 $(".delete-schedule").click(function(){
     selectedDeleteScheduleName = $(this).attr("value");
     $("#scheduleDeleteModalID").attr("value", selectedDeleteScheduleName);
@@ -50,14 +49,57 @@ function convert_meeting_days_to_numbers_array(array) {
     return days;
 }
 
-function get_schedule_sections(id, successCallbackHandler) {
-    $.get("/api/section/get", { id: id}).done(function(data){
-       successCallbackHandler(data);
-    });
+/**
+ * Provides a set of methods that calls the course API methods (incl course offerings)
+ */
+class CourseProvider {
+
+    /**
+     * Returns the data for a particular course with an associated CRN
+     * @param crn
+     * @param successCallbackHandler
+     */
+    static get_course(crn, successCallbackHandler) {
+        $.get("/api/data/course", { crn: crn}).done(function(data) {
+            successCallbackHandler(data);
+        });
+    }
 }
 
-function get_section_meetings(crn, successCallbackHandler) {
-    $.get("/api/meeting/get", { crn: crn}).done(function(data){
-        successCallbackHandler(data);
-    });
+/**
+ * Provides a set of methods that calls the schedule API methods.
+ */
+class ScheduleProvider {
+
+    /**
+     * Fetches all schedules associated with a logged in user.
+     * @param successCallbackHandler
+     */
+    static get_user_schedules(successCallbackHandler) {
+        $.get("/api/schedule/get").done(function(data){
+            successCallbackHandler(data);
+        });
+    }
+
+    /**
+     * Returns data with all the sections associated with a particular schedule ID
+     * @param id
+     * @param successCallbackHandler
+     */
+    static get_schedule_sections(id, successCallbackHandler) {
+        $.get("/api/section/get", { id: id}).done(function(data){
+            successCallbackHandler(data);
+        });
+    }
+
+    /**
+     * Returns data with all the meetings associated with a particular section CRN
+     * @param crn
+     * @param successCallbackHandler
+     */
+    static get_section_meetings(crn, successCallbackHandler) {
+        $.get("/api/meeting/get", { crn: crn}).done(function(data){
+            successCallbackHandler(data);
+        });
+    }
 }

@@ -74,46 +74,21 @@
 
 {% block js-scripts %}
   <script>
-      let calendar;
 
-      function getSectionMeetingsSuccessCallbackHandler(data) {
-          let meetings = data['response']['data'];
-          let meeting;
-          for (meeting of meetings) {
-              calendar.addEvent({
-                  title: meeting['section'],
-                  startRecur: meeting['start_date'],
-                  endRecur: meeting['end_date'],
-                  startTime: meeting['start_time'],
-                  endTime: meeting['end_time'],
-                  daysOfWeek: convert_meeting_days_to_numbers_array(meeting),
-                  eventTextColor: 'red'
-              });
-          }
+      /* Class that represents the calendar on the schedule page. */
+      class Calendar {
+          constructor(element_id, schedule_provider) {
+              this.dom_element = document.getElementById(element_id);
+              if (this.dom_element == null) {
+                  throw new Error('Could not find DOM element with ID: '+element_id);
+              }
 
-          /* Here, we begin adding each meeting to the  */
-      }
+              this.schedule_provider = schedule_provider;
+              this.schedule_year = document.getElementById('time-grid').getAttribute('data-year');
+              this.schedule_term = document.getElementById('time-grid').getAttribute('data-term');
+              this.schedule_id = document.getElementById('time-grid').getAttribute('data-id');
 
-      function getScheduleSectionsSuccessCallbackHandler(data) {
-
-          let sections = data['response']['data'];
-          console.log(sections);
-          let section;
-          for (section of sections) {
-              get_section_meetings(section["crn"], getSectionMeetingsSuccessCallbackHandler);
-          }
-      }
-
-      document.addEventListener('DOMContentLoaded', function() {
-          let calendarEl = document.getElementById('time-grid');
-
-          // If calendar to be displayed, first render calendar and the start date properly
-          if (calendarEl != null) {
-              let schedule_year = document.getElementById('time-grid').getAttribute('data-year');
-              let schedule_term = document.getElementById('time-grid').getAttribute('data-term');
-              let schedule_id = document.getElementById('time-grid').getAttribute('data-id');
-
-              calendar = new FullCalendar.Calendar(calendarEl, {
+              this.calendar = new FullCalendar.Calendar(this.dom_element, {
                   plugins: ['timeGrid'],
                   themeSystem: 'bootstrap',
                   defaultView: 'timeGridWeek',
@@ -121,18 +96,65 @@
                   slotMinTime: "07:00:00",
                   height: 800,
                   firstDay: 1,
-                  defaultDate: schedule_to_calendar[schedule_year][schedule_term]
+                  defaultDate: schedule_to_calendar[this.schedule_year][this.schedule_term]
               });
 
-              calendar.render();
-
-              /* Must fetch all sections and meetings associated with the schedule for that term, and
-               * and add to the schedule.
-               */
-              get_schedule_sections(schedule_id, getScheduleSectionsSuccessCallbackHandler);
-
+              this.calendar.render();
           }
 
-      });
+          add_event(title, start_recur, end_recur, start_time, end_time, days_of_week) {
+              this.calendar.addEvent({
+                  title: title,
+                  startRecur: start_recur,
+                  endRecur: end_recur,
+                  startTime: start_time,
+                  endTime: end_time,
+                  daysOfWeek: days_of_week,
+                  eventTextColor: 'red'
+              });
+          }
+
+          render_schedule() {
+              // Set a scope for the callback functions to set properties and call functions
+              let self = this;
+
+              this.schedule_provider.get_schedule_sections(this.schedule_id, function(data) {
+                  let sections = data['response']['data'];
+
+                  let section;
+                  for (section of sections) {
+                      ScheduleProvider.get_section_meetings(section["crn"], function(data) {
+                          let meetings = data['response']['data'];
+
+                          let meeting;
+                          for (meeting of meetings) {
+                              self.add_event(
+                                  meeting['section'],
+                                  meeting['start_data'],
+                                  meeting['end_date'],
+                                  meeting['start_time'],
+                                  meeting['end_time'],
+                                  convert_meeting_days_to_numbers_array(meeting)
+                              )
+                          }
+                      });
+                  }
+              });
+          }
+     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize calendar and render the sections and meetings
+        let calendar;
+        if ($("#time-grid").length) {
+            calendar = new Calendar('time-grid', ScheduleProvider);
+            calendar.render_schedule();
+        }
+
+
+    });
+
+
+
   </script>
 {% endblock %}

@@ -7,6 +7,8 @@ from plan.models import Course, Program
 class DataHandler:
     RESPONSE_BASE = {'success': False, 'message': '', 'data': None}
 
+
+
     @staticmethod
     def get_course_data(request):
         """

@@ -13,12 +13,21 @@ class Schedule(models.Model):
     year = models.PositiveSmallIntegerField()
     term = models.PositiveSmallIntegerField(
         choices=[
-            (1, 'spring'),
-            (2, 'summer'),
-            (3, 'fall')
+            ('spring', 'spring'),
+            ('summer', 'summer'),
+            ('fall', 'fall')
         ]
     )
     name = models.CharField(max_length=100)
+
+    def to_dict(self):
+        result = {
+            'id': self.id,
+            'year': self.year,
+            'term': self.term,
+            'name': self.name,
+        }
+        return result
 
     def __str__(self):
         return str(self.user) + " - " + self.name
@@ -32,16 +41,6 @@ class Schedule(models.Model):
     #             result['data'].append(section.crn)
     #
     #     return result
-    #
-    # def to_dict(self):
-    #     result = {
-    #         'year': self.year,
-    #         'term_type': self.term_type,
-    #         'name': self.name,
-    #         'sections': [section.to_dict() for section in self.sections.all()]
-    #     }
-    #     return result
-
 
 class ScheduleSection(models.Model):
     schedule = models.ForeignKey(to=Schedule, on_delete=models.CASCADE)

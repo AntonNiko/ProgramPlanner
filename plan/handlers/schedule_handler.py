@@ -45,10 +45,10 @@ class ScheduleHandler:
         Returns a response with the requested schedule data for a specific user profile or
         user session.
 
-        Three options are accepted for the GET parameters, resulting in 3 different responses:
-          - `name` is defined, but neither the `year` or `term_type`.
-          - `year` and `term_type` are defined, but `name` is undefined.
-          - Neither of those
+        Currently, only two options are supported:
+            1) If id parameter is defined, attempt to return the schedule with that ID,
+               provided it belongs to the logged in user
+            2) If id parameter not defined, returns all the logged in user's schedules.
 
         :param request:
         :return:
@@ -58,27 +58,19 @@ class ScheduleHandler:
         response: Dict[str, Union[bool, str, list]] = ScheduleHandler.RESPONSE_BASE.copy()
 
         # Parameter parsing
-        name = request.GET.get('name')
-        year = int(request.GET.get('year')) if request.GET.get('year') is not None else None
-        term_type = int(request.GET.get('term_type')) if request.GET.get('term_type') is not None else None
+        schedule_id = request.GET.get('id')
 
-        if request.user.is_authenticated:
+        if not request.user.is_authenticated:
+            response['success'] = False
+            response['message'] = 'Error: user must be authenticated to process this request.'
+            return response
+
+        if schedule_id is None:
             schedules = Schedule.objects.filter(user=request.user)
+            response['data'] = [schedule.to_dict() for schedule in schedules]
         else:
-            schedules = request.session.get('saved_schedules')
-
-        if name is not None:
-            response['data'] = [schedule.to_dict() for schedule in schedules.filter(name__exact=name)]
-            response['success'] = True
-        elif year is not None and term_type is not None:
-            response['data'] = [schedule.to_dict() for schedule in schedules.filter(year__exact=year).filter(term_type__exact=term_type)]
-            response['success'] = True
-        elif year is None and term_type is None:
-            response['data'] = [schedule.to_dict() for schedule in schedules.all()]
-            response['success'] = True
-        # Invalid request parameters
-        else:
-            response['message'] = 'Invalid request parameter values'
+            schedule = Schedule.objects.get(id=int(schedule_id))
+            response['data'] = schedule.to_dict()
 
         return response
 

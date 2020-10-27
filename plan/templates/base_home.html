@@ -24,95 +24,9 @@
             <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Schedules</h1>
 
             <!-- Active schedules list -->
-            {% if schedules %}
-                <ul class="list-group">
-                    {% for schedule in schedules %}
-                        <li class="list-group-item">
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-4 my-2">
-                                    <h6 class="text-left font-weight-bold text-gray-800">{{ schedule.name }}</h6>
-                                </div>
-                                <div class="col-xs-12 col-sm-12 col-md-2 my-2">
-                                    <span class="d-block">
-                                        <span>Year:</span>
-                                        <span class="font-weight-bold">{{ schedule.year }}</span>
-                                    </span>
-                                    <span class="d-block">
-                                        <span>Term:</span>
-                                        <span class="font-weight-bold">
-                                        {% if schedule.term == 1 %}
-                                            Spring
-                                        {% elif schedule.term == 2 %}
-                                            Summer
-                                        {% elif schedule.term == 3 %}
-                                            Fall
-                                        {% endif %}
-                                        </span>
-                                    </span>
-                                </div>
-                                <div class="col-xs-12 col-sm-12 col-md my-2">
-                                    <div class="float-right">
-                                        <a class="btn btn-primary my-1" href="/schedule?id={{ schedule.id }}">Open</a>
-                                        <button class="btn btn-danger my-1 delete-schedule" type="button" value="{{ schedule.id }}" data-toggle="modal" data-target="#scheduleDeleteModal">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-center">Looks like you haven't created any schedules yet... click below to start one!</p>
-            {% endif %}
-
-            <!--<ul class="list-group">
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-4 my-2">
-                            <h6 class="text-left font-weight-bold text-gray-800">My Test Schedule</h6>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-2 my-2">
-                            <span class="d-block">
-                                <span>Year:</span>
-                                <span class="font-weight-bold">2020</span>
-                            </span>
-                            <span class="d-block">
-                                <span>Term:</span>
-                                <span class="font-weight-bold">Fall</span>
-                            </span>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md my-2">
-                            <div class="float-right">
-                                <button class="btn btn-primary my-1" type="button">Open</button>
-                                <button class="btn btn-danger my-1" type="button">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-4 my-2">
-                            <h6 class="text-left font-weight-bold text-gray-800">MECH Fall 2020 Schedule 1</h6>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-2 my-2">
-                            <span class="d-block">
-                                <span>Year:</span>
-                                <span class="font-weight-bold">2020</span>
-                            </span>
-                            <span class="d-block">
-                                <span>Term:</span>
-                                <span class="font-weight-bold">Fall</span>
-                            </span>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md my-2">
-                            <div class="float-right">
-                                <button class="btn btn-primary my-1" type="button">Open</button>
-                                <button class="btn btn-danger my-1" type="button">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                <li class="list-group-item">Test 3</li>
-            </ul>-->
+            <ul class="list-group" id="schedule-menu">
+            </ul>
+            <!--<p class="text-center">Looks like you haven't created any schedules yet... click below to start one!</p>-->
 
             <!-- Start new Schedule button -->
             <div class="col-12 text-center">
@@ -123,28 +37,9 @@
             <h1 class="h3 font-weight-bold text-center text-gray-800 my-4">Degree Plans</h1>
 
             <!-- Active sequences list -->
-            {% if sequences %}
-                <ul class="list-group">
-                    {% for sequence in sequences %}
-                        <li class="list-group-item">
-                            <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-4 my-2">
-                                    <h6 class="text-left font-weight-bold text-gray-800">{{ sequence.name }}</h6>
-                                </div>
-                                <div class="col-xs-12 col-sm-12 col-md my-2">
-                                    <div class="float-right">
-                                        <button class="btn btn-primary my-1" type="button">Open</button>
-                                        <button class="btn btn-danger my-1" type="button">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-
-            {% else %}
-                <p class="text-center">Looks like you haven't created any sequences yet... click below to start one!</p>
-            {% endif %}
+            <ul class="list-group" id="sequence-menu">
+            </ul>
+            <!--<p class="text-center">Looks like you haven't created any sequences yet... click below to start one!</p>-->
 
             <!--<ul class="list-group">
                 <li class="list-group-item">
@@ -196,4 +91,88 @@
         </div>
     </div>
 
+{% endblock %}
+
+{% block js-scripts %}
+    <script>
+        class ScheduleMenu {
+            /**
+             * Renders the logged in user's schedules
+             * @param element_id
+             */
+            constructor(element_id) {
+                this.dom_element = $("#"+element_id);
+                this.update_menu();
+            }
+
+            /**
+             * Updates the menu UI by fetching all of a logged in user's schedules
+             */
+            update_menu() {
+                let self = this;
+
+                ScheduleProvider.get_user_schedules(function(data) {
+                    let schedules = data['response']['data'];
+                    let schedule
+                    for (schedule of schedules) {
+                        self.dom_element.append(`
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 my-2">
+                                        <h6 class="text-left font-weight-bold text-gray-800">${schedule.name}</h6>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-2 my-2">
+                                        <span class="d-block">
+                                            <span>Year:</span>
+                                            <span class="font-weight-bold">${schedule.year}</span>
+                                        </span>
+                                        <span class="d-block">
+                                            <span>Term:</span>
+                                            <span class="font-weight-bold">${schedule.term}</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md my-2">
+                                        <div class="float-right">
+                                            <a class="btn btn-primary my-1" href="/schedule?id=${schedule.id }">Open</a>
+                                            <button class="btn btn-danger my-1 delete-schedule" type="button" value="${schedule.id}" data-toggle="modal" data-target="#scheduleDeleteModal">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>`);
+
+                    }
+                });
+            }
+        }
+
+        class SequenceMenu {
+            /**
+             * Renders the logged in user's sequences
+             * @param element_id
+             */
+            constructor(element_id) {
+                this.dom_element = $("#"+element_id);
+                this.update_menu();
+            }
+
+            /**
+             * Updates the menu UI by fetching all of a logged in user's sequences
+             */
+            update_menu() {
+                // TODO Implement once backend works
+            }
+        }
+
+        let schedule_menu;
+        if ($("#schedule-menu").length) {
+            schedule_menu = new ScheduleMenu("schedule-menu");
+        }
+
+        let sequence_menu;
+        if ($("#sequence-menu").length) {
+            sequence_menu = new SequenceMenu("sequence-menu");
+        }
+
+
+    </script>
 {% endblock %}
