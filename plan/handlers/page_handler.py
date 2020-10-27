@@ -26,7 +26,7 @@ class PageHandler:
         template = loader.get_template('base_schedule.html')
 
         schedule_id = request.GET.get("id")
-        context = {}
+        context = {"schedule_id": schedule_id}
         if request.user.is_authenticated:
             schedules = Schedule.objects.filter(user=request.user)
             context["schedules"] = schedules

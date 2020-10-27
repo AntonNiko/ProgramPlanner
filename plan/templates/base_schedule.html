@@ -40,20 +40,48 @@
 
             <div class="card-body">
                 <div id="time-grid" data-year="{{ requested_schedule.year }}" data-term="{{ requested_schedule.term }}" data-id="{{ requested_schedule.id }}"></div>
-
-                <button class="btn btn-success my-4">Add Course / Section</button>
-                <button class="btn btn-danger my-4">Remove Course / Section</button>
             </div>
         </div>
 
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Active Registration</h6>
             </div>
 
             <div class="card-body">
+                <button class="btn btn-success my-4">Add Course / Section</button>
 
-            </div>
+                <div class="table-responsive">
+                    <div id="dataTable_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                        <div class="row">
+                            <div class="col-sm-12">
+                               <table class="table table-bordered" id="active_registration_table" width="100%" cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
+                                  <!--<thead>
+                                    <tr role="row">
+                                        <th rowspan="1" colspan="1">Course</th>
+                                        <th rowspan="1" colspan="1">Section</th>
+                                        <th rowspan="1" colspan="1">Dates</th>
+                                        <th rowspan="1" colspan="1">Times</th>
+                                        <th rowspan="1" colspan="1">Professor</th>
+                                        <th rowspan="1" colspan="1">Remove</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr role="row">
+                                          <td class="sorting_1">CSC 116</td>
+                                          <td>A02</td>
+                                          <td>Sep 4 2020 - Dec 13 2020</td>
+                                          <td>MR 4:30pm-5:20pm</td>
+                                          <td>Daniel German</td>
+                                          <td><i class="fas fa-trash-alt" style="color:#ef002b;"></i></td>
+                                      </tr>
+                                  </tbody>-->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
         </div>
     {% elif requested_schedule and requested_schedule == "Not found" %}
         <div class="text-center">
@@ -65,6 +93,32 @@
     {% else %}
         <p class="mb-4">Please select a schedule from the sidebar, or create a new schedule.</p>
     {% endif %}
+
+    <!-- Add course/section modal -->
+    <div class="modal fade" id="courseScheduleDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="courseScheduleDeleteModalLabel">Delete</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">Are you sure you want to delete this schedule?
+                <form action="/api/schedule/remove" method="post" class="user">
+                    {% csrf_token %}
+                    <input type="hidden" name="schedule-id" id="courseScheduleDeleteModalID" value="">
+                    <input type="hidden" name="schedule-crn" id="courseScheduleDeleteModalCRN" value="">
+                    <input type="submit" class="btn btn-primary btn-user btn-block" value="Delete">
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+              <a class="btn btn-primary" href="#">Logout</a>
+            </div>
+          </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra-html %}
@@ -74,16 +128,16 @@
 
 {% block js-scripts %}
   <script>
-
       /* Class that represents the calendar on the schedule page. */
       class Calendar {
-          constructor(element_id, schedule_provider) {
+          constructor(element_id, schedule_provider, schedule_manager) {
               this.dom_element = document.getElementById(element_id);
               if (this.dom_element == null) {
                   throw new Error('Could not find DOM element with ID: '+element_id);
               }
 
               this.schedule_provider = schedule_provider;
+              this.schedule_manager = schedule_manager;
               this.schedule_year = document.getElementById('time-grid').getAttribute('data-year');
               this.schedule_term = document.getElementById('time-grid').getAttribute('data-term');
               this.schedule_id = document.getElementById('time-grid').getAttribute('data-id');
@@ -114,6 +168,10 @@
               });
           }
 
+          /**
+           * Requests the current schedule and updates the time grid. Furthermore, for each section,
+           * calls the add_section() method of ActiveRegistrationTable to update the table
+           */
           render_schedule() {
               // Set a scope for the callback functions to set properties and call functions
               let self = this;
@@ -123,35 +181,101 @@
 
                   let section;
                   for (section of sections) {
-                      ScheduleProvider.get_section_meetings(section["crn"], function(data) {
-                          let meetings = data['response']['data'];
+                      // Call the active registration table add_section() method
+                      self.schedule_manager.active_registration_table.add_section(section);
 
-                          let meeting;
-                          for (meeting of meetings) {
-                              self.add_event(
-                                  meeting['section'],
-                                  meeting['start_data'],
-                                  meeting['end_date'],
-                                  meeting['start_time'],
-                                  meeting['end_time'],
-                                  convert_meeting_days_to_numbers_array(meeting)
-                              )
-                          }
-                      });
+                      let meeting;
+                      for (meeting of section["meetings"]) {
+                          self.add_event(
+                              meeting['section'],
+                              meeting['start_data'],
+                              meeting['end_date'],
+                              meeting['start_time'],
+                              meeting['end_time'],
+                              convert_meeting_days_to_numbers_array(meeting)
+                          )
+                      }
                   }
               });
           }
      }
 
+     class ActiveRegistrationTable {
+          constructor(element_id) {
+              this.dom_element = $("#"+element_id);
+              this.dom_element.append(`
+                   <thead>
+                    <tr rolw="row">
+                        <th rowspan="1" colspan="1">Course</th>
+                        <th rowspan="1" colspan="1">Section</th>
+                        <th rowspan="1" colspan="1">Dates</th>
+                        <th rowspan="1" colspan="1">Times</th>
+                        <th rowspan="1" colspan="1">Professor</th>
+                        <th rowspan="1" colspan="1">Remove</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+              `);
+
+
+          }
+
+         /**
+          * Adds a row to the active registration table
+          * @param row_data
+          */
+          add_section(row_data) {
+              let table_body = this.dom_element.find('tbody');
+              table_body.append(`
+                  <tr role="row">
+                      <td class="sorting_1">${row_data["course"]}</td>
+                      <td>${row_data["name"]}</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td><button class="delete-section-button"><i class="fas fa-trash-alt" style="color:#ef002b;" data-toggle="modal" data-crn="${row_data["crn"]}" data-target="#courseScheduleDeleteModal"></i></button></td>
+                  </tr>
+              `);
+          }
+
+          remove_section() {
+
+          }
+     }
+
+     /* Manages the calendar lifecycle as well as actions taken by users */
+     class ScheduleUIManager {
+         constructor() {
+             // Stores references to courses
+             this.courses = {};
+
+             // Initialize arrays where each course section will be stored
+             this.sections = [];
+
+             // Initialize table of active registration
+             // TODO: Determine if any patterns would be helpful for time-grid or active reg table
+             this.active_registration_table = new ActiveRegistrationTable("active_registration_table");
+
+             // Initialize calendar and render the sections and meetings
+             this.calendar = null;
+             if ($("#time-grid").length) {
+                 this.calendar = new Calendar('time-grid', ScheduleProvider, this);
+                 this.calendar.render_schedule();
+             }
+         }
+     }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize calendar and render the sections and meetings
-        let calendar;
-        if ($("#time-grid").length) {
-            calendar = new Calendar('time-grid', ScheduleProvider);
-            calendar.render_schedule();
-        }
+        let schedule_ui_manager = new ScheduleUIManager();
 
-
+        // Configure schedule delete modal to be set with appropriate values
+        $(".delete-section-button").click(function(){
+            console.log("hi"); // TODO: Figure out why this isn't working
+            let selectedCRN = $(this).attr("data-crn");
+            let scheduleID = $("#time-grid").attr("data-id");
+            $("#courseScheduleDeleteModalCRN").attr("value", selectedCRN);
+            $("#courseScheduleDeleteModalID").attr("value", scheduleID);
+        });
     });
 
 

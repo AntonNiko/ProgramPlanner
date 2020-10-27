@@ -5,6 +5,7 @@
 
 let selectedDeleteScheduleName = null;
 
+// TODO move this to a dedicated home page JS file
 $(".delete-schedule").click(function(){
     selectedDeleteScheduleName = $(this).attr("value");
     $("#scheduleDeleteModalID").attr("value", selectedDeleteScheduleName);
@@ -82,7 +83,19 @@ class ScheduleProvider {
     }
 
     /**
-     * Returns data with all the sections associated with a particular schedule ID
+     * Fetches the user's schedule with a specific schedule ID.
+     * @param id
+     * @param successCallbackHandler
+     */
+    static get_user_schedule_by_id(id, successCallbackHandler) {
+        $.get("/api/schedule/get", {id: id}).done(function(data){
+            successCallbackHandler(data);
+        });
+    }
+
+    /**
+     * Returns data with all the sections associated with a particular schedule ID,
+     * including meeting times
      * @param id
      * @param successCallbackHandler
      */

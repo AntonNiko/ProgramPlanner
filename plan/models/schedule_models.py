@@ -11,12 +11,13 @@ from .course_models import Section
 class Schedule(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
-    term = models.PositiveSmallIntegerField(
+    term = models.CharField(
         choices=[
             ('spring', 'spring'),
             ('summer', 'summer'),
             ('fall', 'fall')
-        ]
+        ],
+        max_length=10
     )
     name = models.CharField(max_length=100)
 
@@ -41,6 +42,7 @@ class Schedule(models.Model):
     #             result['data'].append(section.crn)
     #
     #     return result
+
 
 class ScheduleSection(models.Model):
     schedule = models.ForeignKey(to=Schedule, on_delete=models.CASCADE)

@@ -184,7 +184,8 @@ class ScheduleHandler:
     @staticmethod
     def get_section(request):
         """
-        Returns the sections associated with the specific user and semester
+        Returns the sections associated with the specific user and semester including
+        meetings
         :param request:
         :return:
         """
@@ -199,7 +200,7 @@ class ScheduleHandler:
         assert schedule_id is not None
 
         # At this point, only gets all sections associated with user
-        # TODO: Add more parameter specific queries
+        # TODO: Add more parameter-specific queries
 
         # Fetch the schedule associated with the request
         schedule = Schedule.objects.filter(user=request.user).get(id=schedule_id)
@@ -210,7 +211,14 @@ class ScheduleHandler:
         for section_reference in sections_references:
             sections.append(Section.objects.get(crn=section_reference["section"]))
 
-        response['data'] = [section.to_dict() for section in sections]
+        # Fetch the associated course offering and meetings
+        for i in range(len(sections)):
+            section_dict = sections[i].to_dict()
+            section_dict.update(sections[i].course_offering.to_dict())
+            section_dict["meetings"] = [meeting.to_dict() for meeting in Meeting.objects.filter(section=sections[i])]
+            sections[i] = section_dict
+
+        response['data'] = sections
         response['success'] = True
 
         # Clean-up

@@ -60,16 +60,26 @@ class Course(models.Model):
 class CourseOffering(models.Model):
     course = models.ForeignKey(to=Course, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
-    term_type = models.PositiveSmallIntegerField(
+    term_type = models.CharField(
         choices=[
-            (1, 'spring'),
-            (2, 'summer'),
-            (3, 'fall')
-        ]
+            ('spring', 'spring'),
+            ('summer', 'summer'),
+            ('fall', 'fall')
+        ],
+        max_length=10
     )
 
     def __str__(self):
         return str(self.course) + " - " + str(self.year) + " " + str(self.term_type)
+
+    def to_dict(self):
+        result = {
+            'course': str(self.course),
+            'year': int(self.year),
+            'term_type': self.term_type
+        }
+
+        return result
 
 
 class Section(models.Model):
